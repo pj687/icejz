@@ -35,7 +35,7 @@ public class SwaggerConfig {
                 .title("IcejzCloud")
                 .description("IcejzCloud")
                 .contact(contact)
-                .version("3.0")
+                .version("1.0.0")
                 .termsOfService("https://icejz.net")
                 .license(new License().name("MIT")
                         .url("https://icejz.net")));

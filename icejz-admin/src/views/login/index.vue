@@ -287,7 +287,7 @@
 					</div>
 				</div>
 
-				<p class="login-footnote">© {{ year }} ICEJZ · 请先阅读并同意相关协议后再登录</p>
+				<p class="login-footnote">© {{ year }} ICEJZ · v{{ appVersion }} · 请先阅读并同意相关协议后再登录</p>
 			</section>
 		</main>
 
@@ -308,8 +308,10 @@ import AssistantFab from '@/components/assistant/AssistantFab.vue'
 import AssistantPanel from '@/components/assistant/AssistantPanel.vue'
 import { useRoute } from 'vue-router'
 import cache from '@/utils/cache'
+import constant from '@/utils/constant'
 
 const year = new Date().getFullYear()
+const appVersion = constant.version
 const slogan = '更快交付 · 更稳运行 · 更易扩展'
 const sloganChars = slogan.split('')
 

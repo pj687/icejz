@@ -46,6 +46,9 @@ storage:
     path: D://upload
 
 icejz:
+  # 平台统一版本号（与前端 package.json / 根目录 VERSION 保持一致）
+  version: 1.0.0
+  name: ICEJZ
   xss:
     enabled: true
     exclude-urls:

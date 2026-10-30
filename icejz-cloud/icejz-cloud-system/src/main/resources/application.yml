@@ -35,6 +35,8 @@ storage:
     path: D://upload
 
 icejz:
+  version: 1.0.0
+  name: ICEJZ
   sms:
     # true：验证码写入 Redis，不调用短信厂商；接口会回传验证码便于联调
     mock: true
