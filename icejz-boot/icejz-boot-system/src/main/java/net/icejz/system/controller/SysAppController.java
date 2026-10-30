@@ -22,7 +22,7 @@ public class SysAppController {
     @Value("${icejz.name:ICEJZ}")
     private String name;
 
-    @Value("${icejz.version:1.0.0}")
+    @Value("${icejz.version:1.0.1}")
     private String version;
 
     @Value("${spring.application.name:icejz-boot}")

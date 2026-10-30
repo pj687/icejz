@@ -96,7 +96,7 @@ public class SwaggerConfig {
                 .title("ICEJZ API")
                 .description("ICEJZ API")
                 .contact(contact)
-                .version("1.0.0")
+                .version("1.0.1")
                 .termsOfService("https://icejz.net")
         );
     }

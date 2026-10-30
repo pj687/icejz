@@ -3,7 +3,7 @@ import { usePublicKeyApi } from '../api/auth.js';
 import cache from './cache.js';
 
 const PUBLIC_KEY_CACHE_KEY = 'sm2PublicKey';
-const DEFAULT_PUBLIC_KEY = '040a302b5e4b961afb3908a4ae191266ac5866be100fc52e3b8dba9707c8620e64ae790ceffc3bfbf262dc098d293dd3e303356cb91b54861c767997799d2f0060';
+const DEFAULT_PUBLIC_KEY = '0417b623de43a93a94bf272b4a19cfb796c1acce8a65bc818357ccf9022ffa4ac35748eb5a502a435ec93b45b0038b59d8df36542d38cc48a9a507fbb210a65019';
 
 export const getPublicKey = async () => {
     const cached = cache.get(PUBLIC_KEY_CACHE_KEY);
