@@ -1,0 +1,113 @@
+* {
+  margin: 0;
+  padding: 0;
+  outline: none !important;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--icejz-font);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  font-size: 14px;
+  overflow: hidden;
+  position: relative;
+  color: var(--icejz-text);
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+#nprogress {
+  .bar {
+    background: var(--el-color-primary) !important;
+    z-index: 99999 !important;
+  }
+}
+
+.layout-container {
+  width: 100%;
+  height: 100%;
+
+  .layout-sidebar {
+    background: var(--theme-menu-bg-color);
+    border-right: 1px solid var(--theme-border-color-light);
+    height: inherit;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden !important;
+    z-index: 20;
+    box-shadow: 4px 0 24px rgba(15, 23, 36, 0.03);
+    transition: width 0.28s ease;
+
+    .el-scrollbar__view {
+      overflow: hidden;
+    }
+
+    &.aside-expend {
+      width: var(--theme-sidebar-width) !important;
+    }
+
+    &.aside-compress {
+      width: 84px !important;
+    }
+  }
+
+  .layout-header {
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: calc(40px + var(--theme-header-height));
+  }
+
+  .layout-main {
+    padding: 0 !important;
+    overflow: hidden;
+    width: 100%;
+    background:
+      radial-gradient(circle at top right, rgba(0, 168, 232, 0.06), transparent 28%),
+      var(--theme-main-bg-color);
+
+    .layout-card {
+      min-height: calc(100vh - 60px - var(--theme-header-height));
+    }
+  }
+
+  .layout-scrollbar {
+    padding: var(--theme-page-padding);
+  }
+
+  .layout-query {
+    margin-bottom: 16px;
+    border-radius: var(--theme-card-radius);
+
+    .el-card__body {
+      padding: 16px 16px 2px;
+    }
+  }
+
+  .layout-table {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .el-card {
+    border: 1px solid rgba(232, 238, 245, 0.9);
+    border-radius: var(--theme-card-radius);
+    box-shadow: var(--icejz-shadow);
+    background: #fff;
+  }
+}

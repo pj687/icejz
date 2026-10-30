@@ -1,0 +1,79 @@
+// 侧边栏暗色 — 现代深空冰蓝
+.sidebar-dark {
+  --theme-logo-text-color: #f5f9fc;
+  --theme-main-bg-color: #000;
+  --theme-menu-text-color: rgba(255, 255, 255, 0.74);
+  --theme-menu-bg-color:
+    radial-gradient(120% 70% at 0% 0%, rgba(0, 168, 232, 0.26), transparent 42%),
+    radial-gradient(90% 50% at 100% 100%, rgba(62, 198, 255, 0.12), transparent 40%),
+    linear-gradient(165deg, #0b1320 0%, #121c2e 46%, #0e1a2b 100%);
+  --theme-menu-hover-color: #ffffff;
+  --theme-menu-hover-bg-color: rgba(0, 168, 232, 0.22);
+  --theme-menu-border-color: transparent;
+
+  &.layout-sidebar {
+    border-right: none;
+    background: var(--theme-menu-bg-color);
+    box-shadow:
+      0 22px 48px rgba(8, 18, 32, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    .sidebar-logo {
+      border-bottom: none !important;
+      background: transparent;
+    }
+
+    .el-menu {
+      background: transparent !important;
+    }
+
+    .el-menu-item,
+    .el-sub-menu__title {
+      border-radius: 14px !important;
+    }
+
+    .el-menu-item.is-active {
+      border-right: none !important;
+      right: 0;
+      color: #e8f8ff !important;
+      background: rgba(0, 168, 232, 0.16) !important;
+      box-shadow: none;
+
+      &:hover {
+        background: rgba(0, 168, 232, 0.2) !important;
+      }
+    }
+
+    .el-menu-item:hover,
+    .el-sub-menu__title:hover {
+      background: rgba(255, 255, 255, 0.07) !important;
+      color: #fff !important;
+    }
+
+    .el-sub-menu.is-active > :first-child {
+      color: #7ddfff !important;
+    }
+  }
+}
+
+.layout-columns {
+  .sidebar-dark {
+    .sidebar-logo {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+  }
+}
+
+// 顶栏主题色
+.header-theme {
+  --theme-header-bg-color: var(--el-color-primary);
+  --theme-header-text-color: rgb(255 255 255 / 88%);
+  --theme-header-hover-color: rgba(0, 0, 0, 0.08);
+  --theme-menu-text-color: #ddd;
+  --theme-logo-text-color: #fff;
+  --theme-menu-hover-color: #fff;
+  --el-menu-active-color: #fff;
+  .el-dropdown {
+    color: inherit;
+  }
+}

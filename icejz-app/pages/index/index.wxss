@@ -1,0 +1,20 @@
+.container {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(0, 168, 232, 0.12), transparent 40%),
+    #f4f7fb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.text {
+  margin-top: 48rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a2332;
+  letter-spacing: 2rpx;
+}

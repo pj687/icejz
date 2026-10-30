@@ -1,0 +1,11 @@
+.t-tab-bar {
+  --td-tab-bar-color: #9ca3af;
+  --td-tab-bar-active-color: #00a8e8;
+  --td-tab-bar-bg-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 -8rpx 28rpx rgba(15, 23, 36, 0.06);
+  border-top: 1rpx solid rgba(232, 238, 245, 0.95);
+}
+
+.t-tab-bar-item {
+  font-weight: 500;
+}

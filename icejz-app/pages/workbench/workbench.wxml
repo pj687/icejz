@@ -1,0 +1,18 @@
+<view>
+  <t-swiper current="{{current}}" autoplay="{{autoplay}}" duration="{{duration}}" interval="{{interval}}" navigation="{{ { type: 'dots' } }}" list="{{swiperList}}">
+  </t-swiper>
+  <t-grid column="{{4}}">
+    <t-grid-item text="用户管理" icon="user" bindclick="onClick" t-class="red" />
+    <t-grid-item text="机构管理" icon="member" bindclick="onClick" t-class="red" />
+    <t-grid-item text="角色管理" icon="cloud" bindclick="onClick" t-class="red" />
+    <t-grid-item text="权限管理" image="{{img1}}" bindclick="onClick" />
+    <t-grid-item text="我的通知" image="{{img2}}" bindclick="onClick" badge-props="{{ { count: 6 } }}" />
+    <t-grid-item text="我发起的" image="{{img3}}" bindclick="onClick" />
+    <t-grid-item text="认领流程" icon="application" bindclick="onClick" t-class="red" />
+    <t-grid-item text="我的审批" icon="discount" bindclick="onClick" badge-props="{{ { count: 2 } }}" t-class="red" />
+    <t-grid-item text="系统设置" icon="setting" bindclick="onClick" t-class="red" />
+    <t-grid-item text="修改密码" icon="adjustment" bindclick="onClick" t-class="red" />
+    <t-grid-item text="个人资料" icon="edit-1" bindclick="onClick" t-class="red" />
+    <t-grid-item text="关于我们" icon="chat" bindclick="onClick" t-class="red" />
+  </t-grid>
+</view>

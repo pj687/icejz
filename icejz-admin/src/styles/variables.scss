@@ -1,0 +1,37 @@
+:root {
+  /* ICEJZ brand */
+  --icejz-primary: #00a8e8;
+  --icejz-primary-soft: #e8f7fd;
+  --icejz-accent: #3ec6ff;
+  --icejz-dark: #0f1724;
+  --icejz-dark-2: #162033;
+  --icejz-success: #11c26d;
+  --icejz-warning: #eb6709;
+  --icejz-danger: #f56c6c;
+  --icejz-text: #1f2937;
+  --icejz-text-secondary: #6b7280;
+  --icejz-radius: 14px;
+  --icejz-radius-sm: 10px;
+  --icejz-shadow: 0 6px 24px rgba(15, 23, 36, 0.06);
+  --icejz-shadow-lg: 0 16px 48px rgba(15, 23, 36, 0.12);
+  --icejz-font: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+
+  --theme-header-height: 58px;
+  --theme-border-color-light: #e8eef5;
+  --theme-logo-text-color: var(--el-color-primary);
+
+  --theme-menu-text-color: #4b5563;
+  --theme-menu-bg-color: #ffffff;
+  --theme-menu-border-color: transparent;
+  --theme-menu-hover-color: var(--el-color-primary);
+  --theme-menu-hover-bg-color: rgba(0, 168, 232, 0.08);
+
+  --theme-header-bg-color: rgba(255, 255, 255, 0.88);
+  --theme-header-text-color: #374151;
+  --theme-header-hover-color: rgba(0, 168, 232, 0.08);
+
+  --theme-main-bg-color: #f3f6fb;
+  --theme-card-radius: var(--icejz-radius);
+  --theme-page-padding: 18px;
+  --theme-sidebar-width: 248px;
+}

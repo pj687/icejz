@@ -1,0 +1,15 @@
+<view>
+  <t-cell-group>
+    <t-cell title="头像" bind:click="uploadAvatar" arrow>
+      <t-image slot="note" src="{{user.avatar || 'https://oss.mlh.jucheng.icu/logo.png'}}" t-class="avatar" mode="aspectFill" />
+    </t-cell>
+    <t-cell title="姓名" note="{{user.realName}}" url="input/input?key=realName" arrow />
+    <t-cell title="手机号" note="{{user.mobile}}" url="input/input?key=mobile" arrow />
+    <t-cell title="邮箱" note="{{user.email}}" url="input/input?key=email" arrow />
+    <t-cell title="性别" note="{{genderMap[user.gender] || ''}}" bind:click="onGenderOpen" arrow />
+  </t-cell-group>
+</view>
+
+<t-picker visible="{{genderVisible}}" value="{{[user.gender]}}" title="选择性别" cancelBtn="取消" confirmBtn="确认" bindchange="onGenderChange" bindcancel="onGenderCancel">
+  <t-picker-item options="{{genderList}}"></t-picker-item>
+</t-picker>

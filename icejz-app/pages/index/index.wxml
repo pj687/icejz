@@ -1,0 +1,4 @@
+﻿<view class="container">
+  <t-image src="/images/logo.png" mode="heightFix" height="50" />
+  <view class="text">ICEJZ 低代码开发平台！</view>
+</view>

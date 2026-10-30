@@ -1,0 +1,34 @@
+@use './variables.scss';
+@use './layout.scss';
+@use './element.scss';
+@use './menu.scss';
+@use './theme.scss';
+@use './dark.scss';
+
+.page-card {
+  border: 1px solid rgba(232, 238, 245, 0.9);
+  border-radius: var(--icejz-radius);
+  overflow: hidden;
+}
+
+.page-toolbar {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed #e8eef5;
+}
+
+.layout-query {
+  .el-form-item {
+    margin-bottom: 14px;
+  }
+}
+
+.sidebar-dark .sidebar-logo {
+  background: transparent;
+}
+
+.sidebar-dark .logo-mark {
+  background: linear-gradient(145deg, rgba(0, 168, 232, 0.28), rgba(62, 198, 255, 0.1));
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 22px rgba(0, 168, 232, 0.2);
+}

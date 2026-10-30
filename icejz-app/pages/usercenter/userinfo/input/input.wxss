@@ -1,0 +1,12 @@
+page {
+  background-color: #f5f5f5;
+}
+page view {
+  box-sizing: border-box;
+}
+.input-edit {
+  padding-top: 20rpx;
+}
+.input-btn {
+  margin: 80rpx 20rpx 0 20rpx;
+}

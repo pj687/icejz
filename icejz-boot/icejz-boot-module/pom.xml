@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>net.icejz</groupId>
+		<artifactId>icejz-boot</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>icejz-boot-module</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>icejz-module-quartz</module>
+		<module>icejz-module-generator</module>
+		<module>icejz-module-monitor</module>
+		<module>icejz-module-member</module>
+        <module>icejz-module-iot</module>
+        <module>icejz-module-websocket</module>
+    </modules>
+	
+</project>

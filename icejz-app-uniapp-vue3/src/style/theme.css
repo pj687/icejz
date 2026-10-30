@@ -1,0 +1,70 @@
+/* ICEJZ brand theme */
+page {
+    --icejz-primary: #00a8e8;
+    --icejz-accent: #3ec6ff;
+    --icejz-dark: #141820;
+    --icejz-bg: #f4f7fb;
+    --icejz-text: #1f2937;
+    --icejz-radius: 24rpx;
+    background-color: var(--icejz-bg);
+    color: var(--icejz-text);
+}
+
+.t-input {
+    --td-input-placeholder-text-color: #9ca3af;
+    --td-input-text-color: #1f2937;
+}
+
+.t-tab-bar {
+    --td-tab-bar-color: #9ca3af;
+    --td-tab-bar-active-color: #00a8e8;
+}
+
+.t-cascader {
+    --td-cascader-active-color: #00a8e8;
+}
+
+.t-switch {
+    --td-switch-checked-color: #00a8e8;
+}
+
+.t-button {
+    --td-button-font-weight: 500;
+    --td-button-medium-font-size: 32rpx;
+    --td-button-default-color: #fff;
+    --td-button-default-bg-color: #00a8e8;
+    --td-button-default-border-color: #00a8e8;
+    --td-button-default-disabled-color: #fff;
+    --td-button-default-disabled-bg: #cccccc;
+    --td-button-default-disabled-border-color: #cccccc;
+    --td-button-default-active-bg-color: #0090c8;
+    --td-button-default-active-border-color: #0090c8;
+}
+
+.t-textarea {
+    --td-textarea-placeholder-color: #9ca3af;
+}
+
+.t-checkbox {
+    --td-checkbox-icon-checked-color: #00a8e8;
+}
+
+.dialog__button-confirm {
+    color: #00a8e8 !important;
+}
+
+.dialog__button-cancel {
+    color: #aeb3b7 !important;
+}
+
+.icejz-card {
+    background: #fff;
+    border-radius: 24rpx;
+    box-shadow: 0 8rpx 32rpx rgba(20, 24, 32, 0.06);
+}
+
+.icejz-primary-btn {
+    background: #00a8e8 !important;
+    color: #fff !important;
+    border-radius: 16rpx !important;
+}

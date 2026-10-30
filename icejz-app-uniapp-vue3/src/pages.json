@@ -1,0 +1,216 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "首页"
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/workbench/workbench",
+			"style": {
+				"navigationBarTitleText": "服务"
+			}
+		},
+		{
+			"path": "pages/activity/activity",
+			"style": {
+				"navigationBarTitleText": "社区活动",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/activity/detail/detail",
+			"style": {
+				"navigationBarTitleText": "活动详情"
+			}
+		},
+		{
+			"path": "pages/activity/signup/signup",
+			"style": {
+				"navigationBarTitleText": "活动报名"
+			}
+		},
+		{
+			"path": "pages/activity/review/review",
+			"style": {
+				"navigationBarTitleText": "活动评价"
+			}
+		},
+		{
+			"path": "pages/activity/my-activity/my-activity",
+			"style": {
+				"navigationBarTitleText": "我的活动",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/activity/my-review/my-review",
+			"style": {
+				"navigationBarTitleText": "我的活动评价",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/services/home-care/home-care",
+			"style": {
+				"navigationBarTitleText": "上门照护"
+			}
+		},
+		{
+			"path": "pages/services/home-care/detail/detail",
+			"style": {
+				"navigationBarTitleText": "服务详情"
+			}
+		},
+		{
+			"path": "pages/services/home-care/booking/booking",
+			"style": {
+				"navigationBarTitleText": "预约详情"
+			}
+		},
+		{
+			"path": "pages/services/rehab/rehab",
+			"style": {
+				"navigationBarTitleText": "康复理疗"
+			}
+		},
+		{
+			"path": "pages/services/rehab/detail/detail",
+			"style": {
+				"navigationBarTitleText": "课程详情"
+			}
+		},
+		{
+			"path": "pages/services/health-monitor/health-monitor",
+			"style": {
+				"navigationBarTitleText": "健康监测"
+			}
+		},
+		{
+			"path": "pages/services/health-monitor/trend/trend",
+			"style": {
+				"navigationBarTitleText": "健康趋势"
+			}
+		},
+		{
+			"path": "pages/services/health-monitor/alert/alert",
+			"style": {
+				"navigationBarTitleText": "健康预警"
+			}
+		},
+		{
+			"path": "pages/services/health-monitor/detail/detail",
+			"style": {
+				"navigationBarTitleText": "记录详情"
+			}
+		},
+		{
+			"path": "pages/services/activity-signup/activity-signup",
+			"style": {
+				"navigationBarTitleText": "活动报名"
+			}
+		},
+		{
+			"path": "pages/usercenter/usercenter",
+			"style": {
+				"navigationBarTitleText": "个人中心",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/usercenter/password/password",
+			"style": {
+				"navigationBarTitleText": "修改密码"
+			}
+		},
+		{
+			"path": "pages/usercenter/userinfo/userinfo",
+			"style": {
+				"navigationBarTitleText": "个人信息"
+			}
+		},
+		{
+			"path": "pages/usercenter/about/about",
+			"style": {
+				"navigationBarTitleText": "关于我们"
+			}
+		},
+		{
+			"path": "pages/usercenter/elder-archive/list",
+			"style": {
+				"navigationBarTitleText": "老人档案"
+			}
+		},
+		{
+			"path": "pages/usercenter/order-list/order-list",
+			"style": {
+				"navigationBarTitleText": "我的订单",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/usercenter/elder-archive/bind",
+			"style": {
+				"navigationBarTitleText": "绑定老人档案"
+			}
+		},
+		{
+			"path": "pages/usercenter/userinfo/input/input",
+			"style": {
+				"navigationBarTitleText": "个人信息"
+			}
+		}
+	],
+	"tabBar": {
+		"color": "#9ca3af",
+		"selectedColor": "#00a8e8",
+		"backgroundColor": "#ffffff",
+		"borderStyle": "white",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "首页",
+				"iconPath": "static/images/home.png",
+				"selectedIconPath": "static/images/home-active.png"
+			},
+			{
+				"pagePath": "pages/workbench/workbench",
+				"text": "服务",
+				"iconPath": "static/images/workbench.png",
+				"selectedIconPath": "static/images/workbench-active.png"
+			},
+			{
+				"pagePath": "pages/activity/activity",
+				"text": "活动",
+				"iconPath": "static/images/tips-double.png",
+				"selectedIconPath": "static/images/tips-double-active.png"
+			},
+			{
+				"pagePath": "pages/usercenter/usercenter",
+				"text": "我的",
+				"iconPath": "static/images/user.png",
+				"selectedIconPath": "static/images/user-active.png"
+			}
+		]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "朝夕守护",
+		"navigationBarBackgroundColor": "#ffffff",
+		"backgroundColor": "#f4f7fb"
+	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+		}
+	},
+	"subPackages": []
+}

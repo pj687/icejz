@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+  icejz-cloud-gateway:
+    image: icejznet:1.0
+    container_name: icejz-cloud-gateway
+    ports:
+      - 8080:8080
+    volumes:
+      - /work/www/icejz-cloud/icejz-cloud-gateway.jar:/app/app.jar
+  icejz-cloud-system:
+    image: icejznet:1.0
+    container_name: icejz-cloud-system
+    volumes:
+      - /work/www/icejz-cloud/icejz-cloud-system.jar:/app/app.jar

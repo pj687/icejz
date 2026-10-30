@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "miniprogram-sm-crypto": "^0.3.13",
+    "tdesign-miniprogram": "^1.8.4"
+  },
+  "devDependencies": {
+    "eslint": "^7.28.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^4.1.3",
+    "prettier": "^2.5.1"
+  }
+}

@@ -1,0 +1,12 @@
+{
+	"id": "xiaobing-morph",
+	"displayName": "小冰变身",
+	"description": "机体 ↔ 飞行 变身序列（6 帧 × 2 行）",
+	"spritesheetPath": "spritesheet.webp",
+	"cellW": 192,
+	"cellH": 208,
+	"cols": 6,
+	"rows": 2,
+	"rowsNamed": ["bot-to-fly", "fly-to-bot"],
+	"version": "1"
+}

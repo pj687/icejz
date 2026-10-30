@@ -1,0 +1,9 @@
+{
+	"id": "xiaobing",
+	"displayName": "小冰",
+	"description": "ICEJZ 桌宠：hatch-pet 九态精灵表",
+	"spritesheetPath": "spritesheet.webp",
+	"kind": "robot",
+	"credits": "ICEJZ / hatch-pet",
+	"version": "hatch2"
+}
