@@ -1,7 +1,9 @@
 {
-  "navigationBarTitleText": "ICEJZ 低代码平台",
+  "navigationBarTitleText": "ICEJZ",
   "usingComponents": {
     "t-input": "tdesign-miniprogram/input/input",
-    "t-button": "tdesign-miniprogram/button/button"
+    "t-button": "tdesign-miniprogram/button/button",
+    "login-captcha-popup": "/components/login-captcha-popup/login-captcha-popup",
+    "login-agreement": "/components/login-agreement/login-agreement"
   }
 }

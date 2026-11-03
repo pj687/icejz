@@ -1,10 +1,13 @@
 <template>
-	<el-card class="ma-left-tree">
+	<el-card class="ma-left-tree org-auth-card" shadow="never">
 		<template #header>
 			<div class="card-header">
-				<span>{{ title }}</span>
+				<div class="title-wrap">
+					<span class="title-mark" aria-hidden="true"></span>
+					<span>{{ title }}</span>
+				</div>
 				<el-dropdown @command="handleCommand">
-					<span style="cursor: pointer">
+					<span class="menu-btn" title="更多操作">
 						<ma-icon icon="icon-menu" size="18px"></ma-icon>
 					</span>
 					<template #dropdown>
@@ -18,22 +21,24 @@
 				</el-dropdown>
 			</div>
 		</template>
-		<div style="margin: 10px">
-			<el-input v-model="keyword" clearable placeholder="请输入关键字" />
+		<div class="tree-search">
+			<el-input v-model="keyword" clearable placeholder="搜索机构" />
 		</div>
-		<el-tree
-			ref="treeRef"
-			:key="treeKey"
-			:data="dataList"
-			:expand-on-click-node="false"
-			:default-expand-all="isExpandAll"
-			:filter-node-method="filterNode"
-			:props="props"
-			highlight-current
-			node-key="id"
-			:current-node-key="currentNodeKey"
-			@node-click="handleNodeClick"
-		/>
+		<div class="tree-body">
+			<el-tree
+				ref="treeRef"
+				:key="treeKey"
+				:data="dataList"
+				:expand-on-click-node="false"
+				:default-expand-all="isExpandAll"
+				:filter-node-method="filterNode"
+				:props="props"
+				highlight-current
+				node-key="id"
+				:current-node-key="currentNodeKey"
+				@node-click="handleNodeClick"
+			/>
+		</div>
 	</el-card>
 </template>
 
@@ -189,24 +194,101 @@ function getChildrenIdsRecursively(node: any): any[] {
 
 <style lang="scss" scoped>
 .ma-left-tree {
-	min-height: calc(100vh - 112px - var(--theme-header-height));
+	min-height: calc(100vh - 168px - var(--theme-header-height));
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+
 	:deep(.el-tree-node__content) {
-		padding: 10px 0;
+		height: 38px;
+		border-radius: 11px;
+		margin: 2px 10px;
+		padding-right: 8px;
+		transition: background 0.15s ease, color 0.15s ease;
+
+		&:hover {
+			background: rgba(0, 168, 232, 0.08);
+		}
 	}
+
+	:deep(.el-tree-node__label) {
+		font-size: 13px;
+		color: #1f2a37;
+	}
+
+	:deep(.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content) {
+		background: rgba(0, 168, 232, 0.12);
+		color: #007eb8;
+		font-weight: 700;
+
+		.el-tree-node__label {
+			color: #007eb8;
+		}
+	}
+
 	:deep(.el-card__header) {
-		padding: 15px 12px;
-		font-weight: bold;
-		font-size: 16px;
+		padding: 14px 14px 10px;
+		border-bottom: 1px solid #eef3f8;
+		background: linear-gradient(180deg, #f7fbfe, #fff);
 	}
+
 	:deep(.el-card__body) {
-		padding: 0;
+		padding: 0 0 10px;
 	}
+
 	.card-header {
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
+		font-weight: 720;
+		font-size: 14px;
+		color: #122033;
+	}
+
+	.title-wrap {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.title-mark {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #00a8e8;
+		box-shadow: 0 0 0 4px rgba(0, 168, 232, 0.14);
+	}
+
+	.menu-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 30px;
+		height: 30px;
+		border-radius: 9px;
+		cursor: pointer;
+		color: #64748b;
+		transition: background 0.15s ease, color 0.15s ease;
+
+		&:hover {
+			background: rgba(0, 168, 232, 0.1);
+			color: #007eb8;
+		}
+	}
+
+	.tree-search {
+		padding: 10px 12px 8px;
+
+		:deep(.el-input__wrapper) {
+			border-radius: 11px;
+			box-shadow: 0 0 0 1px #e2e8f0 inset;
+		}
+	}
+
+	.tree-body {
+		max-height: calc(100vh - 250px - var(--theme-header-height));
+		overflow: auto;
+		padding-bottom: 8px;
 	}
 }
 </style>

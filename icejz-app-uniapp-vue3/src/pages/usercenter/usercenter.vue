@@ -22,7 +22,7 @@
                         </view>
                     </view>
                 </view>
-                <view class="status-chip">{{ isLoggedIn ? '守护进行中' : '欢迎使用' }}</view>
+                <view class="status-chip">{{ isLoggedIn ? '已登录' : '欢迎使用' }}</view>
             </view>
 
 
@@ -47,7 +47,7 @@
             <view class="stat-card light-card">
                 <text class="stat-value">{{ overview.monthServiceCount }}</text>
                 <text class="stat-label">本月服务</text>
-                <text class="stat-foot">持续守护中</text>
+                <text class="stat-foot">服务进行中</text>
             </view>
             <view class="stat-card light-card tappable-card" @tap="openTodoCenter">
                 <text class="stat-value">{{ overview.todoCount }}</text>
@@ -92,7 +92,7 @@
         <view class="section-card light-card care-card">
             <view class="section-header compact-header">
                 <view>
-                    <text class="section-title">守护概览</text>
+                    <text class="section-title">服务概览</text>
                     <text class="section-subtitle">最近服务与关怀进展</text>
                 </view>
             </view>
@@ -436,9 +436,9 @@ export default {
                 return '已登录 · 关注健康服务、预约进度与照护提醒';
             }
             if (this.isFamilyRole) {
-                return '已登录 · 查看老人档案、联系人关系与守护动态';
+                return '已登录 · 查看老人档案、联系人关系与服务动态';
             }
-            return '已登录 · 守护档案持续更新中';
+            return '已登录 · 档案信息持续更新中';
         },
         quickSectionSubtitle() {
             if (this.isElderRole) return '为您优先展示健康与预约功能';
@@ -1267,7 +1267,6 @@ export default {
     white-space: nowrap;
 }
 
-undefined
 .name {
     display: block;
     color: #ffffff;

@@ -1,20 +1,10 @@
 <view class="about-page">
-
   <view class="about-card">
-
     <view class="about-logo">
-
       <t-image src="/images/logo.png" mode="heightFix" height="80" />
-
     </view>
-
-    <view class="about-title">ICEJZ</view>
-
-    <view class="about-sub">低代码开发平台</view>
-
-    <view class="about-intro">面向企业的低代码开发平台，支持代码生成、在线表单、工作流与多端接入，帮助团队更快交付业务系统。</view>
-
+    <view class="about-title">{{brand.name}}</view>
+    <view class="about-sub">{{brand.slogan}}</view>
+    <view class="about-intro">{{brand.description}}</view>
   </view>
-
 </view>
-

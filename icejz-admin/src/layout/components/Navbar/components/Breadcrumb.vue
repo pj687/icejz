@@ -13,9 +13,13 @@
 import { useRoute } from 'vue-router'
 import { ArrowRight } from '@element-plus/icons-vue'
 import { computed } from 'vue'
+import { translateMenuTitle } from '@/utils/menu-i18n'
 
 const route = useRoute()
-const breadcrumb = computed(() => route.meta.breadcrumb)
+const breadcrumb = computed(() => {
+	const list = (route.meta.breadcrumb as string[]) || []
+	return list.map(item => translateMenuTitle(item))
+})
 </script>
 
 <style lang="scss" scoped>

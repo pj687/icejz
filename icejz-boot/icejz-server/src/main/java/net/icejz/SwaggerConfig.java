@@ -21,7 +21,7 @@ public class SwaggerConfig {
         String[] packagedToMatch = {"net.icejz.system"};
         return GroupedOpenApi.builder()
                 .group("1")
-                .displayName("System API")
+                .displayName("系统接口")
                 .pathsToMatch(paths)
                 .packagesToScan(packagedToMatch).build();
     }
@@ -32,7 +32,7 @@ public class SwaggerConfig {
         String[] packagedToMatch = {"net.icejz.quartz"};
         return GroupedOpenApi.builder()
                 .group("2")
-                .displayName("Quartz API")
+                .displayName("定时任务")
                 .pathsToMatch(paths)
                 .packagesToScan(packagedToMatch).build();
     }
@@ -43,7 +43,7 @@ public class SwaggerConfig {
         String[] packagedToMatch = {"net.icejz.monitor"};
         return GroupedOpenApi.builder()
                 .group("3")
-                .displayName("Monitor API")
+                .displayName("系统监控")
                 .pathsToMatch(paths)
                 .packagesToScan(packagedToMatch).build();
     }
@@ -54,7 +54,7 @@ public class SwaggerConfig {
         String[] packagedToMatch = {"net.icejz.member"};
         return GroupedOpenApi.builder()
                 .group("4")
-                .displayName("Member API")
+                .displayName("会员接口")
                 .pathsToMatch(paths)
                 .packagesToScan(packagedToMatch).build();
     }
@@ -65,7 +65,7 @@ public class SwaggerConfig {
         String[] packagedToMatch = {"net.icejz.iot"};
         return GroupedOpenApi.builder()
                 .group("5")
-                .displayName("Iot API")
+                .displayName("物联网")
                 .pathsToMatch(paths)
                 .packagesToScan(packagedToMatch).build();
     }
@@ -76,7 +76,7 @@ public class SwaggerConfig {
         String[] packagedToMatch = {"net.icejz"};
         return GroupedOpenApi.builder()
                 .group("99")
-                .displayName("Other API")
+                .displayName("其他接口")
                 .pathsToMatch(paths)
                 .packagesToExclude(
                         "net.icejz.system", "net.icejz.quartz", "net.icejz.monitor", "net.icejz.member", "net.icejz.iot",
@@ -94,7 +94,7 @@ public class SwaggerConfig {
 
         return new OpenAPI().info(new Info()
                 .title("ICEJZ API")
-                .description("ICEJZ API")
+                .description("ICEJZ 低代码开发平台接口文档。左侧切换业务分组浏览接口；调试前请在 Header 配置 Authorization Token。")
                 .contact(contact)
                 .version("1.0.1")
                 .termsOfService("https://icejz.net")

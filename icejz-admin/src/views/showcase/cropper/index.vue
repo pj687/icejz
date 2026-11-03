@@ -86,7 +86,7 @@ const handleDownload = () => {
 .panel {
 	border-radius: 20px;
 	border: 1px solid rgba(0, 168, 232, 0.12);
-	background: rgba(255, 255, 255, 0.9);
+	background: color-mix(in srgb, var(--sc-panel, #fff) 90%, transparent);
 	box-shadow: 0 10px 24px rgba(15, 40, 64, 0.04);
 }
 
@@ -134,7 +134,7 @@ const handleDownload = () => {
 	overflow: hidden;
 	border-radius: 18px;
 	border: 1px solid rgba(0, 168, 232, 0.16);
-	background: #f8fafc;
+	background: var(--sc-soft, #f8fafc);
 	box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.7);
 }
 

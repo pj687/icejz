@@ -184,6 +184,34 @@ import {
 } from '@/api/sys/ai'
 import { getGreetHello, getTimeHello } from './greetings'
 
+/** 将上游鉴权等原始错误转成对话里可读的提示 */
+const formatAssistantError = (raw: string) => {
+	const text = (raw || '').trim()
+	if (!text) {
+		return '小冰暂时连不上模型。请技术人员到「系统配置 · AI助手」检查模型是否启用、API Key 是否填写正确。'
+	}
+	const lower = text.toLowerCase()
+	if (
+		lower.includes('authentication fails') ||
+		lower.includes('governor') ||
+		text.includes('鉴权失败') ||
+		text.includes('(401)')
+	) {
+		return (
+			'模型鉴权失败啦～多半是 API Key 没填、填错或已失效（DeepSeek 常见提示 Authentication Fails）。\n' +
+			'请到「系统配置 · AI助手」打开当前默认模型，补全/更新 API Key，保存后再试。\n' +
+			'（这和系统提示词无关，改提示词解决不了 401。）'
+		)
+	}
+	if (text.includes('额度不足') || lower.includes('402')) {
+		return '模型账户额度不足，请到服务商控制台充值，或切换到其它可用模型。'
+	}
+	if (text.includes('过于频繁') || lower.includes('429')) {
+		return '请求太频繁了，稍等一会儿再问我吧。'
+	}
+	return text
+}
+
 const props = withDefaults(
 	defineProps<{
 		/** 登录页等未登录场景：本地应答，不调需鉴权接口 */
@@ -375,9 +403,10 @@ const send = async () => {
 			await loadSessions(currentSessionId.value)
 		}
 	} catch (e: any) {
-		const tip = e?.msg || e?.message || '小冰暂不可用，请联系技术人员在「系统配置 · AI助手」中接入模型'
+		const raw = e?.msg || e?.message || ''
+		const tip = formatAssistantError(raw)
 		messages.value.push({ role: 'assistant', content: tip })
-		ElMessage.warning(tip)
+		ElMessage.warning(tip.length > 80 ? tip.slice(0, 80) + '…' : tip)
 	} finally {
 		loading.value = false
 		await scrollBottom()

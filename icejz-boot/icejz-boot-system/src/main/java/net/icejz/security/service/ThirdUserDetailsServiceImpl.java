@@ -8,6 +8,7 @@ import net.icejz.system.dao.SysUserDao;
 import net.icejz.system.entity.SysUserEntity;
 import net.icejz.system.service.SysThirdLoginService;
 import net.icejz.system.service.SysUserDetailsService;
+import net.icejz.system.service.SysUserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class ThirdUserDetailsServiceImpl implements ThirdUserDetailsService {
     private final SysUserDetailsService sysUserDetailsService;
     private final SysThirdLoginService sysThirdLoginService;
     private final SysUserDao sysUserDao;
+    private final SysUserService sysUserService;
 
     @Override
     public UserDetails loadUserByOpenTypeAndOpenId(String openType, String openId) throws UsernameNotFoundException {
@@ -32,6 +34,7 @@ public class ThirdUserDetailsServiceImpl implements ThirdUserDetailsService {
         if (userEntity == null) {
             throw new UsernameNotFoundException("绑定的系统用户，不存在");
         }
+        userEntity = sysUserService.releaseIfBanExpired(userEntity);
 
         return sysUserDetailsService.getUserDetails(BeanUtil.copyProperties(userEntity, UserDetail.class));
     }

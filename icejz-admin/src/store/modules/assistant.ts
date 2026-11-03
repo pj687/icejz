@@ -35,8 +35,11 @@ export const useAssistantStore = defineStore('assistant', () => {
 	const welcome = ref('你好，我是 ICEJZ 小冰，有什么可以帮你的？')
 	const fabPos = ref<FabPos | null>(loadPos())
 	const dockHidden = ref(loadDockHidden())
+	/** 仅当前会话关闭桌宠；刷新页面自动重新显示，不写 localStorage */
+	const mascotClosed = ref(false)
 
 	const openPanel = (text?: string) => {
+		mascotClosed.value = false
 		if (text) {
 			draft.value = text
 		}
@@ -48,7 +51,19 @@ export const useAssistantStore = defineStore('assistant', () => {
 	}
 
 	const togglePanel = () => {
+		if (!open.value) {
+			mascotClosed.value = false
+		}
 		open.value = !open.value
+	}
+
+	const closeMascot = () => {
+		open.value = false
+		mascotClosed.value = true
+	}
+
+	const showMascot = () => {
+		mascotClosed.value = false
 	}
 
 	const setRobotProfile = (profile: { name?: string; welcome?: string }) => {
@@ -77,9 +92,12 @@ export const useAssistantStore = defineStore('assistant', () => {
 		welcome,
 		fabPos,
 		dockHidden,
+		mascotClosed,
 		openPanel,
 		closePanel,
 		togglePanel,
+		closeMascot,
+		showMascot,
 		setRobotProfile,
 		setFabPos,
 		setDockHidden,

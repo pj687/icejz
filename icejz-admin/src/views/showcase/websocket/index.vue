@@ -147,7 +147,7 @@ const getCurrentDate = () => {
 	padding: 18px;
 	border-radius: 20px;
 	border: 1px solid rgba(0, 168, 232, 0.12);
-	background: rgba(255, 255, 255, 0.92);
+	background: color-mix(in srgb, var(--sc-panel, #fff) 92%, transparent);
 	box-shadow: 0 10px 24px rgba(15, 40, 64, 0.04);
 }
 

@@ -9,7 +9,7 @@
             <view class="hero-header">
                 <view>
                     <text class="hero-eyebrow">个人资料</text>
-                    <text class="hero-title">完善你的守护档案</text>
+                    <text class="hero-title">完善个人资料</text>
                     <text class="hero-desc">点击头像上传照片，使用更直观的方式管理个人信息。</text>
                 </view>
             </view>

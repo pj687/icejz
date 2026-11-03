@@ -32,11 +32,11 @@ public interface SysAuthService {
     SysUserTokenVO loginByThird(SysThirdCallbackVO login);
 
     /**
-     * 发送手机验证码
+     * 发送手机验证码（需先通过图形验证码）
      *
-     * @param mobile 手机号
+     * @param send 手机号与图形验证码
      */
-    boolean sendCode(String mobile);
+    boolean sendCode(SysSendCodeVO send);
 
     /**
      * 根据刷新Token，获取AccessToken

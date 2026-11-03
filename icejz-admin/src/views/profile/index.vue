@@ -1,41 +1,65 @@
 <template>
 	<div class="profile-page">
 		<section class="profile-hero">
-			<div class="hero-bg" aria-hidden="true"></div>
 			<div class="hero-content">
-				<div class="hero-avatar">
-					<ma-upload-image
-						v-model:image-url="userStore.user.avatar"
-						:drag="false"
-						width="96px"
-						height="96px"
-						border-radius="50%"
-						@success="handleSuccess"
+				<div class="hero-avatar" :class="{ empty: !userStore.user.avatar, uploading: avatarUploading }">
+					<button
+						type="button"
+						class="avatar-btn"
+						:disabled="avatarUploading"
+						aria-label="更换头像"
+						@click="pickAvatar"
 					>
-						<template #empty>
+						<img
+							v-if="userStore.user.avatar"
+							class="avatar-img"
+							:src="userStore.user.avatar"
+							alt="用户头像"
+						/>
+						<span v-else class="avatar-empty">
 							<el-icon><Avatar /></el-icon>
-							<span>上传头像</span>
-						</template>
-					</ma-upload-image>
-					<span class="avatar-ring"></span>
+							<em>上传头像</em>
+						</span>
+						<span class="avatar-veil" aria-hidden="true">
+							<span class="veil-card">
+								<el-icon v-if="!avatarUploading"><Camera /></el-icon>
+								<em>{{ avatarUploading ? '上传中…' : '更换头像' }}</em>
+							</span>
+						</span>
+					</button>
+					<span class="avatar-ring" aria-hidden="true"></span>
+					<input
+						ref="avatarInputRef"
+						class="avatar-input"
+						type="file"
+						accept="image/jpeg,image/png,image/gif,image/webp"
+						@change="onAvatarChange"
+					/>
 				</div>
+
 				<div class="hero-meta">
-					<div class="hero-eyebrow">ICEJZ · 个人中心</div>
-					<h1 class="hero-name">{{ userStore.user.realName || userStore.user.username }}</h1>
+					<span class="hero-kicker">个人资料</span>
+					<h1>{{ userStore.user.realName || userStore.user.username }}</h1>
 					<p class="hero-sub">
-						<span>@{{ userStore.user.username }}</span>
-						<span class="dot">·</span>
+						<span class="handle">@{{ userStore.user.username }}</span>
+						<span class="dot" aria-hidden="true"></span>
 						<span>{{ userStore.user.orgName || '未分配机构' }}</span>
 					</p>
-					<div class="hero-tags">
-						<span class="tag">
-							<ma-icon icon="icon-tag" />
-							{{ postLabel }}
-						</span>
-						<span class="tag soft">
-							<ma-icon icon="icon-calendar-check" />
-							入驻 {{ createDate }}
-						</span>
+					<div class="hero-chips">
+						<span class="chip primary">{{ postLabel }}</span>
+						<span class="chip">入驻 {{ createDate }}</span>
+					</div>
+				</div>
+
+				<div class="hero-contact" aria-label="联系方式">
+					<div class="contact-item">
+						<span class="contact-label">手机</span>
+						<span class="contact-value">{{ userStore.user.mobile || '未填写' }}</span>
+					</div>
+					<span class="contact-rule" aria-hidden="true"></span>
+					<div class="contact-item">
+						<span class="contact-label">邮箱</span>
+						<span class="contact-value">{{ userStore.user.email || '未填写' }}</span>
 					</div>
 				</div>
 			</div>
@@ -43,63 +67,78 @@
 
 		<div class="profile-grid">
 			<aside class="profile-side">
-				<div class="side-card">
-					<div class="side-title">
-						<span>账号概览</span>
-					</div>
-					<ul class="info-list">
-						<li v-for="item in infoItems" :key="item.label">
-							<div class="info-icon">
-								<ma-icon :icon="item.icon" />
-							</div>
-							<div class="info-body">
+				<section class="side-panel overview-panel">
+					<header class="side-head">
+						<strong>账号概览</strong>
+						<span>基础身份信息</span>
+					</header>
+					<div v-for="group in overviewGroups" :key="group.title" class="info-group">
+						<h3>{{ group.title }}</h3>
+						<div class="info-grid">
+							<article
+								v-for="item in group.items"
+								:key="item.label"
+								class="info-cell"
+								:class="{ wide: item.wide }"
+							>
 								<span class="label">{{ item.label }}</span>
-								<span class="value">{{ item.value }}</span>
-							</div>
-						</li>
-					</ul>
-				</div>
+								<strong
+									class="value"
+									:class="{ nowrap: item.wide && !item.email, email: item.email }"
+									:title="String(item.value || '')"
+								>
+									{{ item.value }}
+								</strong>
+							</article>
+						</div>
+					</div>
+				</section>
 
-				<div class="side-card tip-card">
-					<div class="tip-badge">安全提示</div>
-					<p>定期更新密码，勿将账号共享给他人。绑定第三方登录可提升登录便利性与安全性。</p>
-				</div>
+				<section class="side-panel tip-panel">
+					<span class="tip-badge">安全提示</span>
+					<p>定期更新密码，勿共享账号。绑定第三方登录可提升登录便利性。</p>
+				</section>
 			</aside>
 
 			<main class="profile-main">
-				<div class="main-card">
-					<div class="main-tabs">
+				<section class="main-panel">
+					<nav class="tab-rail" aria-label="个人中心功能">
 						<button
 							v-for="tab in tabs"
 							:key="tab.name"
 							type="button"
-							:class="['tab-item', { active: activeName === tab.name }]"
+							class="tab-btn"
+							:class="{ active: activeName === tab.name }"
 							@click="activeName = tab.name"
 						>
-							<span class="tab-icon">
-								<ma-icon :icon="tab.icon" />
-							</span>
-							<span class="tab-text">
-								<span class="tab-label">{{ tab.label }}</span>
-								<span class="tab-desc">{{ tab.desc }}</span>
+							<span class="tab-icon"><ma-icon :icon="tab.icon" /></span>
+							<span class="tab-copy">
+								<strong>{{ tab.label }}</strong>
+								<em>{{ tab.desc }}</em>
 							</span>
 						</button>
-					</div>
+					</nav>
 
-					<div class="main-panel">
-						<div class="panel-head">
-							<h2>{{ currentTab?.label }}</h2>
-							<p>{{ currentTab?.desc }}</p>
-						</div>
+					<div class="panel-stage">
+						<header class="stage-head">
+							<div>
+								<h2>{{ currentTab?.label }}</h2>
+								<p>{{ currentTab?.desc }}</p>
+							</div>
+						</header>
 
-						<div class="panel-body" :class="{ wide: activeName === 'third' || activeName === 'signature' }">
+						<div
+							class="stage-body"
+							:class="{ wide: activeName === 'third' || activeName === 'signature' || activeName === 'devices' }"
+						>
 							<UserInfo v-if="activeName === 'info'" />
 							<Password v-else-if="activeName === 'password'" />
+							<Devices v-else-if="activeName === 'devices'" />
 							<Signature v-else-if="activeName === 'signature'" />
 							<ThirdLogin v-else-if="activeName === 'third'" />
 						</div>
 					</div>
-				</div>
+				</section>
 			</main>
 		</div>
 	</div>
@@ -107,25 +146,71 @@
 
 <script setup lang="ts" name="ProfileIndex">
 import { computed, ref } from 'vue'
+import { Avatar, Camera } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/modules/user'
 import Password from '@/views/profile/password.vue'
 import UserInfo from '@/views/profile/user-info.vue'
+import Devices from '@/views/profile/devices.vue'
 import Signature from '@/views/profile/signature.vue'
 import ThirdLogin from '@/views/profile/third-login.vue'
 import { useUserAvatarApi } from '@/api/sys/user'
+import { uploadImg } from '@/api/sys/upload'
 import { ElMessage } from 'element-plus'
 
 const userStore = useUserStore()
 const activeName = ref('info')
+const avatarInputRef = ref<HTMLInputElement | null>(null)
+const avatarUploading = ref(false)
+
+const pickAvatar = () => {
+	if (avatarUploading.value) {
+		return
+	}
+	avatarInputRef.value?.click()
+}
+
+const onAvatarChange = async (event: Event) => {
+	const input = event.target as HTMLInputElement
+	const file = input.files?.[0]
+	input.value = ''
+	if (!file) {
+		return
+	}
+
+	const allow = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+	if (!allow.includes(file.type)) {
+		ElMessage.warning('请上传 JPG / PNG / GIF / WEBP 图片')
+		return
+	}
+	if (file.size > 5 * 1024 * 1024) {
+		ElMessage.warning('图片大小不能超过 5MB')
+		return
+	}
+
+	const formData = new FormData()
+	formData.append('file', file)
+	avatarUploading.value = true
+	try {
+		const { data } = await uploadImg(formData)
+		await useUserAvatarApi({ avatar: data.url })
+		userStore.user.avatar = data.url
+		ElMessage.success('头像更新成功')
+	} catch {
+		ElMessage.error('头像上传失败，请重试')
+	} finally {
+		avatarUploading.value = false
+	}
+}
 
 const tabs = [
-	{ name: 'info', label: '基本资料', desc: '维护姓名、手机与邮箱等信息', icon: 'icon-user' },
-	{ name: 'password', label: '修改密码', desc: '定期更换密码保障账号安全', icon: 'icon-lock' },
-	{ name: 'signature', label: '个人签名', desc: '手写签名用于审批与文书场景', icon: 'icon-edit' },
-	{ name: 'third', label: '第三方登录', desc: '绑定企业微信、钉钉等平台', icon: 'icon-link' }
+	{ name: 'info', label: '基本资料', desc: '姓名、手机与邮箱', icon: 'icon-user' },
+	{ name: 'password', label: '修改密码', desc: '提升账号安全性', icon: 'icon-lock' },
+	{ name: 'devices', label: '登录设备', desc: '多设备偏好与会话', icon: 'icon-mobile' },
+	{ name: 'signature', label: '个人签名', desc: '审批与文书使用', icon: 'icon-edit' },
+	{ name: 'third', label: '第三方登录', desc: '企微 / 钉钉等', icon: 'icon-link' }
 ]
 
-const currentTab = computed(() => tabs.find(t => t.name === activeName.value) || tabs[0])
+const currentTab = computed(() => tabs.find((t) => t.name === activeName.value) || tabs[0])
 
 const postLabel = computed(() => {
 	const list = userStore.user.postNameList
@@ -140,98 +225,191 @@ const createDate = computed(() => {
 	return t ? String(t).slice(0, 10) : '—'
 })
 
-const infoItems = computed(() => [
-	{ icon: 'icon-user', label: '用户名', value: userStore.user.username || '—' },
-	{ icon: 'icon-idcard', label: '姓名', value: userStore.user.realName || '—' },
-	{ icon: 'icon-phone', label: '手机号码', value: userStore.user.mobile || '—' },
-	{ icon: 'icon-mail', label: '用户邮箱', value: userStore.user.email || '—' },
-	{ icon: 'icon-apartment', label: '所属机构', value: userStore.user.orgName || '—' },
-	{ icon: 'icon-tag', label: '所属岗位', value: postLabel.value },
-	{ icon: 'icon-calendar-check', label: '创建日期', value: userStore.user.createTime || '—' }
+const createDateTime = computed(() => {
+	const t = userStore.user.createTime
+	if (!t) {
+		return '—'
+	}
+	return String(t).replace('T', ' ').replace(/\.\d+$/, '').slice(0, 19)
+})
+
+const overviewGroups = computed(() => [
+	{
+		title: '账号',
+		items: [
+			{ label: '用户名', value: userStore.user.username || '—' },
+			{ label: '姓名', value: userStore.user.realName || '—' },
+			{ label: '手机号码', value: userStore.user.mobile || '—' },
+			{ label: '用户邮箱', value: userStore.user.email || '—', wide: true, email: true }
+		]
+	},
+	{
+		title: '组织',
+		items: [
+			{ label: '所属机构', value: userStore.user.orgName || '—' },
+			{ label: '所属岗位', value: postLabel.value },
+			{ label: '创建日期', value: createDateTime.value, wide: true }
+		]
+	}
 ])
 
-const handleSuccess = (data: any) => {
-	useUserAvatarApi({ avatar: data.url }).then(() => {
-		ElMessage.success('头像更新成功')
-	})
-}
 </script>
 
 <style scoped lang="scss">
 .profile-page {
-	--profile-brand: #00a8e8;
-	--profile-brand-deep: #0090c8;
-	--profile-ink: #0f1724;
-	--profile-muted: #6b7c8d;
-	--profile-line: rgba(15, 23, 36, 0.08);
-	--profile-soft: #f4f8fb;
+	--ink: #122033;
+	--muted: #64748b;
+	--line: #e8eef5;
+	--soft: #f7fbfe;
+	--panel: #fff;
+	--brand: #00a8e8;
+	--brand-deep: #007eb8;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 	min-height: 100%;
-	padding: 4px 2px 20px;
+	padding: 2px 2px 20px;
+	animation: rise 0.35s ease both;
+}
+
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
 }
 
 .profile-hero {
-	position: relative;
-	overflow: hidden;
-	border-radius: 22px;
-	margin-bottom: 18px;
+	border-radius: 20px;
+	border: 1px solid rgba(0, 168, 232, 0.14);
 	background:
-		radial-gradient(120% 140% at 0% 0%, rgba(0, 168, 232, 0.22), transparent 42%),
-		radial-gradient(90% 120% at 100% 10%, rgba(62, 198, 255, 0.16), transparent 40%),
-		linear-gradient(135deg, #0b1a28 0%, #123247 48%, #0e2435 100%);
-	box-shadow: 0 18px 40px rgba(11, 26, 40, 0.18);
-}
-
-.hero-bg {
-	position: absolute;
-	inset: 0;
-	background-image:
-		linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-	background-size: 28px 28px;
-	mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
-	opacity: 0.55;
-	pointer-events: none;
+		radial-gradient(120% 160% at 0% 0%, rgba(0, 168, 232, 0.14), transparent 55%),
+		linear-gradient(135deg, color-mix(in srgb, var(--brand) 8%, var(--panel)), var(--panel) 48%, var(--soft));
+	box-shadow: 0 12px 28px rgba(15, 23, 36, 0.04);
+	overflow: hidden;
 }
 
 .hero-content {
-	position: relative;
-	z-index: 1;
-	display: flex;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	gap: 20px;
 	align-items: center;
-	gap: 28px;
-	padding: 28px 32px;
+	padding: 22px 24px;
 }
 
 .hero-avatar {
 	position: relative;
+	width: 120px;
+	height: 120px;
 	flex-shrink: 0;
-	width: 108px;
-	height: 108px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+}
 
-	:deep(.upload-box) {
-		width: 96px;
-		height: 96px;
-	}
+.avatar-btn {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	place-items: center;
+	width: 112px;
+	height: 112px;
+	margin: 4px;
+	padding: 0;
+	overflow: hidden;
+	border: none;
+	border-radius: 50%;
+	background: var(--panel);
+	box-shadow: 0 8px 18px rgba(15, 23, 36, 0.08);
+	cursor: pointer;
+	transition: box-shadow 0.22s ease, transform 0.22s ease;
 
-	:deep(.upload-image) {
-		border-radius: 50%;
-		object-fit: cover;
-	}
+	&:hover,
+	&:focus-visible {
+		transform: translateY(-1px);
+		box-shadow: 0 12px 24px rgba(0, 168, 232, 0.18);
+		outline: none;
 
-	:deep(.upload-empty) {
-		color: rgba(255, 255, 255, 0.75);
+		.avatar-veil {
+			opacity: 1;
+		}
 
-		.el-icon {
-			color: rgba(255, 255, 255, 0.85);
+		.veil-card {
+			transform: translateY(0);
+			opacity: 1;
+		}
+
+		.avatar-img {
+			transform: scale(1.03);
 		}
 	}
 
-	:deep(.el-upload) {
-		border-color: rgba(255, 255, 255, 0.28) !important;
-		background: rgba(255, 255, 255, 0.08);
+	&:disabled {
+		cursor: wait;
+	}
+}
+
+.avatar-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+	transition: transform 0.28s ease;
+}
+
+.avatar-empty {
+	display: grid;
+	justify-items: center;
+	gap: 4px;
+	color: var(--brand-deep);
+
+	.el-icon {
+		font-size: 28px;
+		color: var(--brand);
+	}
+
+	em {
+		font-style: normal;
+		font-size: 12px;
+		font-weight: 650;
+	}
+}
+
+.avatar-veil {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	background: linear-gradient(180deg, rgba(0, 126, 184, 0.08), rgba(8, 36, 52, 0.58));
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.veil-card {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 12px;
+	border-radius: 999px;
+	color: #fff;
+	background: rgba(255, 255, 255, 0.16);
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	backdrop-filter: blur(6px);
+	box-shadow: 0 8px 18px rgba(8, 28, 42, 0.18);
+	opacity: 0;
+	transform: translateY(6px);
+	transition: opacity 0.2s ease, transform 0.2s ease;
+
+	.el-icon {
+		font-size: 14px;
+	}
+
+	em {
+		font-style: normal;
+		font-size: 12px;
+		font-weight: 700;
+		letter-spacing: 0.02em;
 	}
 }
 
@@ -239,162 +417,255 @@ const handleSuccess = (data: any) => {
 	position: absolute;
 	inset: 0;
 	border-radius: 50%;
-	border: 2px solid rgba(255, 255, 255, 0.35);
-	box-shadow: 0 0 0 6px rgba(0, 168, 232, 0.18);
+	border: 1px solid rgba(0, 168, 232, 0.2);
+	box-shadow: 0 0 0 4px rgba(0, 168, 232, 0.07);
 	pointer-events: none;
+	transition: border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.hero-avatar:hover .avatar-ring,
+.avatar-btn:focus-visible + .avatar-ring,
+.hero-avatar.uploading .avatar-ring {
+	border-color: rgba(0, 168, 232, 0.42);
+	box-shadow: 0 0 0 5px rgba(0, 168, 232, 0.12);
+}
+
+.hero-avatar.uploading {
+	.avatar-veil,
+	.veil-card {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+.avatar-input {
+	display: none;
 }
 
 .hero-meta {
 	min-width: 0;
-	color: #fff;
 }
 
-.hero-eyebrow {
-	display: inline-flex;
-	align-items: center;
-	padding: 4px 10px;
-	border-radius: 999px;
-	font-size: 12px;
-	font-weight: 650;
-	letter-spacing: 0.3px;
-	color: #bfefff;
-	background: rgba(255, 255, 255, 0.08);
-	border: 1px solid rgba(255, 255, 255, 0.12);
+.hero-kicker {
+	display: inline-block;
+	margin-bottom: 6px;
+	padding: 3px 8px;
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	color: var(--brand-deep);
+	background: rgba(0, 168, 232, 0.1);
 }
 
-.hero-name {
-	margin: 12px 0 8px;
-	font-size: 28px;
+.hero-meta h1 {
+	margin: 0;
+	font-size: 24px;
+	line-height: 1.25;
 	font-weight: 750;
-	line-height: 1.2;
-	letter-spacing: 0.2px;
+	color: var(--ink);
 }
 
 .hero-sub {
 	display: flex;
-	align-items: center;
 	flex-wrap: wrap;
+	align-items: center;
 	gap: 8px;
-	margin: 0 0 14px;
-	font-size: 14px;
-	color: rgba(255, 255, 255, 0.72);
+	margin: 8px 0 12px;
+	font-size: 13px;
+	color: var(--muted);
+
+	.handle {
+		font-weight: 650;
+		color: #475569;
+	}
 
 	.dot {
-		opacity: 0.45;
+		width: 3px;
+		height: 3px;
+		border-radius: 50%;
+		background: #94a3b8;
 	}
 }
 
-.hero-tags {
+.hero-chips {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 }
 
-.tag {
+.chip {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
-	padding: 7px 12px;
-	border-radius: 999px;
-	font-size: 12.5px;
-	background: rgba(0, 168, 232, 0.22);
-	border: 1px solid rgba(191, 239, 255, 0.22);
-	color: #eaf9ff;
+	height: 26px;
+	padding: 0 10px;
+	border-radius: 8px;
+	font-size: 12px;
+	font-weight: 650;
+	color: var(--muted);
+	background: color-mix(in srgb, var(--panel) 90%, transparent);
+	border: 1px solid var(--line);
 
-	&.soft {
-		background: rgba(255, 255, 255, 0.08);
-		border-color: rgba(255, 255, 255, 0.12);
-		color: rgba(255, 255, 255, 0.82);
+	&.primary {
+		color: var(--brand-deep);
+		background: rgba(0, 168, 232, 0.1);
+		border-color: rgba(0, 168, 232, 0.14);
 	}
+}
+
+.hero-contact {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: stretch;
+	min-width: 240px;
+	max-width: 320px;
+	padding: 12px 14px;
+	border-radius: 14px;
+	background: color-mix(in srgb, var(--panel) 92%, transparent);
+	border: 1px solid rgba(0, 168, 232, 0.12);
+	box-shadow: 0 8px 18px rgba(15, 23, 36, 0.04);
+}
+
+.contact-item {
+	display: grid;
+	gap: 5px;
+	min-width: 0;
+	padding: 2px 4px;
+}
+
+.contact-label {
+	font-size: 11px;
+	font-weight: 650;
+	letter-spacing: 0.02em;
+	color: #7b8b9c;
+}
+
+.contact-value {
+	font-size: 13px;
+	font-weight: 720;
+	line-height: 1.35;
+	color: var(--ink);
+	word-break: break-all;
+}
+
+.contact-rule {
+	width: 1px;
+	margin: 2px 8px;
+	background: linear-gradient(180deg, transparent, var(--line) 18%, var(--line) 82%, transparent);
 }
 
 .profile-grid {
 	display: grid;
-	grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-	gap: 18px;
+	grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+	gap: 16px;
 	align-items: start;
 }
 
-.side-card,
-.main-card {
+.side-panel,
+.main-panel {
 	border-radius: 18px;
-	background: #fff;
-	border: 1px solid var(--profile-line);
-	box-shadow: 0 10px 28px rgba(15, 23, 36, 0.04);
+	background: var(--panel);
+	border: 1px solid var(--line);
+	box-shadow: 0 10px 24px rgba(15, 23, 36, 0.04);
 }
 
-.side-card {
-	padding: 18px 18px 8px;
+.side-panel {
+	padding: 16px;
+	margin-bottom: 12px;
+}
+
+.overview-panel {
+	padding: 16px 14px 14px;
+}
+
+.side-head {
 	margin-bottom: 14px;
-}
+	padding: 0 2px 12px;
+	border-bottom: 1px solid var(--line);
 
-.side-title {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 8px;
-	padding: 0 4px 10px;
-	font-size: 15px;
-	font-weight: 700;
-	color: var(--profile-ink);
-	border-bottom: 1px solid var(--profile-line);
-}
+	strong {
+		display: block;
+		font-size: 14px;
+		color: var(--ink);
+	}
 
-.info-list {
-	list-style: none;
-	margin: 0;
-	padding: 4px 0 8px;
-}
-
-.info-list li {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 12px 6px;
-	border-bottom: 1px dashed rgba(15, 23, 36, 0.06);
-
-	&:last-child {
-		border-bottom: none;
+	span {
+		display: block;
+		margin-top: 2px;
+		font-size: 12px;
+		color: var(--muted);
 	}
 }
 
-.info-icon {
-	width: 34px;
-	height: 34px;
-	border-radius: 10px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-	color: var(--profile-brand-deep);
-	background: rgba(0, 168, 232, 0.1);
+.info-group {
+	& + & {
+		margin-top: 14px;
+		padding-top: 12px;
+		border-top: 1px dashed var(--line);
+	}
+
+	h3 {
+		margin: 0 0 8px 2px;
+		font-size: 11px;
+		font-weight: 720;
+		letter-spacing: 0.04em;
+		color: #7b8b9c;
+	}
 }
 
-.info-body {
+.info-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.info-cell {
+	display: grid;
+	gap: 4px;
 	min-width: 0;
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	gap: 2px;
+	padding: 10px 11px;
+	border-radius: 12px;
+	background: var(--soft);
+	border: 1px solid var(--line);
+
+	&.wide {
+		grid-column: 1 / -1;
+	}
 }
 
 .label {
-	font-size: 12px;
-	color: var(--profile-muted);
+	font-size: 11px;
+	font-weight: 650;
+	color: #7b8b9c;
 }
 
 .value {
-	font-size: 13.5px;
-	font-weight: 600;
-	color: var(--profile-ink);
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.35;
+	color: var(--ink);
 	word-break: break-all;
+
+	&.nowrap {
+		white-space: nowrap;
+		word-break: normal;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font-variant-numeric: tabular-nums;
+	}
+
+	&.email {
+		white-space: nowrap;
+		word-break: normal;
+		overflow-wrap: normal;
+		overflow: visible;
+	}
 }
 
-.tip-card {
-	padding: 16px 18px 18px;
+.tip-panel {
 	background:
-		radial-gradient(120% 100% at 0% 0%, rgba(0, 168, 232, 0.1), transparent 50%),
-		linear-gradient(180deg, #f8fcff, #f3f8fb);
+		radial-gradient(120% 140% at 0% 0%, rgba(0, 168, 232, 0.08), transparent 55%),
+		#fff;
 }
 
 .tip-badge {
@@ -404,133 +675,141 @@ const handleSuccess = (data: any) => {
 	border-radius: 999px;
 	font-size: 11px;
 	font-weight: 700;
-	color: var(--profile-brand-deep);
-	background: rgba(0, 168, 232, 0.12);
+	color: var(--brand-deep);
+	background: rgba(0, 168, 232, 0.1);
 }
 
-.tip-card p {
+.tip-panel p {
 	margin: 0;
-	font-size: 13px;
-	line-height: 1.7;
-	color: var(--profile-muted);
+	font-size: 12.5px;
+	line-height: 1.65;
+	color: var(--muted);
 }
 
-.main-card {
+.main-panel {
 	overflow: hidden;
 }
 
-.main-tabs {
+.tab-rail {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-template-columns: repeat(5, minmax(0, 1fr));
 	gap: 8px;
-	padding: 14px;
-	background: linear-gradient(180deg, #f7fafc, #f2f7fa);
-	border-bottom: 1px solid var(--profile-line);
+	padding: 12px;
+	background: linear-gradient(180deg, var(--soft), color-mix(in srgb, var(--soft) 80%, var(--line)));
+	border-bottom: 1px solid var(--line);
 }
 
-.tab-item {
+.tab-btn {
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
-	padding: 12px 12px 11px;
+	min-height: 64px;
+	padding: 11px 12px;
 	border: 1px solid transparent;
 	border-radius: 14px;
 	background: transparent;
 	text-align: left;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.8);
+		background: color-mix(in srgb, var(--panel) 75%, transparent);
 	}
 
 	&.active {
-		background: #fff;
+		background: var(--panel);
 		border-color: rgba(0, 168, 232, 0.18);
-		box-shadow: 0 8px 20px rgba(15, 23, 36, 0.06);
+		box-shadow: 0 8px 18px rgba(15, 23, 36, 0.05);
 
 		.tab-icon {
 			color: #fff;
-			background: linear-gradient(135deg, #00a8e8, #3ec6ff);
-			box-shadow: 0 8px 16px rgba(0, 168, 232, 0.28);
+			background: linear-gradient(135deg, #00a8e8, #2bbef5);
 		}
 
-		.tab-label {
-			color: var(--profile-brand-deep);
+		.tab-copy strong {
+			color: var(--brand-deep);
 		}
 	}
 }
 
 .tab-icon {
-	width: 34px;
-	height: 34px;
+	width: 32px;
+	height: 32px;
 	border-radius: 10px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
+	display: inline-grid;
+	place-items: center;
 	flex-shrink: 0;
-	color: var(--profile-brand-deep);
+	color: var(--brand-deep);
 	background: rgba(0, 168, 232, 0.1);
-	transition: all 0.2s ease;
 }
 
-.tab-text {
+.tab-copy {
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
+
+	strong {
+		font-size: 13px;
+		font-weight: 720;
+		color: var(--ink);
+	}
+
+	em {
+		font-style: normal;
+		font-size: 11.5px;
+		line-height: 1.4;
+		color: var(--muted);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
 }
 
-.tab-label {
-	font-size: 13.5px;
-	font-weight: 700;
-	color: var(--profile-ink);
+.panel-stage {
+	padding: 20px 22px 26px;
 }
 
-.tab-desc {
-	font-size: 11.5px;
-	line-height: 1.4;
-	color: var(--profile-muted);
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-}
-
-.main-panel {
-	padding: 22px 24px 28px;
-}
-
-.panel-head {
-	margin-bottom: 18px;
-	padding-bottom: 14px;
-	border-bottom: 1px dashed rgba(15, 23, 36, 0.08);
+.stage-head {
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 1px dashed #e8eef5;
 
 	h2 {
-		margin: 0 0 6px;
-		font-size: 18px;
+		margin: 0 0 4px;
+		font-size: 17px;
 		font-weight: 740;
-		color: var(--profile-ink);
+		color: var(--ink);
 	}
 
 	p {
 		margin: 0;
 		font-size: 13px;
-		color: var(--profile-muted);
+		color: var(--muted);
 	}
 }
 
-.panel-body {
+.stage-body {
 	max-width: 640px;
 
 	&.wide {
-		max-width: 860px;
+		max-width: 900px;
 	}
 }
 
 @media (max-width: 1100px) {
-	.main-tabs {
+	.tab-rail {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.hero-content {
+		grid-template-columns: auto minmax(0, 1fr);
+	}
+
+	.hero-contact {
+		grid-column: 1 / -1;
+		max-width: none;
 	}
 }
 
@@ -540,27 +819,46 @@ const handleSuccess = (data: any) => {
 	}
 
 	.hero-content {
-		flex-direction: column;
-		align-items: flex-start;
-		padding: 24px 20px;
+		grid-template-columns: 1fr;
+		justify-items: start;
 	}
 
-	.hero-name {
-		font-size: 24px;
+	.hero-meta h1 {
+		font-size: 22px;
+	}
+
+	.hero-contact {
+		width: 100%;
 	}
 }
 
 @media (max-width: 640px) {
-	.main-tabs {
+	.tab-rail {
 		grid-template-columns: 1fr;
 	}
 
-	.main-panel {
-		padding: 18px 16px 22px;
+	.panel-stage {
+		padding: 16px;
 	}
 
-	.panel-body {
+	.stage-body {
 		max-width: none;
+	}
+
+	.info-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.hero-contact {
+		grid-template-columns: 1fr;
+		gap: 10px;
+	}
+
+	.contact-rule {
+		width: auto;
+		height: 1px;
+		margin: 0;
+		background: linear-gradient(90deg, transparent, #d7e5ef 18%, #d7e5ef 82%, transparent);
 	}
 }
 </style>

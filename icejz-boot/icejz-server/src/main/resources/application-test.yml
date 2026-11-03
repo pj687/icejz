@@ -24,6 +24,7 @@ spring:
           username: icejz
           password: 123456
   mqtt:
+    enabled: false
     host: tcp://localhost:1883
     username: icejz
     password: icejz

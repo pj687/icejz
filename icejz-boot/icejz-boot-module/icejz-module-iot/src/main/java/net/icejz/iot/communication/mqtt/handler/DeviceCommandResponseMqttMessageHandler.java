@@ -8,6 +8,7 @@ import net.icejz.iot.communication.service.MQTTService;
 import net.icejz.iot.communication.dto.DeviceCommandResponseDTO;
 import net.icejz.iot.communication.mqtt.factory.DeviceCommandResponseHandlerFactory;
 import net.icejz.iot.enums.DeviceTopicEnum;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "spring.mqtt", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DeviceCommandResponseMqttMessageHandler implements MqttMessageHandler {
 
     private final DeviceCommandResponseHandlerFactory deviceCommandResponseHandlerFactory;

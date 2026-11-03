@@ -14,6 +14,7 @@ import net.icejz.iot.entity.IotDeviceEntity;
 import net.icejz.iot.enums.DeviceCommandEnum;
 import net.icejz.iot.enums.DeviceTopicEnum;
 import net.icejz.iot.service.IotDeviceServiceLogService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "spring.mqtt", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class MQTTService implements BaseCommunication {
 
     private final MqttGateway mqttGateway;

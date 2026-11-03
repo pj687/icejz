@@ -1,5 +1,17 @@
 <template>
-	<div class="ai-config">
+	<div class="org-auth-page ai-config">
+		<section class="org-auth-hero">
+			<div class="hero-copy">
+				<span class="hero-kicker"><i class="hero-mark" aria-hidden="true"></i>系统管理</span>
+				<h2>AI 助手</h2>
+				<p>配置平台机器人形象、欢迎语与默认模型接入</p>
+			</div>
+			<div class="hero-meta">
+				<span class="hero-chip"><em>{{ state.total || 0 }}</em>个模型</span>
+				<span class="hero-chip">{{ robotEnabled ? '已启用' : '已停用' }}</span>
+			</div>
+		</section>
+
 		<section class="robot-card">
 			<div class="robot-visual">
 				<IceBotMascot size="xl" pet form="fly" :bounce="true" :auto-action-ms="0" :show-name="false" />
@@ -37,7 +49,7 @@
 			</div>
 		</section>
 
-		<section class="model-card">
+		<section class="model-card org-auth-card">
 			<div class="model-head">
 				<div>
 					<strong>模型接入</strong>
@@ -49,37 +61,51 @@
 				</div>
 			</div>
 
-			<el-table v-loading="state.dataListLoading" :data="state.dataList" border class="layout-table" @selection-change="selectionChangeHandle">
+			<el-table v-loading="state.dataListLoading" :data="state.dataList" class="layout-table" @selection-change="selectionChangeHandle">
 				<el-table-column type="selection" header-align="center" align="center" width="50" />
-				<el-table-column prop="name" label="名称" min-width="120" />
-				<el-table-column prop="provider" label="厂商" width="110" />
-				<el-table-column label="接入" width="90" align="center">
+				<el-table-column prop="name" label="名称" min-width="120">
 					<template #default="{ row }">
-						<el-tag :type="row.apiType === 0 ? 'success' : 'primary'" size="small">
+						<span class="org-auth-name">
+							<span class="avatar model">{{ (row.name || '模').slice(0, 1) }}</span>
+							{{ row.name }}
+						</span>
+					</template>
+				</el-table-column>
+				<el-table-column prop="provider" label="厂商" width="110" />
+				<el-table-column label="接入" width="100" align="center">
+					<template #default="{ row }">
+						<span class="sys-type-pill" :class="row.apiType === 0 ? 'button' : 'menu'">
 							{{ row.apiType === 0 ? '本地' : '线上' }}
-						</el-tag>
+						</span>
 					</template>
 				</el-table-column>
 				<el-table-column prop="modelName" label="模型" min-width="140" show-overflow-tooltip />
-				<el-table-column prop="baseUrl" label="Base URL" min-width="180" show-overflow-tooltip />
-				<el-table-column label="默认" width="80" align="center">
+				<el-table-column prop="baseUrl" label="Base URL" min-width="180" show-overflow-tooltip>
 					<template #default="{ row }">
-						<el-tag v-if="row.isDefault === 1" type="warning" size="small">默认</el-tag>
+						<span v-if="row.baseUrl" class="sys-route-code">{{ row.baseUrl }}</span>
+						<span v-else>—</span>
+					</template>
+				</el-table-column>
+				<el-table-column label="默认" width="90" align="center">
+					<template #default="{ row }">
+						<span v-if="row.isDefault === 1" class="sys-type-pill api">默认</span>
 						<span v-else>—</span>
 					</template>
 				</el-table-column>
 				<el-table-column label="状态" width="90" align="center">
 					<template #default="{ row }">
-						<el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
+						<span class="sys-type-pill" :class="row.status === 1 ? 'button' : 'open-out'">
 							{{ row.status === 1 ? '启用' : '禁用' }}
-						</el-tag>
+						</span>
 					</template>
 				</el-table-column>
-				<el-table-column label="操作" fixed="right" width="210" align="center">
+				<el-table-column label="操作" fixed="right" width="230" align="center">
 					<template #default="scope">
-						<el-button type="primary" link @click="testHandle(scope.row)">测试</el-button>
-						<el-button type="primary" link @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
-						<el-button type="primary" link @click="deleteBatchHandle(scope.row.id)">删除</el-button>
+						<div class="org-auth-actions">
+							<el-button class="act-btn act-warn" @click="testHandle(scope.row)">测试</el-button>
+							<el-button class="act-btn act-primary" :icon="Edit" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
+							<el-button class="act-btn act-danger" :icon="Delete" @click="deleteBatchHandle(scope.row.id)">删除</el-button>
+						</div>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -102,6 +128,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Delete, Edit } from '@element-plus/icons-vue'
 import { useCrud } from '@/hooks'
 import { IHooksOptions } from '@/hooks/interface'
 import IceBotMascot from '@/components/assistant/IceBotMascot.vue'
@@ -183,19 +210,22 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .ai-config {
-	margin-top: 10px;
-	display: flex;
-	flex-direction: column;
 	gap: 16px;
 }
 
 .robot-card,
 .model-card {
-	border: 1px solid rgba(0, 168, 232, 0.12);
+	--ai-ink: #122033;
+	--ai-muted: #7a8796;
+	--ai-soft: #eef8fc;
+	--ai-panel: #fff;
+	--ai-line: #e7eef5;
+	--ai-brand: #007eb8;
+	border: 1px solid var(--ai-line);
 	border-radius: 20px;
-	background: #fff;
+	background: color-mix(in srgb, var(--ai-panel) 94%, transparent);
 	overflow: hidden;
-	box-shadow: 0 12px 28px rgba(15, 23, 36, 0.04);
+	box-shadow: 0 10px 24px rgba(15, 23, 36, 0.035);
 }
 
 .robot-card {
@@ -211,13 +241,13 @@ onMounted(async () => {
 	padding: 20px 12px;
 	background:
 		radial-gradient(120% 100% at 50% 0%, rgba(0, 168, 232, 0.16), transparent 60%),
-		linear-gradient(180deg, #f3faff, #eef8fc);
+		linear-gradient(180deg, color-mix(in srgb, #00a8e8 8%, var(--ai-soft)), var(--ai-soft));
 }
 
 .bot-caption {
 	font-size: 13px;
 	font-weight: 750;
-	color: #007eb8;
+	color: var(--ai-brand);
 	letter-spacing: 0.04em;
 }
 
@@ -231,12 +261,12 @@ onMounted(async () => {
 	strong {
 		display: block;
 		font-size: 16px;
-		color: #122033;
+		color: var(--ai-ink);
 	}
 	em {
 		font-style: normal;
 		font-size: 12.5px;
-		color: #7a8796;
+		color: var(--ai-muted);
 	}
 }
 
@@ -271,12 +301,12 @@ onMounted(async () => {
 	strong {
 		display: block;
 		font-size: 15px;
-		color: #122033;
+		color: var(--ai-ink);
 	}
 	em {
 		font-style: normal;
 		font-size: 12.5px;
-		color: #7a8796;
+		color: var(--ai-muted);
 	}
 }
 

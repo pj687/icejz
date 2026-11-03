@@ -17,7 +17,9 @@ import net.icejz.framework.security.utils.TokenUtils;
 import net.icejz.system.convert.SysUserConvert;
 import net.icejz.system.dao.SysUserDao;
 import net.icejz.system.entity.SysUserEntity;
+import cn.hutool.core.util.ObjectUtil;
 import net.icejz.system.enums.SuperAdminEnum;
+import net.icejz.system.enums.UserStatusEnum;
 import net.icejz.system.query.SysRoleUserQuery;
 import net.icejz.system.query.SysUserQuery;
 import net.icejz.system.service.*;
@@ -139,6 +141,43 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
 
         // 更新用户缓存权限
         sysUserTokenService.updateCacheAuthByUserId(entity.getId());
+
+        if (entity.getStatus() != null && entity.getStatus() == UserStatusEnum.DISABLE.getValue()) {
+            sysUserTokenService.forceLogoutByUserId(entity.getId());
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateStatus(Long id, Integer status, String reason) {
+        if (id == null) {
+            throw new ServerException("用户不存在");
+        }
+        if (status == null || (status != UserStatusEnum.DISABLE.getValue() && status != UserStatusEnum.ENABLED.getValue())) {
+            throw new ServerException("状态值无效");
+        }
+        if (id.equals(SecurityUser.getUserId())) {
+            throw new ServerException("不能封禁当前登录用户");
+        }
+
+        SysUserEntity user = getById(id);
+        if (user == null) {
+            throw new ServerException("用户不存在");
+        }
+        if (ObjectUtil.equal(user.getSuperAdmin(), SuperAdminEnum.YES.getValue())) {
+            throw new ServerException("不能封禁超级管理员");
+        }
+
+        SysUserEntity patch = new SysUserEntity();
+        patch.setId(id);
+        patch.setStatus(status);
+        updateById(patch);
+
+        if (status == UserStatusEnum.DISABLE.getValue()) {
+            sysUserTokenService.forceLogoutByUserId(id);
+        } else {
+            sysUserTokenService.updateCacheAuthByUserId(id);
+        }
     }
 
     @Override

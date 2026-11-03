@@ -29,6 +29,11 @@ withDefaults(
 
 <style scoped lang="scss">
 .showcase-page {
+	--sc-ink: #0f1724;
+	--sc-muted: #64748b;
+	--sc-panel: #fff;
+	--sc-soft: #ecf7fd;
+	--sc-brand: #007eb8;
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -49,7 +54,7 @@ withDefaults(
 	border-radius: 20px;
 	border: 1px solid rgba(0, 168, 232, 0.14);
 	background:
-		linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(236, 247, 253, 0.9));
+		linear-gradient(135deg, color-mix(in srgb, var(--sc-panel) 96%, transparent), color-mix(in srgb, var(--sc-soft) 90%, transparent));
 	box-shadow: 0 12px 28px rgba(15, 40, 64, 0.05);
 }
 
@@ -64,7 +69,7 @@ withDefaults(
 		font-size: 11px;
 		font-weight: 750;
 		letter-spacing: 0.04em;
-		color: #007eb8;
+		color: var(--sc-brand);
 		background: rgba(0, 168, 232, 0.12);
 		border: 1px solid rgba(0, 168, 232, 0.18);
 	}
@@ -73,7 +78,7 @@ withDefaults(
 		margin: 0;
 		font-size: 22px;
 		font-weight: 780;
-		color: #0f1724;
+		color: var(--sc-ink);
 		letter-spacing: -0.02em;
 	}
 
@@ -81,7 +86,7 @@ withDefaults(
 		margin: 8px 0 0;
 		font-size: 13.5px;
 		line-height: 1.6;
-		color: #64748b;
+		color: var(--sc-muted);
 	}
 }
 

@@ -5,6 +5,7 @@ import net.icejz.framework.common.utils.Result;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,6 +50,11 @@ public class ServerExceptionHandler {
     public Result<String> handleAccessDeniedException(Exception ex) {
 
         return Result.error(ErrorCode.FORBIDDEN);
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public Result<String> handleDisabledException(DisabledException ex) {
+        return Result.error("抱歉，您的账号已被封禁，暂时无法登录。如有疑问，请联系系统管理员。");
     }
 
     @ExceptionHandler(Exception.class)

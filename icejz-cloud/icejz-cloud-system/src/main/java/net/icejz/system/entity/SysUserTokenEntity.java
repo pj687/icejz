@@ -53,6 +53,21 @@ public class SysUserTokenEntity {
     private Long tenantId;
 
     /**
+     * 登录 IP
+     */
+    private String loginIp;
+
+    /**
+     * User-Agent
+     */
+    private String userAgent;
+
+    /**
+     * 客户端类型：pc / app / mp
+     */
+    private String clientType;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

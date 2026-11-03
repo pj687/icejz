@@ -12,11 +12,16 @@ server:
       cookie:
         http-only: true
 
+# enable 保持 false：knife4j 4.5.0 与当前 springdoc 3.x 开启增强会触发 getGroupConfigs NoSuchMethodError
+# 主题样式通过自定义 doc.html + /icejz-knife4j.css 注入，不依赖增强模式
 knife4j:
   enable: false
   setting:
+    language: zh_cn
     custom-code: 500
     enable-footer-custom: false
+
+
 
 # 禁用springdoc，主要用于生产环境
 #springdoc:
@@ -47,7 +52,7 @@ storage:
 
 icejz:
   # 平台统一版本号（与前端 package.json / 根目录 VERSION 保持一致）
-  version: 1.0.1
+  version: 1.0.2
   name: ICEJZ
   xss:
     enabled: true

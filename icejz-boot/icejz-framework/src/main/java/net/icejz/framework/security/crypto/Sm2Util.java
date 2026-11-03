@@ -48,11 +48,38 @@ public class Sm2Util {
     /**
      * 解密
      *
-     * @param data 加密后的密文
+     * @param data 加密后的密文（hex，通常以 04 开头；也兼容 Base64）
      * @return 解密后的明文
      */
     public static String decrypt(String data) {
-        return sm2.decryptStr(data, KeyType.PrivateKey);
+        if (data == null || data.isBlank()) {
+            throw new IllegalArgumentException("SM2密文为空");
+        }
+        String cipher = data.trim();
+        try {
+            return sm2.decryptStr(cipher, KeyType.PrivateKey);
+        } catch (Exception first) {
+            // 兼容前端漏拼 / 多拼 04 前缀
+            try {
+                if (cipher.startsWith("04") || cipher.startsWith("04".toUpperCase())) {
+                    return sm2.decryptStr(cipher.substring(2), KeyType.PrivateKey);
+                }
+                return sm2.decryptStr("04" + cipher, KeyType.PrivateKey);
+            } catch (Exception ignored) {
+                throw first;
+            }
+        }
+    }
+
+    /**
+     * 前端可用的 SM2 非压缩公钥（以 04 开头）
+     */
+    public static String getPublicKeyHex() {
+        PublicKey publicKey = sm2.getPublicKey();
+        if (publicKey instanceof BCECPublicKey bcecPublicKey) {
+            return Hex.toHexString(bcecPublicKey.getQ().getEncoded(false));
+        }
+        return "0417b623de43a93a94bf272b4a19cfb796c1acce8a65bc818357ccf9022ffa4ac35748eb5a502a435ec93b45b0038b59d8df36542d38cc48a9a507fbb210a65019";
     }
 
     public static void main(String[] args) {

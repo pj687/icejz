@@ -52,7 +52,22 @@ public class Sm2Util {
      * @return 解密后的明文
      */
     public static String decrypt(String data) {
-        return sm2.decryptStr(data, KeyType.PrivateKey);
+        if (data == null || data.isBlank()) {
+            throw new IllegalArgumentException("SM2密文为空");
+        }
+        String cipher = data.trim();
+        try {
+            return sm2.decryptStr(cipher, KeyType.PrivateKey);
+        } catch (Exception first) {
+            try {
+                if (cipher.startsWith("04") || cipher.startsWith("04".toUpperCase())) {
+                    return sm2.decryptStr(cipher.substring(2), KeyType.PrivateKey);
+                }
+                return sm2.decryptStr("04" + cipher, KeyType.PrivateKey);
+            } catch (Exception ignored) {
+                throw first;
+            }
+        }
     }
 
     public static void main(String[] args) {

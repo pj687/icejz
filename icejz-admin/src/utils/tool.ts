@@ -79,30 +79,49 @@ export const getDictLabelClass = (dictList: any[], dictType: string, dictValue: 
 	}
 }
 
-export const getDictLabelList = (dictType: string, dictValue: any): string => {
-	if (Number.isInteger(dictValue)) {
-		dictValue = dictValue + ''
+export type DictLabelItem = {
+	value: string
+	label: string
+	tone: string
+}
+
+const normalizeDictTone = (classStyle?: string) => {
+	const tone = (classStyle || 'info').toLowerCase()
+	if (['primary', 'success', 'warning', 'danger', 'info'].includes(tone)) {
+		return tone
+	}
+	return 'info'
+}
+
+/** 字典标签结构化数据，供组件渲染美化令牌 */
+export const getDictLabelItems = (dictType: string, dictValue: any): DictLabelItem[] => {
+	if (dictValue === null || dictValue === undefined || dictValue === '') {
+		return []
 	}
 
-	if (!dictValue) {
-		return ''
-	}
-
+	const valueText = typeof dictValue === 'number' || Number.isInteger(dictValue) ? String(dictValue) : String(dictValue)
 	const appStore = useAppStore()
 
-	let result = ''
-	dictValue.split(',').forEach((value: string) => {
-		const classStyle = getDictLabelClass(appStore.dictList, dictType, value)
-		const label = getDictLabel(appStore.dictList, dictType, value)
+	return valueText
+		.split(',')
+		.map((value: string) => value.trim())
+		.filter((value) => value !== '')
+		.map((value: string) => {
+			const classStyle = getDictLabelClass(appStore.dictList, dictType, value)
+			const label = getDictLabel(appStore.dictList, dictType, value)
+			return {
+				value,
+				label: String(label ?? value),
+				tone: normalizeDictTone(classStyle)
+			}
+		})
+}
 
-		if (classStyle) {
-			result += `<span class="el-tag el-tag--${classStyle} el-tag--${appStore.componentSize}">${label}</span>&nbsp;`
-		} else {
-			result += label + '&nbsp;'
-		}
-	})
-
-	return result
+export const getDictLabelList = (dictType: string, dictValue: any): string => {
+	const items = getDictLabelItems(dictType, dictValue)
+	return items
+		.map((item) => `<span class="icejz-dict-tag tone-${item.tone}"><i class="dot"></i>${item.label}</span>`)
+		.join(' ')
 }
 
 // 获取字典数据列表

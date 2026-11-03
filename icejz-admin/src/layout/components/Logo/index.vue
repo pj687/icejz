@@ -1,12 +1,12 @@
 <template>
-	<div v-if="appStore.sidebarOpened" class="sidebar-logo">
+	<div v-if="showFullLogo" class="sidebar-logo">
 		<div class="logo-mark">
 			<img class="logo-img" src="/logo.png" alt="ICEJZ" />
 			<span class="logo-shine" aria-hidden="true"></span>
 		</div>
 		<div class="logo-text-wrap">
 			<span class="logo-title">{{ $t('app.logoText') }}</span>
-			<span class="logo-sub">Low Code Platform</span>
+			<span class="logo-sub">{{ $t('layout.logoSub') }}</span>
 		</div>
 	</div>
 	<div v-else class="sidebar-logo sidebar-logo-mini">
@@ -18,8 +18,10 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useAppStore } from '@/store/modules/app'
 const appStore = useAppStore()
+const showFullLogo = computed(() => appStore.sidebarOpened)
 </script>
 
 <style lang="scss" scoped>

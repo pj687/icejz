@@ -36,12 +36,14 @@ public class PreAuthorizeUtil {
                 PreAuthorize preAuthorize = AnnotationUtils.findAnnotation(method, PreAuthorize.class);
                 if (preAuthorize != null) {
                     String value = preAuthorize.value();
-                    // 使用正则表达式提取权限字符串
-                    Pattern pattern = Pattern.compile("hasAuthority\\('([^']*)'\\)");
+                    // 提取 hasAuthority('xxx') / hasAnyAuthority('a','b')
+                    Pattern pattern = Pattern.compile("(?:hasAuthority|hasAnyAuthority)\\(([^)]*)\\)");
                     Matcher matcher = pattern.matcher(value);
                     while (matcher.find()) {
-                        String authority = matcher.group(1);
-                        authorities.add(authority);
+                        Matcher codeMatcher = Pattern.compile("'([^']*)'").matcher(matcher.group(1));
+                        while (codeMatcher.find()) {
+                            authorities.add(codeMatcher.group(1));
+                        }
                     }
                 }
             }

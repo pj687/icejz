@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ICEJZ API 接口文档">
+  <title>ICEJZ API Docs</title>
+  <link href="webjars/css/chunk-41ae0dec.999bc9fd.css" rel="prefetch">
+  <link href="webjars/css/chunk-cdc6d52e.9612b987.css" rel="prefetch">
+  <link href="webjars/js/chunk-069eb437.355c4fb0.js" rel="prefetch">
+  <link href="webjars/js/chunk-0d102d5a.b2bddffc.js" rel="prefetch">
+  <link href="webjars/js/chunk-0fd67716.d57e2c41.js" rel="prefetch">
+  <link href="webjars/js/chunk-260d712a.390177fe.js" rel="prefetch">
+  <link href="webjars/js/chunk-2d0af44e.392afcd6.js" rel="prefetch">
+  <link href="webjars/js/chunk-2d0bd799.eb48b7f1.js" rel="prefetch">
+  <link href="webjars/js/chunk-2d0da532.591ad7fc.js" rel="prefetch">
+  <link href="webjars/js/chunk-3b888a65.8737ce4f.js" rel="prefetch">
+  <link href="webjars/js/chunk-3ec4aaa8.a79d19f8.js" rel="prefetch">
+  <link href="webjars/js/chunk-41ae0dec.7cdc472b.js" rel="prefetch">
+  <link href="webjars/js/chunk-589faee0.5bfd1708.js" rel="prefetch">
+  <link href="webjars/js/chunk-735c675c.5b409314.js" rel="prefetch">
+  <link href="webjars/js/chunk-adb9e944.2c7f24fe.js" rel="prefetch">
+  <link href="webjars/js/chunk-cdc6d52e.5c46a8aa.js" rel="prefetch">
+  <link href="webjars/css/app.1824bac3.css" rel="preload" as="style">
+  <link href="webjars/css/chunk-vendors.f24a310a.css" rel="preload" as="style">
+  <link href="webjars/js/app.c31badf5.js" rel="preload" as="script">
+  <link href="webjars/js/chunk-vendors.d51cf6f8.js" rel="preload" as="script">
+  <link href="webjars/css/chunk-vendors.f24a310a.css" rel="stylesheet">
+  <link href="webjars/css/app.1824bac3.css" rel="stylesheet">
+  <link href="/icejz-knife4j.css?v=20261101-home5" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/icons/favicon-16x16.png">
+</head>
+<body class="icejz-knife4j">
+  <noscript>
+    <strong>请确保 Knife4j 静态资源已正确放行，并开启 JavaScript 后继续访问。</strong>
+  </noscript>
+  <div id="app"></div>
+  <script src="webjars/js/chunk-vendors.d51cf6f8.js"></script>
+  <script src="webjars/js/app.c31badf5.js"></script>
+  <script>
+    (function () {
+      var lastHomeSignature = '';
+      var mutating = false;
+      var bootTries = 0;
+
+      function textOf(el) {
+        return (el && (el.innerText || el.textContent) || '').replace(/\s+/g, ' ').trim();
+      }
+
+      function isHome() {
+        var hash = (location.hash || '').toLowerCase();
+        return !hash || hash === '#' || hash === '#/' || hash === '#/home' || hash.indexOf('#/home') === 0;
+      }
+
+      function polishChrome() {
+        document.title = 'ICEJZ API Docs';
+
+        document.querySelectorAll('.ant-menu a, .ant-menu span').forEach(function (el) {
+          if (!el.childElementCount && el.textContent && el.textContent.trim() === 'Swagger Models') {
+            el.textContent = '数据模型';
+          }
+        });
+
+        document.querySelectorAll('.footer, .knife4j-footer, .ant-layout-footer').forEach(function (el) {
+          if (el.dataset.icejzFooter === '1') return;
+          el.dataset.icejzFooter = '1';
+          el.innerHTML = 'Copyright © 2026 ICEJZ · API Docs';
+        });
+      }
+
+      function parseHome() {
+        var root = document.querySelector('.knife4j-body-content');
+        if (!root) return null;
+        var titleEl = root.querySelector('.title h2, .title');
+        var rows = {};
+        var methods = [];
+        root.querySelectorAll('.description .content-line').forEach(function (line) {
+          var label = textOf(line.querySelector('.ant-col-5, h3'));
+          var valueCol = line.querySelector('.ant-col-19');
+          if (!label || !valueCol) return;
+          if (label.indexOf('接口统计') >= 0) {
+            var countRow = valueCol.querySelector('.content-line-count');
+            if (countRow) {
+              var cols = countRow.querySelectorAll('.ant-col');
+              for (var i = 0; i + 1 < cols.length; i += 2) {
+                var methodText = textOf(cols[i]);
+                var countText = textOf(cols[i + 1]);
+                var m = methodText.match(/^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/i);
+                if (m && countText) {
+                  methods.push({ method: m[1].toUpperCase(), count: countText });
+                }
+              }
+            }
+            if (!methods.length) {
+              var raw = textOf(valueCol);
+              var re = /(GET|POST|PUT|DELETE|PATCH)\s*[:：]?\s*(\d+)/gi;
+              var hit;
+              while ((hit = re.exec(raw))) {
+                methods.push({ method: hit[1].toUpperCase(), count: hit[2] });
+              }
+            }
+            return;
+          }
+          rows[label] = textOf(valueCol);
+        });
+        return {
+          root: root,
+          title: textOf(titleEl) || 'ICEJZ API',
+          rows: rows,
+          methods: methods
+        };
+      }
+
+      function signatureOf(data) {
+        return [
+          data.title,
+          data.rows['分组名称'] || '',
+          data.rows['版本'] || '',
+          data.rows['host'] || '',
+          data.methods.map(function (m) { return m.method + ':' + m.count; }).join(',')
+        ].join('|');
+      }
+
+      function methodClass(method) {
+        return 'icejz-method-' + String(method || '').toLowerCase();
+      }
+
+      function buildHome(data) {
+        var desc = data.rows['简介'] || 'ICEJZ 低代码开发平台接口文档';
+        var author = data.rows['作者'] || '—';
+        var version = data.rows['版本'] || '—';
+        var host = data.rows['host'] || data.rows['Host'] || '—';
+        var basePath = data.rows['basePath'] || '/';
+        var group = data.rows['分组名称'] || '—';
+        var terms = data.rows['API服务条款'] || '';
+        var groupUrl = data.rows['分组Url'] || data.rows['分组location'] || '';
+
+        var total = data.methods.reduce(function (sum, item) {
+          return sum + (parseInt(item.count, 10) || 0);
+        }, 0);
+
+        var methodCards = data.methods.map(function (item) {
+          return (
+            '<article class="icejz-stat-card ' + methodClass(item.method) + '">' +
+              '<span class="method">' + item.method + '</span>' +
+              '<strong>' + item.count + '</strong>' +
+              '<em>个接口</em>' +
+            '</article>'
+          );
+        }).join('');
+
+        if (!methodCards) {
+          methodCards =
+            '<article class="icejz-stat-card"><span class="method">TOTAL</span><strong>' +
+            total +
+            '</strong><em>个接口</em></article>';
+        }
+
+        return (
+          '<section class="icejz-home" data-icejz-home="1">' +
+            '<div class="icejz-home-hero">' +
+              '<div class="hero-copy">' +
+                '<span class="hero-kicker"><i class="hero-mark"></i>接口文档</span>' +
+                '<h1>' + data.title + '</h1>' +
+                '<p>' + desc + '</p>' +
+              '</div>' +
+              '<div class="hero-meta">' +
+                '<span class="hero-chip"><em>' + version + '</em>版本</span>' +
+                '<span class="hero-chip"><em>' + total + '</em>接口</span>' +
+                '<span class="hero-chip">' + group + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="icejz-home-stats">' + methodCards + '</div>' +
+            '<div class="icejz-home-grid">' +
+              '<article class="icejz-info-card">' +
+                '<header><strong>服务信息</strong><span>当前文档分组与运行地址</span></header>' +
+                '<ul>' +
+                  '<li><span>作者</span><b>' + author + '</b></li>' +
+                  '<li><span>Host</span><b class="mono">' + host + '</b></li>' +
+                  '<li><span>Base Path</span><b class="mono">' + basePath + '</b></li>' +
+                  '<li><span>分组</span><b>' + group + '</b></li>' +
+                '</ul>' +
+              '</article>' +
+              '<article class="icejz-info-card">' +
+                '<header><strong>使用提示</strong><span>调试前先完成这些准备</span></header>' +
+                '<ol class="tips">' +
+                  '<li>左侧顶部切换业务分组，浏览对应模块接口</li>' +
+                  '<li>打开「调试」页面前，先在 Header 配置 <code>Authorization</code></li>' +
+                  '<li>可用「全局参数」保存常用 Token，减少重复填写</li>' +
+                  (terms ? '<li>服务条款：<a href="' + terms + '" target="_blank" rel="noreferrer">' + terms + '</a></li>' : '') +
+                  (groupUrl ? '<li>OpenAPI：<code>' + groupUrl + '</code></li>' : '') +
+                '</ol>' +
+              '</article>' +
+            '</div>' +
+          '</section>'
+        );
+      }
+
+      function clearHome() {
+        document.querySelectorAll('.icejz-home').forEach(function (el) { el.remove(); });
+        document.querySelectorAll('.knife4j-body-content').forEach(function (el) {
+          el.classList.remove('icejz-home-ready');
+        });
+        lastHomeSignature = '';
+      }
+
+      function enhanceHome() {
+        if (!isHome()) {
+          if (document.querySelector('.icejz-home')) {
+            mutating = true;
+            clearHome();
+            mutating = false;
+          }
+          return;
+        }
+
+        var data = parseHome();
+        if (!data || !data.root.querySelector('.description .content-line')) {
+          return;
+        }
+
+        var signature = signatureOf(data);
+        var host = data.root.querySelector('.ant-col-24') || data.root;
+        var existing = host.querySelector('[data-icejz-home="1"]');
+
+        // 已渲染且内容未变：绝不重建，避免闪烁
+        if (existing && lastHomeSignature === signature) {
+          data.root.classList.add('icejz-home-ready');
+          return;
+        }
+
+        mutating = true;
+        if (existing) {
+          existing.outerHTML = buildHome(data);
+        } else {
+          var wrap = document.createElement('div');
+          wrap.innerHTML = buildHome(data);
+          host.insertBefore(wrap.firstChild, host.firstChild);
+        }
+        data.root.classList.add('icejz-home-ready');
+        lastHomeSignature = signature;
+        mutating = false;
+      }
+
+      function tick() {
+        if (mutating) return;
+        polishChrome();
+        enhanceHome();
+      }
+
+      // 启动期短轮询，等 Knife4j 渲染完首页即可停止
+      var bootTimer = setInterval(function () {
+        bootTries += 1;
+        tick();
+        if ((isHome() && document.querySelector('[data-icejz-home="1"]')) || bootTries >= 40) {
+          clearInterval(bootTimer);
+        }
+      }, 400);
+
+      document.addEventListener('DOMContentLoaded', tick);
+      window.addEventListener('load', function () { setTimeout(tick, 300); });
+      window.addEventListener('hashchange', function () {
+        lastHomeSignature = '';
+        setTimeout(tick, 200);
+      });
+
+      // 仅在首页尚未渲染时响应 DOM 变化；自身改动不触发
+      var obsTimer = null;
+      var observer = new MutationObserver(function () {
+        if (mutating) return;
+        if (!isHome()) return;
+        if (document.querySelector('[data-icejz-home="1"]') && lastHomeSignature) return;
+        if (obsTimer) clearTimeout(obsTimer);
+        obsTimer = setTimeout(tick, 180);
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    })();
+  </script>
+</body>
+</html>

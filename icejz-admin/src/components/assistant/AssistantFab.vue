@@ -1,15 +1,15 @@
 <template>
 	<div
-		v-show="!assistantStore.open"
+		v-show="!assistantStore.open && !assistantStore.mascotClosed"
 		ref="fabRef"
 		class="assistant-fab"
-		:class="[{ dragging, moving }, `form-${currentForm}`]"
+		:class="[{ dragging, moving, morphing: morphBusy }, `form-${layoutForm}`]"
 		:style="fabStyle"
 		@pointerdown="onPointerDown"
 		@click="onClick"
 		@dblclick.stop="openChat"
 	>
-		<div class="fab-stage" :data-action="currentAction" :data-form="currentForm">
+		<div class="fab-stage" :data-action="currentAction" :data-form="layoutForm">
 			<transition name="bubble">
 				<div
 					v-if="bubbleVisible"
@@ -26,12 +26,22 @@
 			<button
 				type="button"
 				class="morph-fab-btn"
-				:data-form="currentForm"
+				:data-form="layoutForm"
+				:disabled="morphBusy"
 				title="机体 ↔ 飞行 变身"
 				@pointerdown.stop
 				@click.stop="morphNow"
 			>
 				变身
+			</button>
+			<button
+				type="button"
+				class="fab-close-btn"
+				title="关闭小冰（顶栏可再打开）"
+				@pointerdown.stop
+				@click.stop="closeMascot"
+			>
+				×
 			</button>
 			<span class="action-chip" v-if="currentAction !== 'idle'">{{ actionChip }}</span>
 
@@ -42,13 +52,16 @@
 				ref="botRef"
 				size="lg"
 				pet
+				click-to-morph
 				:form="currentForm"
-				:bounce="!dragging && currentAction === 'idle'"
+				:bounce="!dragging && currentAction === 'idle' && !morphBusy"
 				:talking="bubbleVisible"
 				:auto-morph-ms="0"
 				:auto-action-ms="20000"
 				@morph="onMorph"
 				@action="onPetAction"
+				@morph-request="morphNow"
+				@dblclick="openChat"
 			/>
 		</div>
 
@@ -79,24 +92,28 @@
 					class="dock-btn soft"
 					:class="{ active: currentAction === item.key }"
 					:title="item.label"
-					:disabled="currentForm === 'fly'"
+					:disabled="layoutForm === 'fly' || morphBusy"
 					@click="playAction(item.key)"
 				>
 					{{ item.short }}
 				</button>
 			</div>
 			<div class="dock-row tools">
-				<button type="button" class="dock-btn soft" title="打招呼" @click="greetNow">招呼</button>
+				<button type="button" class="dock-btn soft" title="奶龙合拍手势舞" :disabled="morphBusy" @click="greetNow">合拍</button>
 				<button
 					type="button"
 					class="dock-btn accent"
-					:class="{ active: currentForm === 'fly' }"
+					:class="{ active: layoutForm === 'fly' }"
+					:disabled="morphBusy"
 					title="机体 ↔ 飞行 变身"
 					@click="morphNow"
 				>
 					变身
 				</button>
 				<button type="button" class="dock-btn primary" title="打开对话" @click="openChat">对话</button>
+				<button type="button" class="dock-btn soft danger" title="关闭小冰（顶栏可再打开，刷新也会回来）" @click="closeMascot">
+					关闭
+				</button>
 			</div>
 		</div>
 	</div>
@@ -109,7 +126,7 @@ import type { IceBotForm, IcePetAction } from './IceBotMascot.vue'
 import { DOCK_PET_STATES } from './petStates'
 import { useAssistantStore } from '@/store/modules/assistant'
 import { useUserStore } from '@/store/modules/user'
-import { buildGreeting, getClickHello } from './greetings'
+import { buildGreeting } from './greetings'
 
 const props = withDefaults(
 	defineProps<{
@@ -128,12 +145,25 @@ const moving = ref(false)
 const pos = ref({ x: 0, y: 0 })
 const fabW = 300
 const currentForm = ref<IceBotForm>('fly')
+/** 先驱动底部栏/配件布局，变身动画仍跟 currentForm */
+const layoutForm = ref<IceBotForm>('fly')
+const morphBusy = ref(false)
 const currentAction = ref<IcePetAction>('idle')
+const LAYOUT_SETTLE_MS = 260
 const fabH = computed(() => {
-	const fly = currentForm.value === 'fly'
+	const fly = layoutForm.value === 'fly'
 	if (assistantStore.dockHidden) return fly ? 188 : 240
 	return fly ? 300 : 360
 })
+
+const waitMs = (ms: number) => new Promise<void>(resolve => window.setTimeout(resolve, ms))
+
+const prepareLayoutFor = (next: IceBotForm) => {
+	hideBubble()
+	layoutForm.value = next
+	pos.value = clamp(pos.value.x, pos.value.y)
+	assistantStore.setFabPos({ ...pos.value })
+}
 
 const petActions = DOCK_PET_STATES.map(s => ({
 	key: s.name,
@@ -175,6 +205,8 @@ let suppressClick = false
 let hideTimer = 0
 let idleTimer = 0
 let bootTimer = 0
+/** 变身结束后的气泡：null=默认完成语，skip=不弹，对象=自定义文案 */
+let pendingAfterMorph: { text: string; duration?: number } | 'skip' | null = null
 
 const userName = computed(() =>
 	props.guest ? '朋友' : userStore.user?.realName || userStore.user?.username || ''
@@ -220,26 +252,57 @@ const showBubble = (text: string, duration = 5200) => {
 	}, duration)
 }
 
-const greetNow = () => {
-	showBubble(buildGreeting('greet', userName.value), 6500)
+const greetNow = async () => {
+	if (morphBusy.value) return
 	if (currentForm.value === 'fly') {
+		morphBusy.value = true
+		pendingAfterMorph = { text: buildGreeting('greet', userName.value), duration: 6500 }
+		prepareLayoutFor('bot')
+		await waitMs(LAYOUT_SETTLE_MS)
 		botRef.value?.transformTo('bot')
-		window.setTimeout(() => botRef.value?.play('waving'), 900)
+		window.setTimeout(() => {
+			if (currentForm.value === 'bot') botRef.value?.greet()
+		}, 120)
 		return
 	}
-	botRef.value?.play('waving')
+	showBubble(buildGreeting('greet', userName.value), 6500)
+	botRef.value?.greet()
 }
 
-const morphNow = () => {
-	showBubble(currentForm.value === 'bot' ? '变身中…起飞！' : '变身中…合体！', 1400)
-	botRef.value?.transform()
+const morphNow = async () => {
+	if (morphBusy.value || botRef.value?.morphing) return
+	const next: IceBotForm = currentForm.value === 'bot' ? 'fly' : 'bot'
+	morphBusy.value = true
+	pendingAfterMorph = null
+	// 飞行 → 机体：先挪底部栏/配件，再变身
+	// 机体 → 飞行：直接变身，布局等结束后再收
+	if (next === 'bot') {
+		prepareLayoutFor(next)
+		await waitMs(LAYOUT_SETTLE_MS)
+	} else {
+		hideBubble()
+	}
+	if (!botRef.value) {
+		currentForm.value = next
+		layoutForm.value = next
+		morphBusy.value = false
+		showBubble(formTips[next], 3200)
+		return
+	}
+	botRef.value.transformTo(next)
 }
 
-const playAction = (key: IcePetAction) => {
+const playAction = async (key: IcePetAction) => {
+	if (morphBusy.value) return
 	if (currentForm.value === 'fly') {
-		showBubble('先变回机体再做动作哦～', 2200)
+		morphBusy.value = true
+		pendingAfterMorph = 'skip'
+		prepareLayoutFor('bot')
+		await waitMs(LAYOUT_SETTLE_MS)
 		botRef.value?.transformTo('bot')
-		window.setTimeout(() => botRef.value?.play(key), 900)
+		window.setTimeout(() => {
+			if (currentForm.value === 'bot') botRef.value?.play(key)
+		}, 780)
 		return
 	}
 	botRef.value?.play(key)
@@ -247,6 +310,16 @@ const playAction = (key: IcePetAction) => {
 
 const onMorph = (form: IceBotForm) => {
 	currentForm.value = form
+	layoutForm.value = form
+	morphBusy.value = false
+	const pending = pendingAfterMorph
+	pendingAfterMorph = null
+	if (pending === 'skip') return
+	if (pending) {
+		showBubble(pending.text, pending.duration ?? 5200)
+		return
+	}
+	// 变身完成后再出现对应语句气泡
 	showBubble(formTips[form], 3200)
 }
 
@@ -260,7 +333,7 @@ const scheduleIdleGreet = () => {
 	if (idleTimer) window.clearTimeout(idleTimer)
 	const delay = 45000 + Math.random() * 45000
 	idleTimer = window.setTimeout(() => {
-		if (!assistantStore.open && !dragging.value && document.visibilityState === 'visible') {
+		if (!assistantStore.open && !assistantStore.mascotClosed && !dragging.value && document.visibilityState === 'visible') {
 			showBubble(buildGreeting('idle', userName.value), 4800)
 		}
 		scheduleIdleGreet()
@@ -272,15 +345,20 @@ const openChat = () => {
 	assistantStore.openPanel()
 }
 
+const closeMascot = () => {
+	hideBubble()
+	assistantStore.closeMascot()
+}
+
 const onBubbleClick = () => {
 	hideBubble()
 	assistantStore.openPanel()
 }
 
 const onClick = () => {
-	if (suppressClick || moving.value) return
-	botRef.value?.playRandom()
-	showBubble(getClickHello(userName.value), 1800)
+	if (suppressClick || moving.value || morphBusy.value) return
+	// 点舞台区域与变身按钮同一套流程
+	void morphNow()
 }
 
 const onPointerDown = (e: PointerEvent) => {
@@ -365,7 +443,7 @@ watch(
 )
 
 watch(
-	() => [assistantStore.dockHidden, currentForm.value] as const,
+	() => [assistantStore.dockHidden, layoutForm.value] as const,
 	() => {
 		pos.value = clamp(pos.value.x, pos.value.y)
 		assistantStore.setFabPos({ ...pos.value })
@@ -406,10 +484,15 @@ onBeforeUnmount(() => {
 	touch-action: none;
 	user-select: none;
 	cursor: grab;
+	transition: gap 0.26s cubic-bezier(0.22, 1, 0.36, 1);
 
 	&.dragging {
 		z-index: 2800;
 		cursor: grabbing;
+	}
+
+	&.morphing {
+		pointer-events: auto;
 	}
 
 	&.form-fly {
@@ -440,13 +523,18 @@ onBeforeUnmount(() => {
 			left: -8px;
 		}
 
-		.action-chip {
+		.fab-close-btn {
 			top: 0;
 			right: -8px;
 		}
 
+		.action-chip {
+			top: 28px;
+			right: -8px;
+		}
+
 		.speech-bubble {
-			top: 0;
+			top: 42px;
 			right: calc(100% - 18px);
 		}
 
@@ -469,7 +557,10 @@ onBeforeUnmount(() => {
 	place-items: center;
 	overflow: visible;
 	isolation: isolate;
-	transition: width 0.22s ease, height 0.22s ease;
+	transition:
+		width 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+		height 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+		padding 0.26s ease;
 }
 
 .stage-glow {
@@ -484,6 +575,10 @@ onBeforeUnmount(() => {
 	transform: translate(-50%, -50%);
 	pointer-events: none;
 	animation: stage-breathe 4.2s ease-in-out infinite;
+	transition:
+		top 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+		width 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+		height 0.26s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .stage-pedestal {
@@ -498,6 +593,10 @@ onBeforeUnmount(() => {
 	transform: translateX(-50%);
 	pointer-events: none;
 	filter: blur(0.2px);
+	transition:
+		bottom 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+		width 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+		height 0.26s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .morph-fab-btn {
@@ -518,10 +617,18 @@ onBeforeUnmount(() => {
 	box-shadow: 0 4px 12px rgba(8, 50, 80, 0.12);
 	backdrop-filter: blur(8px);
 	transition:
+		top 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+		left 0.26s cubic-bezier(0.22, 1, 0.36, 1),
 		transform 0.14s ease,
 		background 0.14s ease,
 		color 0.14s ease,
-		box-shadow 0.14s ease;
+		box-shadow 0.14s ease,
+		opacity 0.14s ease;
+
+	&:disabled {
+		opacity: 0.55;
+		cursor: wait;
+	}
 
 	&:hover {
 		transform: translateY(-1px);
@@ -541,10 +648,42 @@ onBeforeUnmount(() => {
 	}
 }
 
-.action-chip {
+.fab-close-btn {
 	position: absolute;
 	right: 0;
 	top: 4px;
+	z-index: 5;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 1px solid rgba(148, 163, 184, 0.35);
+	border-radius: 50%;
+	cursor: pointer;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1;
+	color: #64748b;
+	background: rgba(255, 255, 255, 0.95);
+	box-shadow: 0 4px 12px rgba(15, 23, 36, 0.1);
+	backdrop-filter: blur(8px);
+	transition: transform 0.14s ease, color 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+
+	&:hover {
+		transform: translateY(-1px);
+		color: #b45309;
+		border-color: rgba(240, 162, 2, 0.35);
+		background: #fff7ed;
+	}
+
+	&:active {
+		transform: translateY(0) scale(0.96);
+	}
+}
+
+.action-chip {
+	position: absolute;
+	right: 0;
+	top: 32px;
 	z-index: 2;
 	padding: 3px 9px;
 	border-radius: 999px;
@@ -557,22 +696,28 @@ onBeforeUnmount(() => {
 	border: 1px solid rgba(255, 255, 255, 0.35);
 	backdrop-filter: blur(8px);
 	box-shadow: 0 4px 12px rgba(8, 50, 80, 0.1);
+	transition:
+		top 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+		right 0.26s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .speech-bubble {
 	position: absolute;
 	right: calc(100% - 4px);
-	top: 8px;
+	top: 56px;
 	z-index: 2;
 	width: max-content;
 	max-width: 240px;
 	padding: 10px 28px 10px 12px;
 	border-radius: 16px 16px 6px 16px;
-	background: rgba(255, 255, 255, 0.97);
+	background: color-mix(in srgb, var(--icejz-card-bg, #fff) 97%, transparent);
 	border: 1px solid rgba(0, 168, 232, 0.2);
 	box-shadow: 0 12px 28px rgba(8, 50, 80, 0.14);
 	backdrop-filter: blur(10px);
 	cursor: pointer;
+	transition:
+		top 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+		right 0.26s cubic-bezier(0.22, 1, 0.36, 1);
 
 	p {
 		margin: 0;
@@ -611,7 +756,7 @@ onBeforeUnmount(() => {
 	bottom: 14px;
 	width: 12px;
 	height: 12px;
-	background: #fff;
+	background: var(--icejz-card-bg, #fff);
 	border-right: 1px solid rgba(0, 168, 232, 0.2);
 	border-bottom: 1px solid rgba(0, 168, 232, 0.2);
 	transform: rotate(-45deg);
@@ -669,7 +814,11 @@ onBeforeUnmount(() => {
 		inset 0 1px 0 rgba(255, 255, 255, 0.9);
 	backdrop-filter: blur(12px);
 	opacity: 0.94;
-	transition: opacity 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+	transition:
+		opacity 0.18s ease,
+		box-shadow 0.18s ease,
+		transform 0.18s ease,
+		margin-top 0.26s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .dock-head {
@@ -785,6 +934,12 @@ onBeforeUnmount(() => {
 			border-color: transparent;
 			background: linear-gradient(135deg, #00a8e8, #38bdf8);
 			box-shadow: 0 5px 12px rgba(0, 168, 232, 0.3);
+		}
+
+		&.danger {
+			color: #b45309;
+			background: rgba(240, 162, 2, 0.12);
+			border-color: rgba(240, 162, 2, 0.2);
 		}
 	}
 

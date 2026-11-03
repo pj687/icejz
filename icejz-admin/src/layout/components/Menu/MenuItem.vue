@@ -1,10 +1,10 @@
 <template>
-	<el-sub-menu v-if="menu.children.length > 0" :key="menu.path" :index="menu.path" class="icejz-sub-menu">
+	<el-sub-menu v-if="menu.children?.length > 0" :key="menu.path" :index="menu.path" class="icejz-sub-menu">
 		<template #title>
-			<span v-if="showIcon" class="menu-icon-wrap">
+			<span v-if="hasIcon(menu)" class="menu-icon-wrap">
 				<ma-icon :icon="menu.meta.icon" />
 			</span>
-			<span class="menu-title">{{ menu.meta.title }}</span>
+			<span class="menu-title">{{ menuTitle(menu) }}</span>
 		</template>
 		<menu-item v-for="sub in menu.children" :key="sub.path" :menu="sub" />
 	</el-sub-menu>
@@ -15,24 +15,21 @@
 		class="icejz-menu-item"
 		@click="handleClickMenu(menu)"
 	>
-		<span v-if="showIcon" class="menu-icon-wrap">
+		<span v-if="hasIcon(menu)" class="menu-icon-wrap">
 			<ma-icon :icon="menu.meta.icon" />
 		</span>
-		<template #title>
-			<span class="menu-title">{{ menu.meta.title }}</span>
-		</template>
+		<span class="menu-title">{{ menuTitle(menu) }}</span>
 	</el-menu-item>
 </template>
 
 <script setup lang="ts">
-import { computed, PropType } from 'vue'
+import { PropType } from 'vue'
 import { useRouter } from 'vue-router'
 import { isExternalLink, replaceLinkParam } from '@/utils/tool'
-import { useAppStore } from '@/store/modules/app'
+import { translateMenuTitle } from '@/utils/menu-i18n'
 
-const appStore = useAppStore()
-
-const showIcon = computed(() => appStore.theme.layout !== 'columns')
+const hasIcon = (menu: any) => !!menu?.meta?.icon
+const menuTitle = (menu: any) => translateMenuTitle(menu?.meta?.title, menu?.meta?.url)
 
 defineProps({
 	menu: {

@@ -10,9 +10,18 @@ import net.icejz.system.vo.SysCaptchaVO;
  */
 public interface SysCaptchaService {
     /**
-     * 生成验证码
+     * 生成验证码（默认 PC 通道）
      */
-    SysCaptchaVO generate();
+    default SysCaptchaVO generate() {
+        return generate("pc");
+    }
+
+    /**
+     * 按通道生成验证码
+     *
+     * @param channel pc / app / sms
+     */
+    SysCaptchaVO generate(String channel);
 
     /**
      * 验证码效验
@@ -22,6 +31,20 @@ public interface SysCaptchaService {
      * @return true：成功  false：失败
      */
     boolean validate(String key, String code);
+
+    /**
+     * 强制校验图形验证码（不受登录验证码开关影响，用于发短信防刷）
+     *
+     * @param key  key
+     * @param code 验证码
+     * @return true：成功  false：失败
+     */
+    boolean validateRequired(String key, String code);
+
+    /**
+     * 预校验（不消费缓存），用于滑动拼图松手反馈；登录时仍会正式 validate
+     */
+    boolean check(String key, String code);
 
     /**
      * 是否开启登录验证码

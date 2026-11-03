@@ -2,10 +2,11 @@
     <view class="activity-page">
         <view class="banner-card">
             <view>
-                <text class="banner-title">社区活动</text>
-                <text class="banner-subtitle">丰富长者生活，促进邻里互助与健康管理</text>
+                <text class="banner-kicker">{{ brand.activityKicker }}</text>
+                <text class="banner-title">{{ brand.activityTitle }}</text>
+                <text class="banner-subtitle">{{ brand.activitySub }}</text>
             </view>
-            <view class="banner-badge">支持下拉刷新</view>
+            <view class="banner-badge">下拉刷新</view>
         </view>
 
         <view class="section-card quick-card">
@@ -79,11 +80,13 @@
 
 <script>
 import { useActivityPageApi } from '../../api/activity.js';
+import brand from '../../config/brand.js';
 
 export default {
     name: 'Activity',
     data() {
         return {
+            brand,
             loading: false,
             activityList: []
         };
@@ -185,26 +188,38 @@ export default {
 <style scoped>
 .activity-page {
     min-height: 100vh;
-    background: linear-gradient(180deg, #f4f7fb 0%, #eef2f7 100%);
+    background:
+        radial-gradient(circle at top right, rgba(0, 168, 232, 0.1), transparent 36%),
+        #f4f7fb;
     padding: 24rpx;
 }
 
 .banner-card {
-    background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-    border-radius: 24rpx;
+    background:
+        radial-gradient(circle at 90% 10%, rgba(62, 198, 255, 0.32), transparent 36%),
+        linear-gradient(135deg, #121a28 0%, #143047 55%, #0c6f9c 100%);
+    border-radius: 28rpx;
     padding: 34rpx 30rpx;
     margin-bottom: 22rpx;
-    box-shadow: 0 16rpx 36rpx rgba(17, 24, 39, 0.16);
+    box-shadow: 0 16rpx 40rpx rgba(15, 23, 36, 0.16);
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 20rpx;
 }
 
+.banner-kicker {
+    display: block;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 18rpx;
+    letter-spacing: 3rpx;
+    margin-bottom: 10rpx;
+}
+
 .banner-title {
     display: block;
     color: #fff;
-    font-size: 40rpx;
+    font-size: 42rpx;
     font-weight: 700;
 }
 
@@ -218,20 +233,20 @@ export default {
 
 .banner-badge {
     flex-shrink: 0;
-    color: #e8f7fd;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1rpx solid rgba(255, 255, 255, 0.18);
+    color: #fff;
+    background: #00a8e8;
     border-radius: 999rpx;
     padding: 10rpx 18rpx;
     font-size: 20rpx;
 }
 
 .section-card {
-    background: rgba(255, 255, 255, 0.96);
-    border-radius: 24rpx;
+    background: #fff;
+    border-radius: 28rpx;
     padding: 24rpx;
     margin-bottom: 20rpx;
-    box-shadow: 0 8rpx 24rpx rgba(15, 23, 42, 0.06);
+    border: 1rpx solid rgba(232, 238, 245, 0.95);
+    box-shadow: 0 8rpx 24rpx rgba(15, 23, 36, 0.04);
 }
 
 .quick-card {
@@ -292,13 +307,13 @@ export default {
 
 .activity-item {
     margin-top: 18rpx;
-    border-radius: 18rpx;
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 20rpx;
+    background: linear-gradient(180deg, #f7fbfe, #f2f8fc);
     padding: 22rpx;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: inset 0 0 0 1rpx #eef2f7;
+    border: 1rpx solid rgba(0, 168, 232, 0.06);
 }
 
 .activity-main {

@@ -1,21 +1,34 @@
 <template>
-	<el-dialog v-model="visible" :title="!dataForm.id ? '新增' : '修改'" :close-on-click-modal="false" :width="600">
-		<el-form ref="dataFormRef" :model="dataForm" :rules="dataRules" label-width="100px" @keyup.enter="submitHandle()">
-			<el-form-item label="参数名称" prop="paramName">
-				<el-input v-model="dataForm.paramName" placeholder="参数名称"></el-input>
-			</el-form-item>
-			<el-form-item label="参数键" prop="paramKey">
-				<el-input v-model="dataForm.paramKey" placeholder="参数键"></el-input>
-			</el-form-item>
-			<el-form-item label="参数值" prop="paramValue">
-				<el-input v-model="dataForm.paramValue" placeholder="参数值"></el-input>
-			</el-form-item>
-			<el-form-item label="备注" prop="remark">
-				<el-input v-model="dataForm.remark" placeholder="备注"></el-input>
-			</el-form-item>
-			<el-form-item label="系统参数" prop="paramType">
-				<ma-dict-radio v-model="dataForm.paramType" dict-type="params_type"></ma-dict-radio>
-			</el-form-item>
+	<el-dialog
+		v-model="visible"
+		class="org-auth-dialog"
+		:title="!dataForm.id ? '新增参数' : '修改参数'"
+		:close-on-click-modal="false"
+		width="560px"
+		draggable
+	>
+		<el-form ref="dataFormRef" :model="dataForm" :rules="dataRules" label-width="96px" @keyup.enter="submitHandle()">
+			<section class="form-block">
+				<header class="block-head">
+					<strong>参数信息</strong>
+					<span>键值、类型与备注说明</span>
+				</header>
+				<el-form-item label="参数名称" prop="paramName">
+					<el-input v-model="dataForm.paramName" placeholder="参数名称"></el-input>
+				</el-form-item>
+				<el-form-item label="参数键" prop="paramKey">
+					<el-input v-model="dataForm.paramKey" placeholder="参数键"></el-input>
+				</el-form-item>
+				<el-form-item label="参数值" prop="paramValue">
+					<el-input v-model="dataForm.paramValue" placeholder="参数值"></el-input>
+				</el-form-item>
+				<el-form-item label="备注" prop="remark">
+					<el-input v-model="dataForm.remark" placeholder="备注"></el-input>
+				</el-form-item>
+				<el-form-item label="系统参数" prop="paramType">
+					<ma-dict-radio v-model="dataForm.paramType" dict-type="params_type"></ma-dict-radio>
+				</el-form-item>
+			</section>
 		</el-form>
 		<template #footer>
 			<el-button @click="visible = false">取消</el-button>

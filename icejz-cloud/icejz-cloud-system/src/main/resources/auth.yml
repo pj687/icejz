@@ -2,6 +2,7 @@ auth:
   ignore_urls:
     - /sys/auth/captcha
     - /sys/auth/captcha/enabled
+    - /sys/auth/captcha/check
     - /sys/auth/login
     - /sys/auth/token
     - /sys/auth/send/code

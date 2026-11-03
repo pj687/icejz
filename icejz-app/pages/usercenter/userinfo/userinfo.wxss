@@ -1,6 +1,13 @@
+page {
+  background:
+    radial-gradient(circle at top right, rgba(0, 168, 232, 0.08), transparent 36%),
+    #f4f7fb;
+}
+
 .avatar {
   width: 80rpx;
   height: 80rpx;
   border-radius: 50% !important;
   overflow: hidden;
+  border: 3rpx solid rgba(0, 168, 232, 0.2);
 }

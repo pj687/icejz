@@ -36,6 +36,15 @@ public class UserDetail implements UserDetails {
     private Long tenantId;
     private LocalDateTime createTime;
 
+    /** 本次登录 IP */
+    private String loginIp;
+    /** 本次登录 User-Agent */
+    private String userAgent;
+    /** 客户端类型：pc / app / mp 等 */
+    private String clientType;
+    /** 本次登录时间 */
+    private LocalDateTime loginTime;
+
     /**
      * 数据权限范围
      * <p>

@@ -4,8 +4,14 @@ export const useCaptchaEnabledApi = () => {
     return request.get('/sys/auth/captcha/enabled');
 };
 
-export const useCaptchaApi = () => {
-    return request.get('/sys/auth/captcha');
+/** channel: pc | app | sms */
+export const useCaptchaApi = (channel = 'app') => {
+    return request.get('/sys/auth/captcha', { channel });
+};
+
+/** 交互验证码预校验（不消耗验证码，登录/发短信时再正式校验） */
+export const useCaptchaCheckApi = (data) => {
+    return request.post('/sys/auth/captcha/check', data);
 };
 
 export const usePublicKeyApi = () => {
@@ -20,10 +26,10 @@ export const useLoginApi = (data) => {
 };
 
 /**
- * 发送手机验证码
+ * 发送手机验证码（需先通过图形验证码）
  */
-export const useSendCodeApi = (mobile) => {
-    return request.post(`/sys/auth/send/code?mobile=${mobile}`);
+export const useSendCodeApi = (data) => {
+    return request.post('/sys/auth/send/code', data);
 };
 
 /**

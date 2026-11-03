@@ -1,12 +1,13 @@
 {
 	"name": "icejz-admin",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
 		"build": "vue-tsc --noEmit && vite build",
 		"preview": "vite preview",
-		"lint": "eslint --fix --ext .vue,.jsx,.ts,.tsx ."
+		"lint": "eslint --fix --ext .vue,.jsx,.ts,.tsx .",
+		"theme:apply": "node scripts/apply-theme-config.mjs"
 	},
 	"dependencies": {
 		"@element-plus/icons-vue": "2.3.2",

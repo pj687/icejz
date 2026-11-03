@@ -1,7 +1,10 @@
 <view class="user-center-card">
   <view class="user-center-card__header">
     <t-avatar image="{{user.avatar || 'https://oss.mlh.jucheng.icu/logo.png'}}" class="user-center-card__header__avatar" />
-    <view class="user-center-card__header__name">{{user.realName}}</view>
+    <view class="user-center-card__header__meta">
+      <view class="user-center-card__header__name">{{user.realName}}</view>
+      <view class="user-center-card__header__sub">{{brand.slogan}}</view>
+    </view>
   </view>
 </view>
 <view class="content-wrapper">
@@ -11,7 +14,7 @@
         <t-cell t-class="nav-group__top" title="常用功能" note="查看全部" arrow />
       </t-cell-group>
       <view class="nav-group__content">
-        <view class="nav-group__item" wx:for="{{menuData}}" wx:for-item="item" wx:key="index" bindtap="onClickMenu">
+        <view class="nav-group__item" wx:for="{{menuData}}" wx:for-item="item" wx:key="index" data-index="{{index}}" bindtap="onClickMenu">
           <view class="nav-group__item__icon">
             <t-badge count="{{item.count}}" color="#FF4646">
               <t-icon name="{{item.icon}}" size="56rpx" color="#00a8e8" />

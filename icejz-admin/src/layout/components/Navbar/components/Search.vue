@@ -1,12 +1,12 @@
 <template>
 	<div class="navbar-search">
-		<button type="button" class="search-trigger" title="菜单搜索" aria-label="菜单搜索" @click="openSearch">
+		<button type="button" class="search-trigger" :title="t('layout.menuSearch')" :aria-label="t('layout.menuSearch')" @click="openSearch">
 			<ma-icon icon="icon-search" />
 		</button>
 
 		<Teleport to="body">
 			<div v-if="visible" class="menu-search-layer" @mousedown.self="closeSearch">
-				<div class="search-box" role="dialog" aria-label="菜单搜索" @mousedown.stop>
+				<div class="search-box" role="dialog" :aria-label="t('layout.menuSearch')" @mousedown.stop>
 					<el-autocomplete
 						ref="menuAutocompleteRef"
 						v-model="menuValue"
@@ -17,7 +17,7 @@
 						:fetch-suggestions="menuSearch"
 						:trigger-on-focus="true"
 						:fit-input-width="true"
-						placeholder="菜单搜索"
+						:placeholder="t('layout.menuSearch')"
 						@select="handleSelect"
 						@keydown.esc="closeSearch"
 					>
@@ -27,14 +27,14 @@
 									<ma-icon :icon="item.meta.icon || 'icon-unorderedlist'" />
 								</span>
 								<span class="item-main">
-									<span class="item-title">{{ item.meta.title }}</span>
+									<span class="item-title">{{ itemTitle(item) }}</span>
 									<span class="item-path">{{ item.path }}</span>
 								</span>
-								<span class="item-enter">进入</span>
+								<span class="item-enter">{{ t('layout.enter') }}</span>
 							</div>
 						</template>
 					</el-autocomplete>
-					<button type="button" class="search-close" title="关闭" aria-label="关闭" @click="closeSearch">
+					<button type="button" class="search-close" :title="t('close')" :aria-label="t('close')" @click="closeSearch">
 						Esc
 					</button>
 				</div>
@@ -46,14 +46,19 @@
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useRouterStore } from '@/store/modules/router'
+import { translateMenuTitle } from '@/utils/menu-i18n'
 
+const { t } = useI18n()
 const routerStore = useRouterStore()
 const router = useRouter()
 const menuAutocompleteRef = ref()
 const visible = ref(false)
 const menuValue = ref('')
+
+const itemTitle = (item: Restaurant) => translateMenuTitle(item?.meta?.title, item?.meta?.url || item?.path)
 
 const openSearch = () => {
 	visible.value = true
@@ -74,6 +79,7 @@ interface Restaurant {
 	meta: {
 		title: string
 		icon?: string
+		url?: string
 	}
 }
 
@@ -85,10 +91,13 @@ const menuSearch = (queryString: string, cb: any) => {
 }
 
 const createFilter: any = (queryString: string) => {
+	const q = queryString.toLowerCase()
 	return (restaurant: Restaurant) => {
+		const title = translateMenuTitle(restaurant.meta.title, restaurant.meta.url || restaurant.path)
 		return (
-			restaurant.path.toLowerCase().indexOf(queryString.toLowerCase()) > -1 ||
-			restaurant.meta.title.toLowerCase().indexOf(queryString.toLowerCase()) > -1
+			restaurant.path.toLowerCase().indexOf(q) > -1 ||
+			restaurant.meta.title.toLowerCase().indexOf(q) > -1 ||
+			title.toLowerCase().indexOf(q) > -1
 		)
 	}
 }
@@ -163,7 +172,7 @@ onBeforeUnmount(() => {
 	width: min(560px, calc(100vw - 32px));
 	padding: 10px 10px 10px 12px;
 	border-radius: 16px;
-	background: #fff;
+	background: var(--icejz-card-bg, #fff);
 	border: 1px solid rgba(0, 168, 232, 0.18);
 	box-shadow:
 		0 18px 48px rgba(15, 23, 36, 0.14),
@@ -196,7 +205,7 @@ onBeforeUnmount(() => {
 }
 
 .search-box .search-input .el-input__wrapper.is-focus {
-	background: #fff;
+	background: var(--icejz-card-bg, #fff);
 	box-shadow:
 		0 0 0 1px #00a8e8 inset,
 		0 0 0 3px rgba(0, 168, 232, 0.12) !important;
@@ -238,7 +247,7 @@ onBeforeUnmount(() => {
 	border-radius: 14px !important;
 	overflow: hidden;
 	box-shadow: 0 16px 40px rgba(15, 23, 36, 0.14) !important;
-	background: #fff !important;
+	background: var(--icejz-card-bg, #fff) !important;
 
 	.el-popper__arrow {
 		display: none;

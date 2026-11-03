@@ -113,7 +113,7 @@ public class SysAiModelServiceImpl extends BaseServiceImpl<SysAiModelDao, SysAiM
             entity.setStatus(1);
         }
         if (StrUtil.isBlank(entity.getSystemPrompt())) {
-            entity.setSystemPrompt("你是 ICEJZ 平台助手小冰，语气友好、简洁，擅长帮助用户理解平台功能、系统配置与研发协作问题。");
+            entity.setSystemPrompt(DEFAULT_SYSTEM_PROMPT);
         }
     }
 
@@ -258,9 +258,25 @@ public class SysAiModelServiceImpl extends BaseServiceImpl<SysAiModelDao, SysAiM
                 .last("limit 1"));
     }
 
+    /** 小冰默认人设提示词 */
+    private static final String DEFAULT_SYSTEM_PROMPT = """
+            你是 ICEJZ 管理后台助手「小冰」。
+            回答要求：
+            1. 语气友好、简洁，优先给可执行建议，少空话；
+            2. 熟悉平台模块：系统配置、用户权限、短信/邮件、AI 模型接入、业务管理等；
+            3. 不确定时如实说明，并提示用户去「系统设置 · 系统配置 · AI助手」检查模型配置；
+            4. 不要编造不存在的菜单、接口或密钥；不要输出与问题无关的长篇大论。
+            """;
+
     private String invokeOpenAiCompatible(SysAiModelEntity model, SysAiChatVO vo) {
         if (StrUtil.isBlank(model.getBaseUrl()) || StrUtil.isBlank(model.getModelName())) {
-            throw new ServerException("模型缺少 Base URL 或模型名称");
+            throw new ServerException("模型配置不完整：请填写 Base URL 和模型名称");
+        }
+
+        // 云端兼容接口（DeepSeek/OpenAI/通义等）必须带 Key；缺 Key 时上游常返回 Authentication Fails (governor)
+        boolean needKey = model.getApiType() == null || model.getApiType() == 1;
+        if (needKey && StrUtil.isBlank(model.getApiKey())) {
+            throw new ServerException("模型鉴权失败：请到「系统配置 · AI助手」为当前模型填写有效的 API Key 后再试");
         }
 
         String url = normalizeChatUrl(model.getBaseUrl());
@@ -275,8 +291,7 @@ public class SysAiModelServiceImpl extends BaseServiceImpl<SysAiModelDao, SysAiM
         JSONArray messages = new JSONArray();
         JSONObject system = new JSONObject();
         system.set("role", "system");
-        system.set("content", StrUtil.blankToDefault(model.getSystemPrompt(),
-                "你是 ICEJZ 平台助手小冰，语气友好、简洁。"));
+        system.set("content", StrUtil.blankToDefault(model.getSystemPrompt(), DEFAULT_SYSTEM_PROMPT));
         messages.add(system);
 
         if (vo.getHistory() != null) {
@@ -305,35 +320,78 @@ public class SysAiModelServiceImpl extends BaseServiceImpl<SysAiModelDao, SysAiM
                 .timeout(60000)
                 .body(body.toString());
         if (StrUtil.isNotBlank(model.getApiKey())) {
-            request.header("Authorization", "Bearer " + model.getApiKey());
+            request.header("Authorization", "Bearer " + model.getApiKey().trim());
         }
 
         try (HttpResponse response = request.execute()) {
             String resp = response.body();
             if (!response.isOk()) {
-                throw new ServerException("模型调用失败(" + response.getStatus() + ")：" + StrUtil.maxLength(resp, 300));
+                throw new ServerException(friendlyModelHttpError(response.getStatus(), resp));
             }
             JSONObject json = JSONUtil.parseObj(resp);
             JSONArray choices = json.getJSONArray("choices");
             if (choices == null || choices.isEmpty()) {
-                // Ollama native fallback message format is rare with /v1; keep error clear
-                String err = json.getStr("error");
-                throw new ServerException(StrUtil.blankToDefault(err, "模型未返回有效内容"));
+                String err = extractUpstreamError(json);
+                throw new ServerException(StrUtil.blankToDefault(err, "模型未返回有效内容，请稍后重试或更换模型"));
             }
             JSONObject message = choices.getJSONObject(0).getJSONObject("message");
             if (message == null) {
-                throw new ServerException("模型响应格式异常");
+                throw new ServerException("模型响应格式异常，请检查 Base URL 是否为 OpenAI 兼容接口");
             }
             String content = message.getStr("content");
             if (StrUtil.isBlank(content)) {
-                throw new ServerException("模型返回空内容");
+                throw new ServerException("模型返回空内容，可尝试调高 max_tokens 或换一个问题");
             }
             return content.trim();
         } catch (ServerException e) {
             throw e;
         } catch (Exception e) {
-            throw new ServerException("连接模型失败：" + e.getMessage());
+            throw new ServerException("连接模型失败，请检查 Base URL、网络与代理设置：" + e.getMessage());
         }
+    }
+
+    /**
+     * 将上游原始错误（如 DeepSeek 的 Authentication Fails (governor)）转成可操作的中文提示。
+     */
+    private String friendlyModelHttpError(int status, String body) {
+        String raw = StrUtil.blankToDefault(body, "").trim();
+        String lower = raw.toLowerCase();
+
+        if (status == 401 || lower.contains("authentication fails") || lower.contains("incorrect api key")
+                || lower.contains("invalid api key") || lower.contains("unauthorized")) {
+            return "模型鉴权失败（401）：API Key 无效、过期或未正确发送。"
+                    + "请到「系统配置 · AI助手」核对 Key，确认 Base URL（如 DeepSeek 用 https://api.deepseek.com/v1），"
+                    + "并确保账户余额充足后重试。";
+        }
+        if (status == 402 || lower.contains("insufficient") || lower.contains("balance") || lower.contains("quota")) {
+            return "模型额度不足（402）：请登录模型服务商控制台充值或更换可用模型。";
+        }
+        if (status == 429 || lower.contains("rate limit") || lower.contains("too many")) {
+            return "模型请求过于频繁（429）：请稍后再试，或降低并发。";
+        }
+        if (status == 400 || status == 422) {
+            return "模型请求参数有误（" + status + "）：请检查模型名称、温度与 max_tokens。"
+                    + (StrUtil.isBlank(raw) ? "" : " 详情：" + StrUtil.maxLength(raw, 160));
+        }
+        if (status >= 500) {
+            return "模型服务暂时不可用（" + status + "）：请稍后重试。";
+        }
+        return "模型调用失败（" + status + "）"
+                + (StrUtil.isBlank(raw) ? "" : "：" + StrUtil.maxLength(raw, 180));
+    }
+
+    private String extractUpstreamError(JSONObject json) {
+        if (json == null) {
+            return null;
+        }
+        Object err = json.get("error");
+        if (err instanceof JSONObject errObj) {
+            return StrUtil.blankToDefault(errObj.getStr("message"), errObj.getStr("code"));
+        }
+        if (err != null) {
+            return String.valueOf(err);
+        }
+        return json.getStr("message");
     }
 
     private String normalizeChatUrl(String baseUrl) {

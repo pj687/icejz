@@ -12,12 +12,22 @@
 				</template>
 			</el-input>
 		</el-form-item>
+
+		<el-form-item v-if="showCaptcha" prop="captcha" class="login-captcha">
+			<LoginCaptcha
+				ref="captchaRef"
+				v-model="loginForm.captcha"
+				v-model:captcha-key="loginForm.key"
+				channel="sms"
+			/>
+		</el-form-item>
+
 		<el-form-item prop="code" class="login-code">
-			<el-input v-model="loginForm.code" :placeholder="$t('app.captcha')" size="large" maxlength="6">
+			<el-input v-model="loginForm.code" placeholder="短信验证码" size="large" maxlength="6">
 				<template #prefix>
 					<div class="input-icon">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+							<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
 						</svg>
 					</div>
 				</template>
@@ -38,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, inject } from 'vue'
+import { ref, reactive, inject, computed, nextTick, watch } from 'vue'
 import { useUserStore } from '@/store/modules/user'
 import { useSendCodeApi } from '@/api/auth'
 import { useRouter } from 'vue-router'
@@ -47,22 +57,40 @@ import { mobileRegExp } from '@/utils/validate'
 import { ElMessage } from 'element-plus'
 import constant from '@/utils/constant'
 import cache from '@/utils/cache'
+import LoginCaptcha from './LoginCaptcha.vue'
 
 const userStore = useUserStore()
 const loading = ref(false)
+const captchaRef = ref<{ refresh: () => Promise<void>; ensureVerified?: () => Promise<boolean> }>()
 const ensureAgreement = inject<() => boolean>('ensureAgreement', () => true)
 const setLoginLoading = inject<(val: boolean) => void>('setLoginLoading', () => undefined)
 
 const sms = reactive({
 	disabled: false,
 	sending: false,
+	sent: false,
 	total: 60,
 	count: 0
 })
 
+/** 发短信前 / 倒计时结束后需重发时，才展示并校验图形验证码 */
+const showCaptcha = computed(() => !sms.sent || !sms.disabled)
+
 const sendCode = async () => {
 	if (!mobileRegExp.test(loginForm.mobile)) {
 		ElMessage.error('请输入正确的手机号')
+		return
+	}
+
+	if (!loginForm.key) {
+		ElMessage.error('图形验证码已失效，请刷新后重试')
+		await captchaRef.value?.refresh()
+		return
+	}
+
+	const captchaOk = await captchaRef.value?.ensureVerified?.()
+	if (captchaOk === false || loginForm.captcha === '' || loginForm.captcha == null) {
+		ElMessage.error('请先完成图形验证码校验')
 		return
 	}
 
@@ -72,15 +100,24 @@ const sendCode = async () => {
 
 	sms.sending = true
 	try {
-		const { data } = await useSendCodeApi(loginForm.mobile)
+		const { data } = await useSendCodeApi({
+			mobile: loginForm.mobile,
+			key: loginForm.key,
+			captcha: loginForm.captcha
+		})
 		timerHandler()
+		sms.sent = true
+		loginForm.captcha = ''
+		loginForm.key = ''
+		await nextTick()
+		loginFormRef.value?.clearValidate?.('captcha')
 		// 模拟模式下后端会回传动态验证码，便于联调（非固定值）
 		if (data) {
 			loginForm.code = String(data)
-			ElMessage.success('验证码已发送')
-		} else {
-			ElMessage.success('验证码已发送')
 		}
+		ElMessage.success('验证码已发送')
+	} catch {
+		await captchaRef.value?.refresh()
 	} finally {
 		sms.sending = false
 	}
@@ -96,6 +133,7 @@ const timerHandler = () => {
 		} else {
 			sms.disabled = false
 			clearInterval(timer)
+			nextTick(() => captchaRef.value?.refresh())
 		}
 	}, 1000)
 }
@@ -105,14 +143,27 @@ const { t } = useI18n()
 const loginFormRef = ref()
 
 const loginForm = reactive({
-	mobile: '13800138000',
-	code: ''
+	mobile: constant.env.PROD ? '' : '13800138000',
+	code: '',
+	key: '',
+	captcha: ''
 })
 
-const loginRules = ref({
+const loginRules = computed(() => ({
 	mobile: [{ required: true, message: t('required'), trigger: 'blur' }],
+	captcha: showCaptcha.value ? [{ required: true, message: t('required'), trigger: 'change' }] : [],
 	code: [{ required: true, message: t('required'), trigger: 'blur' }]
-})
+}))
+
+watch(
+	() => loginForm.mobile,
+	() => {
+		if (sms.sent) {
+			sms.sent = false
+			loginForm.code = ''
+		}
+	}
+)
 
 const onLogin = () => {
 	loginFormRef.value.validate((valid: boolean) => {
@@ -128,9 +179,14 @@ const onLogin = () => {
 		setLoginLoading(true)
 
 		userStore
-			.mobileLoginAction(loginForm)
+			.mobileLoginAction({
+				mobile: loginForm.mobile,
+				code: loginForm.code
+			})
 			.then(() => {
-				router.push({ path: cache.getRedirect() || constant.loginPage })
+				const redirect = cache.getRedirect()
+				cache.clearRedirect()
+				router.push({ path: redirect || constant.loginPage })
 			})
 			.finally(() => {
 				loading.value = false
@@ -193,6 +249,37 @@ const onLogin = () => {
 	:deep(.el-input__wrapper.is-focus) .input-icon {
 		color: #00a8e8;
 		background: rgba(0, 168, 232, 0.12);
+	}
+}
+
+.login-captcha {
+	margin-bottom: 12px !important;
+
+	:deep(.el-form-item__content) {
+		display: block;
+		width: 100%;
+		position: relative;
+	}
+
+	:deep(.el-form-item__error) {
+		position: static;
+		padding: 8px 4px 0;
+		line-height: 1.35;
+		font-size: 12px;
+		text-align: center;
+	}
+
+	&.is-error {
+		margin-bottom: 6px !important;
+	}
+
+	&:has(.slider-wrap) {
+		margin-bottom: 8px !important;
+	}
+
+	&:has(.click-wrap),
+	&:has(.word-wrap) {
+		margin-bottom: 10px !important;
 	}
 }
 
@@ -290,4 +377,5 @@ const onLogin = () => {
 		z-index: 1;
 	}
 }
+
 </style>

@@ -1,18 +1,55 @@
 <template>
-	<el-dialog v-model="visible" :title="!dataForm.id ? '新增' : '修改'" :close-on-click-modal="false" draggable>
-		<el-form ref="dataFormRef" :model="dataForm" :rules="dataRules" label-width="120px" @keyup.enter="submitHandle()">
-			<el-form-item prop="name" label="名称">
-				<el-input v-model="dataForm.name" placeholder="名称"></el-input>
-			</el-form-item>
-			<el-form-item prop="roleCode" label="编码">
-				<el-input v-model="dataForm.roleCode" placeholder="编码"></el-input>
-			</el-form-item>
-			<el-form-item prop="remark" label="备注">
-				<el-input v-model="dataForm.remark" placeholder="备注"></el-input>
-			</el-form-item>
-			<el-form-item label="菜单权限">
-				<el-tree ref="menuListTree" :data="menuList" :props="{ label: 'name', children: 'children' }" node-key="id" accordion show-checkbox></el-tree>
-			</el-form-item>
+	<el-dialog
+		v-model="visible"
+		class="org-auth-dialog role-dialog"
+		:title="!dataForm.id ? '新增角色' : '修改角色'"
+		:close-on-click-modal="false"
+		width="720px"
+		draggable
+	>
+		<el-form ref="dataFormRef" :model="dataForm" :rules="dataRules" label-width="88px" @keyup.enter="submitHandle()">
+			<div class="dialog-grid">
+				<section class="dialog-block">
+					<header class="block-head">
+						<strong>基本信息</strong>
+						<span>角色标识与说明</span>
+					</header>
+					<el-form-item prop="name" label="名称">
+						<el-input v-model="dataForm.name" placeholder="角色名称"></el-input>
+					</el-form-item>
+					<el-form-item prop="roleCode" label="编码">
+						<el-input v-model="dataForm.roleCode" placeholder="如 ADMIN / OPS"></el-input>
+					</el-form-item>
+					<el-form-item prop="remark" label="备注">
+						<el-input v-model="dataForm.remark" type="textarea" :rows="3" placeholder="可选备注"></el-input>
+					</el-form-item>
+				</section>
+
+				<section class="dialog-block menu-block">
+					<header class="block-head">
+						<div>
+							<strong>菜单权限</strong>
+							<span>勾选后角色可访问对应菜单与按钮</span>
+						</div>
+						<div class="tree-actions">
+							<el-button link type="primary" @click="expandMenus(true)">展开</el-button>
+							<el-button link type="primary" @click="expandMenus(false)">收起</el-button>
+							<el-button link type="primary" @click="checkAllMenus(true)">全选</el-button>
+							<el-button link type="primary" @click="checkAllMenus(false)">清空</el-button>
+						</div>
+					</header>
+					<div class="menu-tree-wrap">
+						<el-tree
+							ref="menuListTree"
+							:data="menuList"
+							:props="{ label: 'name', children: 'children' }"
+							node-key="id"
+							show-checkbox
+							:default-expand-all="menuExpandAll"
+						></el-tree>
+					</div>
+				</section>
+			</div>
 		</el-form>
 		<template #footer>
 			<el-button @click="visible = false">取消</el-button>
@@ -22,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { nextTick, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus/es'
 import { useRoleApi, useRoleMenuApi, useRoleSubmitApi } from '@/api/sys/role'
 
@@ -32,6 +69,7 @@ const visible = ref(false)
 const menuList = ref([])
 const menuListTree = ref()
 const dataFormRef = ref()
+const menuExpandAll = ref(false)
 
 const dataForm = reactive({
 	id: '',
@@ -42,39 +80,58 @@ const dataForm = reactive({
 	remark: ''
 })
 
+const collectIds = (nodes: any[] = [], bag: any[] = []) => {
+	nodes.forEach((node) => {
+		bag.push(node.id)
+		if (node.children?.length) collectIds(node.children, bag)
+	})
+	return bag
+}
+
+const expandMenus = (expand: boolean) => {
+	menuExpandAll.value = expand
+	const nodes = menuListTree.value?.store?.nodesMap || {}
+	Object.values(nodes).forEach((node: any) => {
+		node.expanded = expand
+	})
+}
+
+const checkAllMenus = (checked: boolean) => {
+	if (!menuListTree.value) return
+	menuListTree.value.setCheckedKeys(checked ? collectIds(menuList.value) : [])
+}
+
 const init = async (id?: number) => {
 	visible.value = true
 	dataForm.id = ''
+	menuExpandAll.value = false
 
-	// 重置表单数据
 	if (dataFormRef.value) {
 		dataFormRef.value.resetFields()
 	}
+	await nextTick()
 	if (menuListTree.value) {
 		menuListTree.value.setCheckedKeys([])
 	}
 
-	// 菜单列表
 	await getMenuList()
 
-	// id 存在则为修改
 	if (id) {
 		getRole(id)
 	}
 }
 
-// 获取菜单列表
 const getMenuList = async () => {
 	const res = await useRoleMenuApi()
 	menuList.value = res.data
 }
 
-// 获取信息
 const getRole = (id: number) => {
-	useRoleApi(id).then(res => {
+	useRoleApi(id).then((res) => {
 		Object.assign(dataForm, res.data)
-
-		dataForm.menuIdList.forEach(item => menuListTree.value.setChecked(item, true))
+		nextTick(() => {
+			dataForm.menuIdList.forEach((item) => menuListTree.value.setChecked(item, true))
+		})
 	})
 }
 
@@ -83,7 +140,6 @@ const dataRules = ref({
 	roleCode: [{ required: true, message: '必填项不能为空', trigger: 'blur' }]
 })
 
-// 表单提交
 const submitHandle = () => {
 	dataFormRef.value.validate((valid: boolean) => {
 		if (!valid) {
@@ -108,3 +164,61 @@ defineExpose({
 	init
 })
 </script>
+
+<style scoped lang="scss">
+.dialog-grid {
+	display: grid;
+	grid-template-columns: 1fr 1.15fr;
+	gap: 14px;
+}
+
+.dialog-block {
+	padding: 14px;
+	border-radius: 14px;
+	border: 1px solid #e8eef5;
+	background: #fbfcfe;
+}
+
+.block-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+	margin-bottom: 12px;
+
+	strong {
+		display: block;
+		font-size: 14px;
+		color: #122033;
+	}
+
+	span {
+		display: block;
+		margin-top: 2px;
+		font-size: 12px;
+		color: #7a8796;
+	}
+}
+
+.tree-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 2px;
+}
+
+.menu-tree-wrap {
+	max-height: 360px;
+	overflow: auto;
+	padding: 8px 6px;
+	border-radius: 12px;
+	background: var(--icejz-card-bg, #fff);
+	border: 1px solid var(--icejz-card-border, #eef3f8);
+}
+
+@media (max-width: 760px) {
+	.dialog-grid {
+		grid-template-columns: 1fr;
+	}
+}
+</style>

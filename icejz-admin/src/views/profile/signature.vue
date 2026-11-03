@@ -636,7 +636,7 @@ const loadSavedSignature = () => {
 	gap: 12px;
 	padding: 12px;
 	border-radius: 16px;
-	background: #f7fbfe;
+	background: var(--soft, #f7fbfe);
 	border: 1px solid #e4eef6;
 }
 
@@ -681,7 +681,7 @@ const loadSavedSignature = () => {
 	padding: 8px 8px 9px;
 	border-radius: 14px;
 	border: 1px solid #e2e8f0;
-	background: #fff;
+	background: var(--panel, #fff);
 	color: #475569;
 	cursor: pointer;
 	text-align: left;
@@ -694,7 +694,7 @@ const loadSavedSignature = () => {
 
 	&.active {
 		border-color: #00a8e8;
-		background: linear-gradient(180deg, #f3faff, #fff);
+		background: linear-gradient(180deg, var(--soft, #f3faff), var(--panel, #fff));
 		box-shadow: 0 8px 18px rgba(0, 168, 232, 0.12);
 
 		.tip-preview {
@@ -714,7 +714,7 @@ const loadSavedSignature = () => {
 	height: 34px;
 	border-radius: 10px;
 	color: #64748b;
-	background: #f8fafc;
+	background: var(--soft, #f8fafc);
 	transition: color 0.18s ease, background 0.18s ease;
 
 	:deep(svg) {
@@ -756,7 +756,7 @@ const loadSavedSignature = () => {
 	padding: 0 10px;
 	border-radius: 999px;
 	border: 1px solid #e2e8f0;
-	background: #fff;
+	background: var(--panel, #fff);
 	color: #475569;
 	font-size: 12px;
 	cursor: pointer;
@@ -890,7 +890,7 @@ const loadSavedSignature = () => {
 
 	&.ghost {
 		color: #475569;
-		background: #f1f5f9;
+		background: var(--soft, #f1f5f9);
 
 		&:hover {
 			background: #e2e8f0;
@@ -918,7 +918,7 @@ const loadSavedSignature = () => {
 .tip-card {
 	padding: 14px;
 	border-radius: 16px;
-	background: #f8fbfd;
+	background: var(--soft, #f8fbfd);
 	border: 1px solid #eaf1f7;
 }
 
@@ -943,7 +943,7 @@ const loadSavedSignature = () => {
 .preview-box {
 	height: 120px;
 	border-radius: 12px;
-	background: #fff;
+	background: var(--panel, #fff);
 	border: 1px solid #e8eef5;
 	overflow: hidden;
 	display: grid;
@@ -953,7 +953,7 @@ const loadSavedSignature = () => {
 		width: 100%;
 		height: 100%;
 		object-fit: contain;
-		background: #fff;
+		background: var(--panel, #fff);
 	}
 }
 

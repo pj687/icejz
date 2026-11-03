@@ -215,20 +215,16 @@ const handleUnBind = (openType: string) => {
 	padding: 18px;
 	border-radius: 18px;
 	border: 1px solid rgba(15, 23, 36, 0.08);
-	background: linear-gradient(160deg, #ffffff 0%, #f7fafc 100%);
+	background: linear-gradient(160deg, var(--panel, #fff) 0%, var(--soft, #f7fafc) 100%);
 	transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 
 	&:hover {
-		transform: translateY(-3px);
-		box-shadow: 0 16px 36px rgba(15, 23, 36, 0.1);
-		border-color: color-mix(in srgb, var(--brand) 28%, transparent);
-
-		.mark-core {
-			transform: scale(1.04) rotate(-2deg);
-		}
+		transform: translateY(-1px);
+		box-shadow: 0 10px 22px rgba(15, 23, 36, 0.06);
+		border-color: color-mix(in srgb, var(--brand) 24%, transparent);
 
 		.card-glow {
-			opacity: 1;
+			opacity: 0.85;
 		}
 	}
 
@@ -248,7 +244,7 @@ const handleUnBind = (openType: string) => {
 	&.bound {
 		border-color: color-mix(in srgb, var(--brand) 22%, transparent);
 		background:
-			linear-gradient(160deg, #ffffff 0%, color-mix(in srgb, var(--brand) 6%, #f8fafc) 100%);
+			linear-gradient(160deg, var(--panel, #fff) 0%, color-mix(in srgb, var(--brand) 6%, var(--soft, #f8fafc)) 100%);
 	}
 }
 
@@ -304,10 +300,9 @@ const handleUnBind = (openType: string) => {
 	display: grid;
 	place-items: center;
 	color: var(--brand);
-	background: #fff;
+	background: var(--icejz-card-bg, #fff);
 	border: 1px solid rgba(15, 23, 36, 0.08);
-	box-shadow: 0 6px 16px rgba(15, 23, 36, 0.06);
-	transition: transform 0.22s ease;
+	box-shadow: 0 4px 12px rgba(15, 23, 36, 0.05);
 }
 
 .app-icon {

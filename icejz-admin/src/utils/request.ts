@@ -1,9 +1,8 @@
 import axios, { AxiosResponse } from 'axios'
 import qs from 'qs'
-import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import cache from '@/utils/cache'
-import { ElMessageBox } from 'element-plus/es'
+import { showApiError, showSessionTip } from '@/utils/tip'
 
 // axios实例
 const service = axios.create({
@@ -76,6 +75,12 @@ service.interceptors.response.use(
 		// 没有权限，如：未登录、token过期
 		if (res.code === 401) {
 			const config = response.config
+			// 登录页公开接口（验证码预校验等）不弹「登录超时」
+			const url = String(config?.url || '')
+			if (url.includes('/sys/auth/captcha') || url.includes('/sys/auth/login') || url.includes('/sys/auth/send/code')) {
+				showApiError(res.msg || '请求失败')
+				return Promise.reject(new Error(res.msg || 'Error'))
+			}
 			if (!isRefreshToken) {
 				isRefreshToken = true
 
@@ -116,33 +121,31 @@ service.interceptors.response.use(
 			}
 		}
 
-		// 错误提示
-		ElMessage.error(res.msg)
+		// 错误提示（长文案 / 封禁走温馨弹窗）
+		showApiError(res.msg)
 
 		return Promise.reject(new Error(res.msg || 'Error'))
 	},
 	error => {
-		ElMessage.error(error.message)
+		showApiError(error.message || '网络异常，请稍后重试')
 		return Promise.reject(error)
 	}
 )
 
 const handleAuthorized = () => {
-	ElMessageBox.confirm('登录超时，请重新登录', '提示', {
-		showCancelButton: false,
-		closeOnClickModal: false,
-		showClose: false,
-		confirmButtonText: '重新登录',
-		type: 'warning'
-	}).then(() => {
-		const userStore = useUserStore()
+	showSessionTip('当前登录状态已失效，为保障账号安全，请重新登录后再继续操作。')
+		.then(async () => {
+			const userStore = useUserStore()
 
-		userStore?.setToken('')
-		userStore?.setRefreshToken('')
-		location.reload()
+			userStore?.setToken('')
+			userStore?.setRefreshToken('')
+			await userStore?.clearSessionState?.()
+			// 回登录页且不带 redirect，避免换账号后跳到无权页面
+			location.href = '/login'
+		})
+		.catch(() => undefined)
 
-		return Promise.reject('登录超时，请重新登录')
-	})
+	return Promise.reject(new Error('登录超时，请重新登录'))
 }
 
 // 导出 axios 实例

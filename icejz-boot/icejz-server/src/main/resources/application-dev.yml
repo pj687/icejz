@@ -54,13 +54,10 @@ spring:
           password: 123456
 
   mqtt:
-
+    # 本地未起 MQTT Broker 时请保持 false，避免启动/关闭报错
+    enabled: false
     host: tcp://localhost:1883
-
     username: icejz
-
     password: icejz
-
     clientId: icejz_boot_service_dev
-
     default-topic: topic_default

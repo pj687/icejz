@@ -1,0 +1,99 @@
+<!-- 表单触发条 -->
+<view class="trigger {{verified ? 'ok' : ''}}" bindtap="open">
+  <view class="trigger-main">
+    <text class="trigger-title">安全验证</text>
+    <text class="trigger-sub">{{verified ? verifiedText : '点击完成图形验证'}}</text>
+  </view>
+  <text class="trigger-action">{{verified ? '重新验证' : '去验证'}}</text>
+</view>
+
+<!-- 弹窗 -->
+<view wx:if="{{visible}}" class="root">
+  <view class="mask" bindtap="close" catchtouchmove="noop"></view>
+  <view class="panel" catchtap="noop">
+    <view class="panel-head">
+      <view class="head-main">
+        <text class="kicker">ICEJZ</text>
+        <text class="title">安全验证</text>
+        <text class="desc">{{tip || '请完成下方验证后继续'}}</text>
+      </view>
+      <view class="close" bindtap="close">关闭</view>
+    </view>
+
+    <scroll-view scroll-y class="panel-body" enhanced show-scrollbar="{{false}}">
+      <!-- 滑动拼图 -->
+      <view wx:if="{{mode === 'slider'}}" class="pattern-box">
+        <text class="pattern-tip">{{tip || '请拖动滑块完成拼图'}}</text>
+        <view class="puzzle-wrap">
+          <image wx:if="{{image}}" class="pattern-img" src="{{image}}" mode="widthFix" />
+          <image
+            wx:if="{{jigsawImage}}"
+            class="puzzle-piece"
+            src="{{jigsawImage}}"
+            mode="widthFix"
+            style="left: {{pieceLeftPercent}}%; top: {{jigsawTopPercent}}%; width: 16.1%;"
+          />
+        </view>
+        <view
+          class="slider-track"
+          catchtouchstart="onTrackStart"
+          catchtouchmove="onTrackMove"
+          catchtouchend="onTrackEnd"
+          catchtouchcancel="onTrackEnd"
+        >
+          <view class="slider-fill" style="width: {{trackPercent}}%;"></view>
+          <view class="slider-thumb" style="left: {{trackPercent}}%;"></view>
+          <text wx:if="{{sliderX === 0}}" class="slider-placeholder">拖动滑块完成拼图</text>
+        </view>
+        <text class="pattern-ok">{{localValue !== '' ? '拼图完成' : '拖动对齐缺口'}}</text>
+      </view>
+
+      <!-- 文字点选 -->
+      <view wx:elif="{{mode === 'word'}}" class="pattern-box">
+        <text class="pattern-tip">{{tip || '请依次点击图中文字'}}</text>
+        <view class="pattern-box-inner" bindtap="onWordTap">
+          <image wx:if="{{image}}" class="pattern-img" src="{{image}}" mode="widthFix" />
+        </view>
+        <text class="pattern-ok">已点 {{wordClicks.length}}/{{wordNeed}}</text>
+      </view>
+
+      <!-- 图案点选 -->
+      <view wx:elif="{{mode === 'click'}}" class="pattern-box">
+        <text class="pattern-tip">{{tip || '请点击图中指定图案'}}</text>
+        <view class="pattern-box-inner clickable" bindtap="onPatternTap">
+          <image wx:if="{{image}}" class="pattern-img" src="{{image}}" mode="widthFix" />
+          <view wx:else class="pattern-loading">加载中</view>
+        </view>
+        <text wx:if="{{localValue !== ''}}" class="pattern-ok">已选择图案</text>
+        <text wx:else class="pattern-hint">点击图中对应图案完成验证</text>
+      </view>
+
+      <!-- PoW / Turnstile 提示 -->
+      <view wx:elif="{{mode === 'pow' || mode === 'turnstile'}}" class="pattern-box">
+        <text class="pattern-tip">当前验证码类型暂不适合小程序，请在管理端改为「点选图案 / 滑动拼图 / 字母数字」</text>
+      </view>
+
+      <!-- 输入型 -->
+      <view wx:else class="input-row">
+        <input
+          class="captcha-input"
+          value="{{localValue}}"
+          placeholder="{{tip || '请输入验证码'}}"
+          maxlength="8"
+          bindinput="onInput"
+        />
+        <view class="captcha-thumb" bindtap="onRefresh">
+          <image wx:if="{{image}}" class="thumb-img" src="{{image}}" mode="aspectFill" />
+          <text wx:else class="pattern-loading">加载中</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="panel-foot">
+      <view class="btn ghost" bindtap="onRefresh">刷新</view>
+      <view class="btn primary {{canConfirm ? '' : 'disabled'}}" bindtap="confirm">
+        {{canConfirm ? '验证通过' : confirmHint}}
+      </view>
+    </view>
+  </view>
+</view>

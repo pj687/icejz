@@ -40,7 +40,9 @@
 							:aria-checked="String(dataForm.gender) === item.value"
 							@click="dataForm.gender = Number(item.value)"
 						>
-							<span class="gender-art" aria-hidden="true" v-html="item.art"></span>
+							<span class="gender-art" aria-hidden="true">
+								<img :src="item.art" :alt="item.label" width="96" height="96" draggable="false" />
+							</span>
 							<span class="gender-text">
 								<strong>{{ item.label }}</strong>
 								<em>{{ item.desc }}</em>
@@ -93,97 +95,21 @@ const genderOptions = [
 		label: '男士',
 		desc: 'Male',
 		tone: 'male',
-		art: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-			<defs>
-				<linearGradient id="icejzMaleBg" x1="0" y1="0" x2="1" y2="1">
-					<stop offset="0%" stop-color="#E8F7FD"/>
-					<stop offset="100%" stop-color="#C8ECFA"/>
-				</linearGradient>
-				<linearGradient id="icejzMaleShirt" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0%" stop-color="#5EC8F0"/>
-					<stop offset="100%" stop-color="#00A8E8"/>
-				</linearGradient>
-			</defs>
-			<circle cx="60" cy="60" r="54" fill="url(#icejzMaleBg)"/>
-			<path d="M28 48c2-18 14-30 32-30s30 12 32 30c-6-8-18-12-32-12S34 40 28 48Z" fill="#3A4A5C"/>
-			<path d="M26 52c4-10 14-16 34-16s30 6 34 16v6c0 20-14 34-34 34S26 78 26 58v-6Z" fill="#FFE0C8"/>
-			<path d="M38 44c6-8 16-12 22-12 8 0 16 2 22 8-8-2-16-2-24 0-8 2-14 4-20 4Z" fill="#2E3B4A"/>
-			<circle cx="46" cy="62" r="4.2" fill="#2B3645"/>
-			<circle cx="74" cy="62" r="4.2" fill="#2B3645"/>
-			<circle cx="47.3" cy="60.8" r="1.3" fill="#fff"/>
-			<circle cx="75.3" cy="60.8" r="1.3" fill="#fff"/>
-			<path d="M42 54c2.5-2 5-3 8-2.2" stroke="#2B3645" stroke-width="2" stroke-linecap="round" fill="none"/>
-			<path d="M70 51.8c2.8-.6 5.4.2 8 2.4" stroke="#2B3645" stroke-width="2" stroke-linecap="round" fill="none"/>
-			<path d="M54 72c2.2 2.4 6.2 2.4 8.4 0" stroke="#E0897A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-			<path d="M34 96c6-14 16-20 26-20s20 6 26 20v10H34V96Z" fill="url(#icejzMaleShirt)"/>
-			<path d="M52 76c2 5 6 8 8 8s6-3 8-8c-4 2-8 2-16 0Z" fill="#FFE0C8"/>
-			<circle cx="44" cy="70" r="3.2" fill="#FFB4A3" opacity=".75"/>
-			<circle cx="76" cy="70" r="3.2" fill="#FFB4A3" opacity=".75"/>
-		</svg>`
+		art: '/profile/gender-male.jpg'
 	},
 	{
 		value: '1',
 		label: '女士',
 		desc: 'Female',
 		tone: 'female',
-		art: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-			<defs>
-				<linearGradient id="icejzFemaleBg" x1="0" y1="0" x2="1" y2="1">
-					<stop offset="0%" stop-color="#FFEAF2"/>
-					<stop offset="100%" stop-color="#FFD3E4"/>
-				</linearGradient>
-			</defs>
-			<circle cx="60" cy="60" r="54" fill="url(#icejzFemaleBg)"/>
-			<path d="M22 56c2-24 16-38 38-38s36 14 38 38c-4-14-16-22-38-22S26 42 22 56Z" fill="#6B4A3A"/>
-			<path d="M20 58c6-16 18-24 40-24s34 8 40 24v2c-2 24-18 40-40 40S22 84 20 60v-2Z" fill="#6B4A3A"/>
-			<path d="M32 56c3-8 11-12 28-12s25 4 28 12v4c0 18-12 30-28 30S32 78 32 60v-4Z" fill="#FFE1CB"/>
-			<path d="M28 52c8 2 16 0 22-2 8-2 16-2 24 0 4 1 10 2 16 2 0 0-4-14-18-20-8-4-18-4-26-1-10 4-18 14-18 21Z" fill="#5A3C30"/>
-			<circle cx="48" cy="64" r="4.2" fill="#3A2A24"/>
-			<circle cx="72" cy="64" r="4.2" fill="#3A2A24"/>
-			<circle cx="49.3" cy="62.8" r="1.3" fill="#fff"/>
-			<circle cx="73.3" cy="62.8" r="1.3" fill="#fff"/>
-			<path d="M44 56c2.2-1.8 4.8-2.4 7.4-1.6" stroke="#3A2A24" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-			<path d="M68.6 54.4c2.4-.6 5-.2 7.4 1.6" stroke="#3A2A24" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-			<path d="M56 74c2 2.6 6 2.6 8 0" stroke="#E0897A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-			<circle cx="46" cy="72" r="3.5" fill="#FF9CB8" opacity=".8"/>
-			<circle cx="74" cy="72" r="3.5" fill="#FF9CB8" opacity=".8"/>
-			<path d="M34 98c5-14 14-20 26-20s21 6 26 20v10H34V98Z" fill="#E887AD"/>
-			<path d="M50 78c2 5 6 8 10 8s8-3 10-8c-5 2-10 2-20 0Z" fill="#FFE1CB"/>
-			<path d="M42 42c-3-5-2-10 1-12 2 4 4 8 5 11-2 1-4 1-6 1Z" fill="#F4B4C8"/>
-			<path d="M78 42c3-5 2-10-1-12-2 4-4 8-5 11 2 1 4 1 6 1Z" fill="#F4B4C8"/>
-		</svg>`
+		art: '/profile/gender-female.jpg'
 	},
 	{
 		value: '2',
 		label: '暂不透露',
 		desc: 'Prefer not to say',
 		tone: 'unknown',
-		art: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-			<defs>
-				<linearGradient id="icejzUnknownBg" x1="0" y1="0" x2="1" y2="1">
-					<stop offset="0%" stop-color="#F0F5F9"/>
-					<stop offset="100%" stop-color="#DDE7F0"/>
-				</linearGradient>
-				<linearGradient id="icejzUnknownBody" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0%" stop-color="#B7C7D6"/>
-					<stop offset="100%" stop-color="#8FA4B8"/>
-				</linearGradient>
-			</defs>
-			<circle cx="60" cy="60" r="54" fill="url(#icejzUnknownBg)"/>
-			<path d="M28 50c4-16 14-26 32-26s28 10 32 26c-6-8-16-12-32-12S34 42 28 50Z" fill="#A9B8C7"/>
-			<path d="M30 54c3-10 12-16 30-16s27 6 30 16v4c0 18-12 32-30 32S30 76 30 58v-4Z" fill="#F2F6F9"/>
-			<circle cx="47" cy="62" r="5" fill="#6E8498"/>
-			<circle cx="73" cy="62" r="5" fill="#6E8498"/>
-			<circle cx="48.4" cy="60.6" r="1.5" fill="#fff"/>
-			<circle cx="74.4" cy="60.6" r="1.5" fill="#fff"/>
-			<path d="M42 54c2.5-2 5.5-2.6 8.2-1.4" stroke="#6E8498" stroke-width="2" stroke-linecap="round" fill="none"/>
-			<path d="M69.8 52.6c2.6-.8 5.4-.2 8.2 1.6" stroke="#6E8498" stroke-width="2" stroke-linecap="round" fill="none"/>
-			<path d="M55 73h10" stroke="#91A4B6" stroke-width="2.4" stroke-linecap="round"/>
-			<path d="M34 98c5-14 14-20 26-20s21 6 26 20v10H34V98Z" fill="url(#icejzUnknownBody)"/>
-			<path d="M52 78c2 4 5 7 8 7s6-3 8-7c-4 2-8 2-16 0Z" fill="#F2F6F9"/>
-			<circle cx="86" cy="36" r="12" fill="#fff" stroke="#A7B8C8" stroke-width="2"/>
-			<text x="86" y="41" text-anchor="middle" font-size="14" font-weight="700" fill="#7B8FA3">?</text>
-		</svg>`
+		art: '/profile/gender-unknown.jpg'
 	}
 ]
 
@@ -259,7 +185,7 @@ const handleDataForm = () => {
 .profile-form {
 	:deep(.el-form-item__label) {
 		font-weight: 650;
-		color: #334155;
+		color: var(--ink, #334155);
 		padding-bottom: 6px;
 	}
 
@@ -285,12 +211,12 @@ const handleDataForm = () => {
 	width: 100%;
 	padding: 0 12px 0 10px;
 	border-radius: 14px;
-	background: #f7fbfe;
-	border: 1px solid #e4eef6;
+	background: var(--soft, #f7fbfe);
+	border: 1px solid var(--line, #e4eef6);
 	transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 
 	&:focus-within {
-		background: #fff;
+		background: var(--panel, var(--icejz-card-bg, #fff));
 		border-color: #00a8e8;
 		box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.12);
 	}
@@ -329,28 +255,34 @@ const handleDataForm = () => {
 	gap: 10px;
 	padding: 16px 12px 14px;
 	border-radius: 18px;
-	border: 1px solid #e6eef5;
-	background: linear-gradient(180deg, #ffffff 0%, #f7fbfe 100%);
+	border: 1px solid var(--line, #e6eef5);
+	background: linear-gradient(180deg, var(--panel, #fff) 0%, var(--soft, #f7fbfe) 100%);
 	cursor: pointer;
 	text-align: center;
 	transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .gender-card:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 12px 24px rgba(15, 23, 36, 0.06);
+	transform: translateY(-1px);
+	box-shadow: 0 8px 18px rgba(15, 23, 36, 0.05);
 }
 
 .gender-art {
-	width: 88px;
-	height: 88px;
+	width: 96px;
+	height: 96px;
+	border-radius: 50%;
+	overflow: hidden;
 	display: grid;
 	place-items: center;
-	filter: drop-shadow(0 8px 14px rgba(15, 23, 36, 0.08));
+	box-shadow: 0 10px 18px rgba(15, 23, 36, 0.08);
 
-	:deep(svg) {
-		width: 88px;
-		height: 88px;
+	img {
+		width: 96px;
+		height: 96px;
+		object-fit: cover;
+		display: block;
+		user-select: none;
+		pointer-events: none;
 	}
 }
 

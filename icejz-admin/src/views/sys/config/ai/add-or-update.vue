@@ -63,7 +63,13 @@
 						<el-input v-model="dataForm.baseUrl" placeholder="https://api.openai.com/v1 或 http://127.0.0.1:11434/v1" />
 					</el-form-item>
 					<el-form-item label="API Key" prop="apiKey">
-						<el-input v-model="dataForm.apiKey" type="password" show-password placeholder="本地模型可留空" />
+						<el-input
+							v-model="dataForm.apiKey"
+							type="password"
+							show-password
+							placeholder="DeepSeek/OpenAI/通义等必填；仅本地 Ollama 可留空"
+						/>
+						<div class="field-hint">云端模型缺 Key 或 Key 无效时，上游常返回 401 Authentication Fails (governor)。</div>
 					</el-form-item>
 					<el-form-item label="模型名称" prop="modelName">
 						<el-input v-model="dataForm.modelName" placeholder="如 gpt-4o-mini / deepseek-chat / qwen2.5" />
@@ -89,9 +95,10 @@
 						<el-input
 							v-model="dataForm.systemPrompt"
 							type="textarea"
-							:rows="4"
-							placeholder="定义小冰的人设与回答风格"
+							:rows="5"
+							placeholder="定义小冰人设。建议包含：身份、回答风格、擅长范围、不确定时如何说明。DeepSeek 等云端模型务必填写有效 API Key。"
 						/>
+						<div class="field-hint">提示词只影响回答风格；若出现 401 / Authentication Fails，请先检查 API Key，与提示词无关。</div>
 					</el-form-item>
 					<el-form-item label="设为默认模型" prop="isDefault">
 						<div class="switch-row">
@@ -134,7 +141,8 @@ const dataForm = reactive({
 	modelName: '',
 	temperature: 0.7,
 	maxTokens: 2048,
-	systemPrompt: '你是 ICEJZ 平台助手小冰，语气友好、简洁，擅长帮助用户理解平台功能、系统配置与研发协作问题。',
+	systemPrompt:
+		'你是 ICEJZ 管理后台助手「小冰」。回答友好简洁、可执行；熟悉系统配置、权限、短信邮件与 AI 模型接入；不确定时如实说明，勿编造菜单或密钥。',
 	isDefault: 0,
 	sort: 0,
 	status: 1,
@@ -178,7 +186,8 @@ const init = (id?: number) => {
 		modelName: '',
 		temperature: 0.7,
 		maxTokens: 2048,
-		systemPrompt: '你是 ICEJZ 平台助手小冰，语气友好、简洁，擅长帮助用户理解平台功能、系统配置与研发协作问题。',
+		systemPrompt:
+			'你是 ICEJZ 管理后台助手「小冰」。回答友好简洁、可执行；熟悉系统配置、权限、短信邮件与 AI 模型接入；不确定时如实说明，勿编造菜单或密钥。',
 		isDefault: 0,
 		sort: 0,
 		status: 1,
@@ -267,8 +276,8 @@ defineExpose({ init })
 	margin-bottom: 16px;
 	padding: 14px 14px 4px;
 	border-radius: 16px;
-	background: #fbfcfe;
-	border: 1px solid #e8eef5;
+	background: var(--icejz-surface-2, #fbfcfe);
+	border: 1px solid var(--icejz-card-border, #e8eef5);
 }
 
 .section-title {
@@ -321,6 +330,13 @@ defineExpose({ init })
 	min-height: 32px;
 	color: #64748b;
 	font-size: 12.5px;
+}
+
+.field-hint {
+	margin-top: 6px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: #7b8b9c;
 }
 
 .drawer-footer {

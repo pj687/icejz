@@ -1,7 +1,7 @@
 <template>
-	<div class="settings-switch">
-		<span> {{ title }}</span>
-		<el-switch :model-value="modelValue" :disabled="disabled" @change="handleChange($event)"></el-switch>
+	<div class="settings-switch" :class="{ disabled }">
+		<span>{{ title }}</span>
+		<el-switch :model-value="modelValue" :disabled="disabled" @change="handleChange" />
 	</div>
 </template>
 
@@ -16,13 +16,18 @@ defineProps({
 		required: true
 	},
 	disabled: {
-		type: Boolean
+		type: Boolean,
+		default: false
 	}
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
-const handleChange = (val: boolean) => {
-	emit('update:modelValue', val)
+const emit = defineEmits<{
+	'update:modelValue': [value: boolean]
+	change: []
+}>()
+
+const handleChange = (val: string | number | boolean) => {
+	emit('update:modelValue', Boolean(val))
 	emit('change')
 }
 </script>
@@ -32,7 +37,14 @@ const handleChange = (val: boolean) => {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding-bottom: 15px;
+	gap: 12px;
+	min-height: 36px;
+	padding: 4px 0;
 	color: var(--el-text-color-primary);
+	font-size: 13px;
+
+	&.disabled {
+		opacity: 0.55;
+	}
 }
 </style>

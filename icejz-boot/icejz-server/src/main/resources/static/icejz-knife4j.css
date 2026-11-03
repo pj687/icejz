@@ -1,0 +1,678 @@
+/* ICEJZ Knife4j theme — brand #00a8e8 */
+:root {
+  --icejz-brand: #00a8e8;
+  --icejz-brand-deep: #007eb8;
+  --icejz-ink: #122033;
+  --icejz-muted: #64748b;
+  --icejz-line: #e7eef5;
+  --icejz-soft: #f5f9fc;
+  --icejz-sider: #0f1b28;
+  --icejz-sider-2: #152536;
+  --icejz-get: #0f766e;
+  --icejz-post: #007eb8;
+  --icejz-put: #b45309;
+  --icejz-delete: #b91c1c;
+  --icejz-patch: #7c3aed;
+}
+
+html,
+body.icejz-knife4j {
+  font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+  color: var(--icejz-ink);
+  background: var(--icejz-soft);
+}
+
+body.icejz-knife4j ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+body.icejz-knife4j ::-webkit-scrollbar-thumb {
+  background: rgba(0, 168, 232, 0.28);
+  border-radius: 999px;
+}
+
+body.icejz-knife4j ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 126, 184, 0.45);
+}
+
+/* ========== Sidebar ========== */
+body.icejz-knife4j .ant-layout-sider,
+body.icejz-knife4j .sider.ant-layout-sider-dark {
+  background: linear-gradient(180deg, var(--icejz-sider) 0%, var(--icejz-sider-2) 100%) !important;
+  box-shadow: 8px 0 28px rgba(15, 23, 36, 0.14);
+}
+
+body.icejz-knife4j .knife4j-logo-data {
+  position: relative;
+  padding: 16px 12px 12px !important;
+}
+
+body.icejz-knife4j .knife4j-logo-data::before {
+  content: "ICEJZ Docs";
+  display: block;
+  margin: 0 4px 12px;
+  padding-left: 12px;
+  font-size: 13px;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+  color: #9edfff;
+  border-left: 3px solid var(--icejz-brand);
+}
+
+body.icejz-knife4j .knife4j-logo-data .ant-select {
+  width: 100% !important;
+}
+
+body.icejz-knife4j .knife4j-logo-data .ant-select-selection,
+body.icejz-knife4j .knife4j-logo-data .ant-select-selector {
+  border-radius: 12px !important;
+  border-color: rgba(0, 168, 232, 0.28) !important;
+  box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.08);
+  background: rgba(255, 255, 255, 0.96) !important;
+}
+
+body.icejz-knife4j .ant-menu.ant-menu-dark,
+body.icejz-knife4j .ant-menu-dark .ant-menu-sub {
+  background: transparent !important;
+}
+
+body.icejz-knife4j .ant-menu-dark .ant-menu-item,
+body.icejz-knife4j .ant-menu-dark .ant-menu-submenu-title {
+  margin: 4px 10px !important;
+  width: calc(100% - 20px) !important;
+  border-radius: 10px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+}
+
+body.icejz-knife4j .ant-menu-dark .ant-menu-item:hover,
+body.icejz-knife4j .ant-menu-dark .ant-menu-submenu-title:hover {
+  background: rgba(0, 168, 232, 0.12) !important;
+}
+
+body.icejz-knife4j .ant-menu-dark .ant-menu-item-selected {
+  background: linear-gradient(135deg, rgba(0, 168, 232, 0.32), rgba(0, 126, 184, 0.2)) !important;
+  color: #fff !important;
+  box-shadow: inset 0 0 0 1px rgba(0, 168, 232, 0.28);
+}
+
+body.icejz-knife4j .ant-menu-dark .ant-menu-item-selected::after {
+  display: none !important;
+}
+
+body.icejz-knife4j .knife4j-menu-badge-num,
+body.icejz-knife4j .ant-badge-count {
+  background: var(--icejz-brand) !important;
+  box-shadow: 0 0 0 1px rgba(0, 168, 232, 0.2);
+  border-radius: 999px !important;
+}
+
+/* Sidebar method chips */
+body.icejz-knife4j .knife4j-menu .ant-tag,
+body.icejz-knife4j .ant-menu .ant-tag {
+  border: none !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  line-height: 18px !important;
+  padding: 0 6px !important;
+  min-width: 42px;
+  text-align: center;
+}
+
+body.icejz-knife4j .ant-tag-green,
+body.icejz-knife4j .ant-tag-success {
+  color: #fff !important;
+  background: var(--icejz-get) !important;
+}
+
+body.icejz-knife4j .ant-tag-blue,
+body.icejz-knife4j .ant-tag-processing {
+  color: #fff !important;
+  background: var(--icejz-post) !important;
+}
+
+body.icejz-knife4j .ant-tag-orange,
+body.icejz-knife4j .ant-tag-warning {
+  color: #fff !important;
+  background: var(--icejz-put) !important;
+}
+
+body.icejz-knife4j .ant-tag-red,
+body.icejz-knife4j .ant-tag-error,
+body.icejz-knife4j .ant-tag-magenta {
+  color: #fff !important;
+  background: var(--icejz-delete) !important;
+}
+
+body.icejz-knife4j .ant-tag-purple,
+body.icejz-knife4j .ant-tag-geekblue {
+  color: #fff !important;
+  background: var(--icejz-patch) !important;
+}
+
+/* ========== Header ========== */
+body.icejz-knife4j .ant-layout-header,
+body.icejz-knife4j .knife4j-header-default {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-bottom: 1px solid var(--icejz-line);
+  box-shadow: 0 8px 24px rgba(15, 23, 36, 0.04);
+  backdrop-filter: blur(10px);
+}
+
+body.icejz-knife4j .ant-layout-header .ant-input,
+body.icejz-knife4j .ant-layout-header .ant-input-affix-wrapper {
+  border-radius: 999px !important;
+  border-color: #dbe7f0 !important;
+  background: #f8fbfe !important;
+}
+
+body.icejz-knife4j .ant-layout-header .ant-input:focus,
+body.icejz-knife4j .ant-layout-header .ant-input-affix-wrapper-focused {
+  border-color: var(--icejz-brand) !important;
+  box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.12) !important;
+}
+
+body.icejz-knife4j .ant-breadcrumb a,
+body.icejz-knife4j .ant-breadcrumb > span:last-child {
+  color: var(--icejz-brand-deep) !important;
+  font-weight: 650;
+}
+
+body.icejz-knife4j .ant-tabs.ant-tabs-card .ant-tabs-card-bar .ant-tabs-tab,
+body.icejz-knife4j .header .ant-tabs-tab {
+  border-radius: 10px 10px 0 0 !important;
+}
+
+/* ========== Content shell ========== */
+body.icejz-knife4j .knife4j-body-content.ant-layout-content {
+  background:
+    radial-gradient(780px 240px at 100% 0%, rgba(0, 168, 232, 0.08), transparent 55%),
+    radial-gradient(520px 200px at 0% 100%, rgba(0, 168, 232, 0.045), transparent 50%),
+    #f7fbfe !important;
+  padding: 18px 22px 28px !important;
+}
+
+/* ========== Custom home dashboard ========== */
+body.icejz-knife4j .knife4j-body-content.icejz-home-ready > .ant-row > .ant-col-24 > .title,
+body.icejz-knife4j .knife4j-body-content.icejz-home-ready > .ant-row > .ant-col-24 > .description {
+  display: none !important;
+}
+
+body.icejz-knife4j .icejz-home {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+body.icejz-knife4j .icejz-home-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 168, 232, 0.14);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(241, 249, 253, 0.92)),
+    radial-gradient(520px 220px at 0% 40%, rgba(0, 168, 232, 0.12), transparent 60%);
+  box-shadow: 0 14px 32px rgba(15, 23, 36, 0.045);
+}
+
+body.icejz-knife4j .icejz-home-hero .hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 720;
+  letter-spacing: 0.04em;
+  color: var(--icejz-brand-deep);
+}
+
+body.icejz-knife4j .icejz-home-hero .hero-mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--icejz-brand);
+  box-shadow: 0 0 0 4px rgba(0, 168, 232, 0.14);
+}
+
+body.icejz-knife4j .icejz-home-hero h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  font-weight: 780;
+  color: var(--icejz-ink);
+}
+
+body.icejz-knife4j .icejz-home-hero p {
+  margin: 10px 0 0;
+  max-width: 640px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--icejz-muted);
+}
+
+body.icejz-knife4j .icejz-home-hero .hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+body.icejz-knife4j .icejz-home-hero .hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+  color: #0f4f6e;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(0, 168, 232, 0.14);
+}
+
+body.icejz-knife4j .icejz-home-hero .hero-chip em {
+  font-style: normal;
+  font-weight: 780;
+  font-variant-numeric: tabular-nums;
+  color: var(--icejz-brand);
+}
+
+body.icejz-knife4j .icejz-home-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+body.icejz-knife4j .icejz-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--icejz-line);
+  background: linear-gradient(160deg, #fff, #f7fbfe);
+  box-shadow: 0 10px 24px rgba(15, 23, 36, 0.035);
+}
+
+body.icejz-knife4j .icejz-stat-card .method {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-width: 58px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 780;
+  color: #fff;
+  background: var(--icejz-post);
+}
+
+body.icejz-knife4j .icejz-stat-card.icejz-method-get .method { background: var(--icejz-get); }
+body.icejz-knife4j .icejz-stat-card.icejz-method-post .method { background: var(--icejz-post); }
+body.icejz-knife4j .icejz-stat-card.icejz-method-put .method { background: var(--icejz-put); }
+body.icejz-knife4j .icejz-stat-card.icejz-method-delete .method { background: var(--icejz-delete); }
+body.icejz-knife4j .icejz-stat-card.icejz-method-patch .method { background: var(--icejz-patch); }
+
+body.icejz-knife4j .icejz-stat-card strong {
+  font-size: 32px;
+  line-height: 1;
+  font-weight: 780;
+  letter-spacing: -0.03em;
+  color: var(--icejz-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+body.icejz-knife4j .icejz-stat-card em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--icejz-muted);
+}
+
+body.icejz-knife4j .icejz-home-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 14px;
+}
+
+body.icejz-knife4j .icejz-info-card {
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid var(--icejz-line);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 24px rgba(15, 23, 36, 0.035);
+}
+
+body.icejz-knife4j .icejz-info-card header {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--icejz-line);
+}
+
+body.icejz-knife4j .icejz-info-card header strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 740;
+  color: var(--icejz-ink);
+}
+
+body.icejz-knife4j .icejz-info-card header span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--icejz-muted);
+}
+
+body.icejz-knife4j .icejz-info-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+body.icejz-knife4j .icejz-info-card li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+body.icejz-knife4j .icejz-info-card li span {
+  color: var(--icejz-muted);
+  font-weight: 650;
+  flex-shrink: 0;
+}
+
+body.icejz-knife4j .icejz-info-card li b {
+  color: var(--icejz-ink);
+  font-weight: 650;
+  text-align: right;
+  word-break: break-all;
+}
+
+body.icejz-knife4j .icejz-info-card li b.mono,
+body.icejz-knife4j .icejz-info-card code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: #0f4f6e;
+  background: #f5f9fc;
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+
+body.icejz-knife4j .icejz-info-card .tips {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #334155;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+body.icejz-knife4j .icejz-info-card .tips a {
+  color: var(--icejz-brand-deep);
+  word-break: break-all;
+}
+
+@media (max-width: 1100px) {
+  body.icejz-knife4j .icejz-home-stats,
+  body.icejz-knife4j .icejz-home-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  body.icejz-knife4j .icejz-home-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  body.icejz-knife4j .icejz-home-hero .hero-meta {
+    justify-content: flex-start;
+  }
+
+  body.icejz-knife4j .icejz-home-stats,
+  body.icejz-knife4j .icejz-home-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== API detail ========== */
+body.icejz-knife4j .knife4j-api-title {
+  margin-bottom: 12px !important;
+  padding: 14px 16px !important;
+  border-radius: 14px;
+  border: 1px solid var(--icejz-line);
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15, 23, 36, 0.03);
+  align-items: center;
+}
+
+body.icejz-knife4j .knife4j-api-title > .ant-col span {
+  font-size: 18px;
+  font-weight: 760;
+  color: var(--icejz-ink);
+}
+
+body.icejz-knife4j .knife4j-api-copy-address {
+  color: var(--icejz-brand-deep) !important;
+  font-weight: 650 !important;
+  cursor: pointer;
+}
+
+body.icejz-knife4j .knife4j-api-copy-address:hover {
+  color: var(--icejz-brand) !important;
+}
+
+body.icejz-knife4j .knife4j-api-summary {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px !important;
+  padding: 12px 14px !important;
+  border-radius: 12px;
+  border: 1px solid var(--icejz-line);
+  background: #f8fbfe;
+}
+
+body.icejz-knife4j .knife4j-api-summary-method {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  height: 28px;
+  padding: 0 10px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 780 !important;
+  color: #fff !important;
+  background: var(--icejz-post) !important;
+}
+
+body.icejz-knife4j .knife4j-api-get .knife4j-api-summary-method {
+  background: var(--icejz-get) !important;
+}
+
+body.icejz-knife4j .knife4j-api-post .knife4j-api-summary-method {
+  background: var(--icejz-post) !important;
+}
+
+body.icejz-knife4j .knife4j-api-put .knife4j-api-summary-method {
+  background: var(--icejz-put) !important;
+}
+
+body.icejz-knife4j .knife4j-api-delete .knife4j-api-summary-method {
+  background: var(--icejz-delete) !important;
+}
+
+body.icejz-knife4j .knife4j-api-patch .knife4j-api-summary-method {
+  background: var(--icejz-patch) !important;
+}
+
+body.icejz-knife4j .knife4j-api-summary-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 13.5px !important;
+  font-weight: 650 !important;
+  color: var(--icejz-ink) !important;
+}
+
+body.icejz-knife4j .api-title,
+body.icejz-knife4j .api-basic-title {
+  margin-top: 14px !important;
+  margin-bottom: 10px !important;
+  padding-left: 10px !important;
+  border-left: 3px solid var(--icejz-brand) !important;
+  font-weight: 740 !important;
+  color: var(--icejz-ink) !important;
+}
+
+body.icejz-knife4j .api-tab.ant-tabs {
+  background: #fff;
+  border: 1px solid var(--icejz-line);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 10px 24px rgba(15, 23, 36, 0.035);
+}
+
+body.icejz-knife4j .ant-tabs-ink-bar {
+  background: var(--icejz-brand) !important;
+}
+
+body.icejz-knife4j .ant-tabs-nav .ant-tabs-tab-active {
+  color: var(--icejz-brand-deep) !important;
+  font-weight: 720;
+}
+
+body.icejz-knife4j .ant-tabs-nav .ant-tabs-tab:hover {
+  color: var(--icejz-brand) !important;
+}
+
+/* ========== Buttons / forms ========== */
+body.icejz-knife4j .ant-btn-primary {
+  background: linear-gradient(135deg, var(--icejz-brand), var(--icejz-brand-deep)) !important;
+  border-color: var(--icejz-brand-deep) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 18px rgba(0, 168, 232, 0.22);
+  font-weight: 650;
+}
+
+body.icejz-knife4j .ant-btn-primary:hover,
+body.icejz-knife4j .ant-btn-primary:focus {
+  background: var(--icejz-brand-deep) !important;
+  border-color: var(--icejz-brand-deep) !important;
+}
+
+body.icejz-knife4j .ant-btn {
+  border-radius: 10px !important;
+}
+
+body.icejz-knife4j .ant-input,
+body.icejz-knife4j .ant-select-selection,
+body.icejz-knife4j .ant-input-number,
+body.icejz-knife4j textarea.ant-input,
+body.icejz-knife4j .ant-select-selector {
+  border-radius: 10px !important;
+}
+
+body.icejz-knife4j .ant-input:focus,
+body.icejz-knife4j .ant-input-number-focused,
+body.icejz-knife4j .ant-select-focused .ant-select-selection,
+body.icejz-knife4j .ant-select-focused .ant-select-selector {
+  border-color: var(--icejz-brand) !important;
+  box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.12) !important;
+}
+
+/* ========== Cards / tables ========== */
+body.icejz-knife4j .ant-card,
+body.icejz-knife4j .ant-table-wrapper,
+body.icejz-knife4j .ant-collapse {
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+
+body.icejz-knife4j .ant-card {
+  border: 1px solid var(--icejz-line) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 36, 0.035);
+}
+
+body.icejz-knife4j .ant-table-thead > tr > th {
+  background: #f7fbfe !important;
+  color: #475569 !important;
+  font-weight: 700 !important;
+}
+
+body.icejz-knife4j .ant-table-tbody > tr:hover > td {
+  background: rgba(0, 168, 232, 0.05) !important;
+}
+
+body.icejz-knife4j .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  font-weight: 700;
+  color: var(--icejz-ink);
+}
+
+/* ========== Footer ========== */
+body.icejz-knife4j .footer,
+body.icejz-knife4j .knife4j-footer,
+body.icejz-knife4j .ant-layout-footer {
+  background: transparent !important;
+  color: var(--icejz-muted) !important;
+  border-top: 1px solid var(--icejz-line);
+  font-size: 12px !important;
+}
+
+body.icejz-knife4j .footer a,
+body.icejz-knife4j .ant-layout-footer a {
+  color: var(--icejz-brand-deep) !important;
+}
+
+/* Hide default knife4j credit link style; script may rewrite text */
+body.icejz-knife4j .footer a[href*="knife4j"],
+body.icejz-knife4j .ant-layout-footer a[href*="knife4j"] {
+  color: var(--icejz-muted) !important;
+  text-decoration: none !important;
+}
+
+/* Markdown */
+body.icejz-knife4j .markdown-body,
+body.icejz-knife4j .knife4j-body-content .markdown {
+  background: #fff;
+  border: 1px solid var(--icejz-line);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 10px 24px rgba(15, 23, 36, 0.035);
+}
+
+body.icejz-knife4j .markdown-body h1,
+body.icejz-knife4j .markdown-body h2,
+body.icejz-knife4j .markdown-body h3 {
+  color: var(--icejz-ink);
+  border-color: var(--icejz-line) !important;
+}
+
+body.icejz-knife4j .markdown-body a {
+  color: var(--icejz-brand-deep);
+}
+
+/* Debug send area */
+body.icejz-knife4j .ant-btn-danger {
+  border-radius: 10px !important;
+}
+
+body.icejz-knife4j .CodeMirror,
+body.icejz-knife4j pre {
+  border-radius: 10px !important;
+}

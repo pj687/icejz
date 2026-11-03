@@ -1,7 +1,7 @@
 <template>
   <view class="custom-tab-bar">
-    <view 
-      v-for="(item, index) in list" 
+    <view
+      v-for="(item, index) in list"
       :key="index"
       class="tab-item"
       :class="{ active: value === index }"
@@ -10,12 +10,7 @@
       <view class="tab-icon">
         <text class="icon">{{ getIcon(item.icon) }}</text>
       </view>
-      <text 
-        class="tab-text"
-        :style="{ color: value === index ? '#FF5F15' : '#666666' }"
-      >
-        {{ item.text }}
-      </text>
+      <text class="tab-text">{{ item.text }}</text>
     </view>
   </view>
 </template>
@@ -27,21 +22,10 @@ export default {
     return {
       value: 0,
       list: [
-        {
-          icon: 'home',
-          text: '首页',
-          url: 'pages/index/index'
-        },
-        {
-          icon: 'workbench',
-          text: '工作台',
-          url: 'pages/workbench/workbench'
-        },
-        {
-          icon: 'user',
-          text: '个人中心',
-          url: 'pages/usercenter/usercenter'
-        }
+        { icon: 'home', text: '首页', url: 'pages/index/index' },
+        { icon: 'workbench', text: '服务', url: 'pages/workbench/workbench' },
+        { icon: 'activity', text: '活动', url: 'pages/activity/activity' },
+        { icon: 'user', text: '我的', url: 'pages/usercenter/usercenter' }
       ]
     }
   },
@@ -66,11 +50,12 @@ export default {
     },
     getIcon(icon) {
       const iconMap = {
-        'home': '🏠',
-        'workbench': '⚙️', 
-        'user': '👤'
+        home: '⌂',
+        workbench: '▦',
+        activity: '◎',
+        user: '☺'
       }
-      return iconMap[icon] || '🏠'
+      return iconMap[icon] || '⌂'
     }
   }
 }
@@ -83,9 +68,10 @@ export default {
   left: 0;
   right: 0;
   height: 100rpx;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.96);
   display: flex;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1rpx solid rgba(232, 238, 245, 0.95);
+  box-shadow: 0 -8rpx 28rpx rgba(15, 23, 36, 0.06);
   z-index: 1000;
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -104,15 +90,19 @@ export default {
 }
 
 .icon {
-  font-size: 40rpx;
+  font-size: 34rpx;
+  color: #9ca3af;
 }
 
-.tab-item.active .icon {
-  color: #FF5F15;
+.tab-item.active .icon,
+.tab-item.active .tab-text {
+  color: #00a8e8;
 }
 
 .tab-text {
   font-size: 20rpx;
   margin-top: 4rpx;
+  color: #9ca3af;
+  font-weight: 500;
 }
 </style>

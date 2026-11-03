@@ -12,7 +12,7 @@
 							@visible-change="handleChange($event, tab)"
 							@command="onClose"
 						>
-							<span>{{ tab.title }}</span>
+							<span>{{ tabLabel(tab) }}</span>
 							<template #dropdown>
 								<el-dropdown-menu>
 									<el-dropdown-item :icon="Close" command="close">{{ $t('app.close') }}</el-dropdown-item>
@@ -46,6 +46,7 @@ import { ArrowDown, Close, CircleClose, CircleCloseFilled } from '@element-plus/
 import { useAppStore } from '@/store/modules/app'
 import { useRouterStore } from '@/store/modules/router'
 import { useTabsStore } from '@/store/modules/tabs'
+import { translateMenuTitle } from '@/utils/menu-i18n'
 
 const appStore = useAppStore()
 const routerStore = useRouterStore()
@@ -55,6 +56,7 @@ const router = useRouter()
 
 const activeTabName = ref(route.fullPath)
 const tabsStyleClass = computed(() => 'tabs-item-' + appStore.theme.tabsStyle)
+const tabLabel = (tab: any) => translateMenuTitle(tab?.title || tab?.meta?.title, tab?.meta?.url || tab?.path)
 
 // 是否固定
 const isAffix = (tab: any) => {

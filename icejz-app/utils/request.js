@@ -1,7 +1,8 @@
 const cache = require('@/utils/cache.js')
 
-const baseUrl = 'https://demo.icejz.net/icejz-boot-server'
-// const baseUrl = 'http://192.168.101.86:8080'
+// 与管理端一致，默认联调本地 boot；线上改为 demo 地址
+const baseUrl = 'http://localhost:8080'
+// const baseUrl = 'https://demo.icejz.net/icejz-boot-server'
 
 const request = (method, url, data = {}, header = {}) => {
   // 如果token存在，则设置token

@@ -1,0 +1,80 @@
+<view class="bar">
+  <view class="bar-row" bindtap="onBarTap">
+    <view class="check {{agreed ? 'on' : ''}}"></view>
+    <view class="bar-text">
+      <text class="bar-label">我已阅读并同意</text>
+      <view class="bar-links">
+        <block wx:for="{{agreements}}" wx:key="id">
+          <text class="a" data-id="{{item.id}}" catchtap="openByEvent">《{{item.shortTitle}}》</text>
+          <text wx:if="{{index < agreements.length - 1}}" class="sep">、</text>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view wx:if="{{visible}}" class="root" catchtouchmove="noop">
+  <view class="mask" bindtap="close"></view>
+  <view class="panel" catchtap="noop">
+    <view class="top">
+      <view class="top-left">
+        <text class="brand">ICEJZ</text>
+        <text class="top-title">{{current.shortTitle}}</text>
+      </view>
+      <view class="close" bindtap="close">关闭</view>
+    </view>
+
+    <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}">
+      <view class="chips-inner">
+        <view
+          wx:for="{{agreements}}"
+          wx:key="id"
+          class="chip {{item.id === activeId ? 'active' : ''}} {{confirmedMap[item.id] && item.id !== activeId ? 'done' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="openByEvent"
+        >
+          <text class="chip-n">{{index + 1}}</text>
+          <text class="chip-t">{{item.shortTitle}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="meter">
+      <view class="meter-fill" style="width: {{meterPercent}}%;"></view>
+    </view>
+    <text class="meter-label">已同意 {{confirmedCount}} / {{agreements.length}}</text>
+
+    <scroll-view
+      scroll-y
+      class="doc"
+      scroll-top="{{docScrollTop}}"
+      enhanced
+      show-scrollbar="{{false}}"
+      bindscroll="onDocScroll"
+    >
+      <view class="doc-pad">
+        <text class="doc-h1">{{current.title}}</text>
+        <text class="doc-meta">更新日期 {{current.updatedAt}} · 版本 {{version}}</text>
+
+        <view wx:for="{{current.sections}}" wx:key="heading" class="block">
+          <text class="h2">{{item.heading}}</text>
+          <text wx:for="{{item.paragraphs}}" wx:for-item="p" wx:key="*this" class="p">{{p}}</text>
+        </view>
+
+        <view class="end-tip {{reachedEnd ? 'on' : ''}}">
+          {{reachedEnd ? '已阅读至底部' : '请继续下滑至文末'}}
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="bottom">
+      <view class="btns">
+        <view wx:if="{{currentIndex > 0}}" class="btn ghost" bindtap="openPrev">上一份</view>
+        <view
+          class="btn main {{canAgree ? 'ready' : 'disabled'}} {{currentIndex === 0 ? 'alone' : ''}}"
+          bindtap="onConfirm"
+        >{{mainText}}</view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,52 +1,78 @@
 const cache = require('@/utils/cache.js')
+const brand = require('@/config/brand.js')
 const { useLogoutApi } = require('@/api/auth.js')
-
-const menuData = [
-  {
-    title: '钱包',
-    icon: 'wallet',
-    count: 0
-  },
-  {
-    title: '公司',
-    icon: 'home',
-    count: 0
-  },
-  {
-    title: '客户',
-    icon: 'user',
-    count: 0
-  },
-  {
-    title: '我的消息',
-    icon: 'chat-message',
-    count: 8
-  }
-]
+const { useMessageUnreadCountApi } = require('@/api/message.js')
 
 Page({
   data: {
+    brand,
     showMakePhone: false,
     user: {
       avatar: '',
       realName: ''
-    }
-  },
-
-  onLoad() {
-    this.setData({ menuData })
+    },
+    menuData: [
+      {
+        title: '我的消息',
+        icon: 'chat-message',
+        count: 0,
+        path: '/pages/message/inbox'
+      },
+      {
+        title: '用户管理',
+        icon: 'user',
+        count: 0,
+        path: '/pages/sys/user/index'
+      },
+      {
+        title: '机构管理',
+        icon: 'home',
+        count: 0,
+        path: '/pages/sys/org/index'
+      },
+      {
+        title: '角色管理',
+        icon: 'usergroup',
+        count: 0,
+        path: '/pages/sys/role/index'
+      }
+    ]
   },
 
   onShow() {
-    this.setData({ user: cache.getUserInfo() })
+    if (!cache.getToken()) {
+      wx.reLaunch({ url: '/pages/login/login' })
+      return
+    }
+    this.setData({ user: cache.getUserInfo() || {} })
     this.getTabBar().init()
+    this.loadUnread()
   },
 
-  onClickMenu() {
-    wx.showToast({
-      title: '演示功能',
-      icon: 'none'
-    })
+  async loadUnread() {
+    try {
+      const { data } = await useMessageUnreadCountApi()
+      const count = data || 0
+      const menuData = this.data.menuData.map((item) => {
+        if (item.path === '/pages/message/inbox') {
+          return { ...item, count }
+        }
+        return item
+      })
+      this.setData({ menuData })
+    } catch (e) {
+      // ignore
+    }
+  },
+
+  onClickMenu(e) {
+    const index = e.currentTarget.dataset.index
+    const item = this.data.menuData[index]
+    if (!item?.path) {
+      wx.showToast({ title: '暂未开放', icon: 'none' })
+      return
+    }
+    wx.navigateTo({ url: item.path })
   },
 
   openMakePhone() {
@@ -70,15 +96,12 @@ Page({
   },
 
   onLogout() {
-    useLogoutApi().then(() => {
-      // 退出成功，删除token、userInfo
-      cache.removeToken()
-      cache.removeUserInfo()
-
-      // 跳转到登录页
-      wx.reLaunch({
-        url: '/pages/login/login'
+    useLogoutApi()
+      .catch(() => null)
+      .finally(() => {
+        cache.removeToken()
+        cache.removeUserInfo()
+        wx.reLaunch({ url: '/pages/login/login' })
       })
-    })
   }
 })

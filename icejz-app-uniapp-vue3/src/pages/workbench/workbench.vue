@@ -1,20 +1,30 @@
 <template>
     <view class="service-page">
         <view class="top-card">
+            <view class="top-kicker">{{ brand.serviceKicker }}</view>
             <view class="top-info">
                 <view>
-                    <text class="title">服务大厅</text>
-                    <text class="subtitle">可预约上门照护、健康管理、社区活动</text>
+                    <text class="title">{{ brand.serviceTitle }}</text>
+                    <text class="subtitle">{{ brand.serviceSub }}</text>
                 </view>
                 <view class="user-tag" v-if="isLoggedIn">
                     <text class="user-name">{{ userName }}</text>
                 </view>
             </view>
+            <view class="top-chips">
+                <text class="chip">照护</text>
+                <text class="chip">康复</text>
+                <text class="chip">健康</text>
+                <text class="chip soft">活动</text>
+            </view>
         </view>
 
         <!-- 快捷服务入口 -->
         <view class="section-card">
-            <text class="section-title">快捷服务</text>
+            <view class="section-row">
+                <text class="section-title">快捷服务</text>
+                <text class="section-note">一键进入</text>
+            </view>
             <view class="service-grid">
                 <view class="service-item" v-for="item in quickServices" :key="item.id" @tap="onClick(item)">
                     <view class="service-icon" :style="{ background: item.color }">
@@ -71,20 +81,22 @@
 <script>
 import { useServiceItemListApi, useBookingListApi } from '../../api/user.js';
 import cache from '../../utils/cache.js';
+import brand from '../../config/brand.js';
 
 export default {
     name: 'Workbench',
     data() {
         return {
+            brand,
             isLoggedIn: false,
             userName: '',
             featuredServices: [],
             bookingList: [],
             quickServices: [
-                { id: 1, name: '上门照护', icon: '护', color: '#111827', path: '/pages/services/home-care/home-care' },
+                { id: 1, name: '上门照护', icon: '护', color: '#143047', path: '/pages/services/home-care/home-care' },
                 { id: 2, name: '康复理疗', icon: '康', color: '#00a8e8', path: '/pages/services/rehab/rehab' },
-                { id: 3, name: '健康监测', icon: '健', color: '#16a34a', path: '/pages/services/health-monitor/health-monitor' },
-                { id: 4, name: '活动报名', icon: '活', color: '#9333ea', path: '/pages/activity/activity', isTabBar: true }
+                { id: 3, name: '健康监测', icon: '健', color: '#0c8f6a', path: '/pages/services/health-monitor/health-monitor' },
+                { id: 4, name: '活动报名', icon: '活', color: '#0c6f9c', path: '/pages/activity/activity', isTabBar: true }
             ]
         };
     },
@@ -170,21 +182,37 @@ export default {
 .top-card {
   background:
     radial-gradient(circle at 90% 10%, rgba(62, 198, 255, 0.3), transparent 36%),
-    linear-gradient(135deg, #121a28 0%, #0c6f9c 100%);
+    linear-gradient(135deg, #121a28 0%, #143047 55%, #0c6f9c 100%);
   border-radius: 28rpx;
   padding: 34rpx 30rpx;
   margin-bottom: 24rpx;
   box-shadow: 0 16rpx 40rpx rgba(15, 23, 36, 0.16);
 }
+.top-kicker {
+  display: block;
+  color: rgba(255,255,255,0.55);
+  font-size: 18rpx;
+  letter-spacing: 3rpx;
+  margin-bottom: 10rpx;
+}
 .top-info { display: flex; justify-content: space-between; align-items: flex-start; }
-.title { display: block; color: #fff; font-size: 40rpx; font-weight: 700; }
-.subtitle { display: block; color: rgba(255,255,255,0.72); font-size: 24rpx; margin-top: 8rpx; }
-.user-tag { background: rgba(255,255,255,0.12); padding: 10rpx 18rpx; border-radius: 999rpx; }
+.title { display: block; color: #fff; font-size: 42rpx; font-weight: 700; }
+.subtitle { display: block; color: rgba(255,255,255,0.72); font-size: 24rpx; margin-top: 8rpx; line-height: 1.5; }
+.user-tag { background: rgba(255,255,255,0.12); padding: 10rpx 18rpx; border-radius: 999rpx; border: 1rpx solid rgba(255,255,255,0.16); }
 .user-name { color: #fff; font-size: 24rpx; }
+.top-chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 22rpx; }
+.chip {
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 20rpx;
+}
+.chip.soft { background: #00a8e8; }
 
 .section-card {
   background: #fff;
-  border-radius: 24rpx;
+  border-radius: 28rpx;
   padding: 26rpx;
   margin-bottom: 20rpx;
   border: 1rpx solid rgba(232,238,245,0.95);
@@ -192,26 +220,41 @@ export default {
 }
 .section-title { color: #111827; font-size: 30rpx; font-weight: 700; }
 .section-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
-.section-note { color: #00a8e8; font-size: 22rpx; }
+.section-note {
+  color: #00a8e8;
+  font-size: 20rpx;
+  background: #e8f7fd;
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+}
 
-.service-grid { display: flex; flex-wrap: wrap; margin-top: 16rpx; }
+.service-grid { display: flex; flex-wrap: wrap; margin-top: 8rpx; }
 .service-item { width: 25%; display: flex; flex-direction: column; align-items: center; margin-top: 18rpx; }
 .service-icon {
-  width: 76rpx;
-  height: 76rpx;
+  width: 80rpx;
+  height: 80rpx;
   border-radius: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 18rpx rgba(0,168,232,0.16);
+  box-shadow: 0 10rpx 20rpx rgba(0,168,232,0.16);
 }
 .icon-text { color: #fff; font-size: 28rpx; font-weight: 700; }
-.service-name { margin-top: 10rpx; color: #374151; font-size: 24rpx; }
+.service-name { margin-top: 12rpx; color: #374151; font-size: 24rpx; }
 
-.service-list-item { display: flex; justify-content: space-between; align-items: center; padding: 18rpx 0; border-bottom: 1rpx solid #eef3f8; }
-.service-list-item:last-child { border-bottom: none; }
+.service-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 16rpx;
+  margin-top: 12rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(180deg, #f7fbfe, #f2f8fc);
+  border: 1rpx solid rgba(0,168,232,0.06);
+}
+.service-list-item:first-of-type { margin-top: 4rpx; }
 .svc-left { display: flex; align-items: center; gap: 16rpx; flex: 1; }
-.svc-dot { width: 10rpx; height: 10rpx; border-radius: 50%; flex-shrink: 0; }
+.svc-dot { width: 12rpx; height: 12rpx; border-radius: 50%; flex-shrink: 0; }
 .svc-name { display: block; color: #111827; font-size: 26rpx; font-weight: 600; }
 .svc-meta { display: block; color: #6b7280; font-size: 22rpx; margin-top: 4rpx; }
 .svc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8rpx; }

@@ -2,6 +2,7 @@ package net.icejz.iot.communication.mqtt;
 
 import jakarta.annotation.Resource;
 import net.icejz.iot.communication.mqtt.config.MqttConfig;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.integration.support.MessageBuilder;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @MessagingGateway(defaultRequestChannel = MqttConfig.OUTBOUND_CHANNEL)
+@ConditionalOnProperty(prefix = "spring.mqtt", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class MqttGateway {
     @Resource
     private MqttConfig mqttConfig;

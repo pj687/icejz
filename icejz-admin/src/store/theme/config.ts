@@ -1,7 +1,7 @@
 import { ITheme } from '@/store/theme/interface'
 
 export const themeConfig: ITheme = {
-	sidebarStyle: 'dark',
+	sidebarStyle: 'light',
 	headerStyle: 'light',
 	primaryColor: '#00a8e8',
 	layout: 'vertical',

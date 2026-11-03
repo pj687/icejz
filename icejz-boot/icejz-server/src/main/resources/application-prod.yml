@@ -29,6 +29,8 @@ spring:
           username: icejz
           password: 123456
   mqtt:
+    # 生产环境若使用物联网 MQTT，改为 true
+    enabled: false
     host: tcp://localhost:1883
     username: icejz
     password: icejz

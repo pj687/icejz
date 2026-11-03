@@ -6,19 +6,30 @@
 			form,
 			{
 				talking,
-				bounce: bounce && form === 'bot' && action === 'idle' && !morphing,
+				bounce: bounce && form === 'bot' && action === 'idle' && !morphing && !greeting && !isDancing,
 				badge,
 				morphing,
+				greeting,
+				dancing: isDancing,
 				pet,
 				sprite: useSprite
 			}
 		]"
 		:aria-label="name"
 	>
-		<div class="bot-figure" @click.stop="onFigureClick" @dblclick.stop="onFigureDblClick">
+		<div
+			class="bot-figure"
+			:class="{ settling, greeting, dancing: isDancing }"
+			@click.stop="onFigureClick"
+			@dblclick.stop="onFigureDblClick"
+		>
 			<template v-if="useSprite || morphPlaying">
 				<span class="bot-ground-shadow" aria-hidden="true"></span>
-				<div class="bot-sprite-clip" :class="{ morph: morphPlaying }" :style="clipStyle">
+				<div
+					class="bot-sprite-clip"
+					:class="{ morph: morphPlaying, dancing: isDancing }"
+					:style="{ ...clipStyle, ...morphClipExtra }"
+				>
 					<div class="bot-sprite-sheet" :style="activeSheetStyle" />
 				</div>
 			</template>
@@ -29,8 +40,26 @@
 				:alt="name"
 				draggable="false"
 			/>
-			<span v-if="morphPlaying" class="morph-burst" aria-hidden="true"></span>
-			<span v-if="talking && !morphPlaying" class="talk-glow" aria-hidden="true"></span>
+			<template v-if="morphPlaying">
+				<span class="morph-aura" aria-hidden="true"></span>
+				<span class="morph-ring morph-ring-a" aria-hidden="true"></span>
+				<span class="morph-ring morph-ring-b" aria-hidden="true"></span>
+				<span class="morph-burst" aria-hidden="true"></span>
+				<span class="morph-spark s1" aria-hidden="true"></span>
+				<span class="morph-spark s2" aria-hidden="true"></span>
+				<span class="morph-spark s3" aria-hidden="true"></span>
+				<span class="morph-spark s4" aria-hidden="true"></span>
+				<span class="morph-spark s5" aria-hidden="true"></span>
+				<span class="morph-spark s6" aria-hidden="true"></span>
+			</template>
+			<template v-if="(greeting || isDancing) && !morphPlaying">
+				<span class="greet-halo" aria-hidden="true"></span>
+				<span class="greet-dot d1" aria-hidden="true"></span>
+				<span class="greet-dot d2" aria-hidden="true"></span>
+				<span class="greet-dot d3" aria-hidden="true"></span>
+				<span class="greet-dot d4" aria-hidden="true"></span>
+			</template>
+			<span v-if="talking && !morphPlaying && !greeting && !isDancing" class="talk-glow" aria-hidden="true"></span>
 		</div>
 		<span v-if="showName" class="bot-name">{{ formLabel }}</span>
 	</div>
@@ -39,6 +68,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
+	DANCE_SHEET,
 	MORPH_SHEET,
 	PET_SHEET,
 	PET_SIZE_SCALE,
@@ -98,6 +128,8 @@ const emit = defineEmits<{
 	'update:action': [IcePetAction]
 	morph: [IceBotForm]
 	action: [IcePetAction]
+	/** 单击请求变身（由父级决定流程，与变身按钮一致） */
+	'morph-request': []
 	dblclick: []
 }>()
 
@@ -109,16 +141,42 @@ const innerAction = ref<IcePetAction>(props.action)
 const morphing = ref(false)
 const morphPlaying = ref(false)
 const morphRow = ref(0)
+const morphProgress = ref(0)
+const settling = ref(false)
+const greeting = ref(false)
 const frame = ref(0)
 const sheetUrl = ref(PET_SHEET.src)
 const morphSheetUrl = ref(MORPH_SHEET.src)
+const danceSheetUrl = ref(DANCE_SHEET.src)
 
 let morphTimer = 0
+let morphRaf = 0
+let settleTimer = 0
 let holdTimer = 0
+let greetTimer = 0
 let frameTimer = 0
+let frameDir = 1
 let autoMorphTimer = 0
 let autoActionTimer = 0
 let clickDelayTimer = 0
+
+/** easeInOutCubic：中间帧更快、首尾更稳 */
+const easeInOutCubic = (t: number) =>
+	t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+const morphClipExtra = computed(() => {
+	if (!morphPlaying.value) return {}
+	const p = morphProgress.value
+	const pulse = Math.sin(p * Math.PI)
+	const scale = 1 + pulse * 0.08
+	const rot = (pulse - 0.5) * 4
+	return {
+		transform: `scale(${scale.toFixed(4)}) rotate(${rot.toFixed(2)}deg)`,
+		filter: `drop-shadow(0 10px 16px rgba(5, 70, 102, 0.14)) drop-shadow(0 0 ${
+			12 + pulse * 22
+		}px rgba(56, 189, 248, ${0.28 + pulse * 0.45})) brightness(${1 + pulse * 0.12})`
+	}
+})
 
 watch(
 	() => props.form,
@@ -137,6 +195,7 @@ watch(
 
 const form = computed(() => innerForm.value)
 const action = computed(() => innerAction.value)
+const isDancing = computed(() => form.value === 'bot' && action.value === 'dance' && !morphPlaying.value)
 const useSprite = computed(() => props.pet && form.value === 'bot' && !morphPlaying.value)
 const formLabel = computed(() => (form.value === 'fly' ? `${props.name}·飞行` : props.name))
 const coreSrc = computed(() => (form.value === 'fly' ? FLY_SRC : BOT_SRC))
@@ -176,7 +235,24 @@ const morphSheetStyle = computed(() => {
 	}
 })
 
-const activeSheetStyle = computed(() => (morphPlaying.value ? morphSheetStyle.value : petSheetStyle.value))
+const danceSheetStyle = computed(() => {
+	const scale = PET_SIZE_SCALE[props.size]
+	const { cellW, width, height, sequence } = DANCE_SHEET
+	const step = frame.value % sequence.length
+	const col = sequence[step] ?? 0
+	return {
+		width: `${width * scale}px`,
+		height: `${height * scale}px`,
+		backgroundImage: `url(${danceSheetUrl.value})`,
+		transform: `translate(${-col * cellW * scale}px, 0)`
+	}
+})
+
+const activeSheetStyle = computed(() => {
+	if (morphPlaying.value) return morphSheetStyle.value
+	if (isDancing.value) return danceSheetStyle.value
+	return petSheetStyle.value
+})
 
 const clearHoldTimer = () => {
 	if (holdTimer) {
@@ -189,6 +265,10 @@ const clearFrameTimer = () => {
 	if (frameTimer) {
 		window.clearInterval(frameTimer)
 		frameTimer = 0
+	}
+	if (morphRaf) {
+		window.cancelAnimationFrame(morphRaf)
+		morphRaf = 0
 	}
 }
 
@@ -207,11 +287,36 @@ const backToIdle = () => {
 const startFrameLoop = () => {
 	clearFrameTimer()
 	if (!useSprite.value) return
+	frameDir = 1
 	const meta = stateMeta.value
-	const ms = Math.max(80, Math.round(1000 / Math.max(0.5, meta.fps)))
+	const ms = Math.max(70, Math.round(1000 / Math.max(0.5, meta.fps)))
 	frameTimer = window.setInterval(() => {
 		if (!useSprite.value) return
 		const m = stateMeta.value
+		// 合拍手势舞：按 sequence 节拍步进（frame = 序列下标）
+		if (innerAction.value === 'dance') {
+			const len = DANCE_SHEET.sequence.length
+			const next = frame.value + 1
+			if (next >= len) {
+				frame.value = m.loop ? 0 : frame.value
+				if (!m.loop) backToIdle()
+				return
+			}
+			frame.value = next
+			return
+		}
+		if (m.pingPong && m.loop && m.frames > 1) {
+			let next = frame.value + frameDir
+			if (next >= m.frames) {
+				frameDir = -1
+				next = m.frames - 2
+			} else if (next < 0) {
+				frameDir = 1
+				next = 1
+			}
+			frame.value = Math.max(0, Math.min(m.frames - 1, next))
+			return
+		}
 		const next = frame.value + 1
 		if (next >= m.frames) {
 			if (innerAction.value === 'idle' || m.loop) {
@@ -225,13 +330,23 @@ const startFrameLoop = () => {
 	}, ms)
 }
 
+const clearGreetTimer = () => {
+	if (greetTimer) {
+		window.clearTimeout(greetTimer)
+		greetTimer = 0
+	}
+	greeting.value = false
+}
+
 const play = (next: IcePetAction) => {
 	if (morphing.value) return
 	const meta = PET_STATE_MAP[next]
 	if (!meta) return
+	if (next !== 'dance') clearGreetTimer()
 	clearHoldTimer()
 	innerAction.value = next
 	frame.value = 0
+	frameDir = 1
 	emit('update:action', next)
 	emit('action', next)
 	startFrameLoop()
@@ -243,41 +358,78 @@ const play = (next: IcePetAction) => {
 	}
 }
 
+/** 打招呼入口：跳奶龙舞 */
+const greet = () => {
+	if (morphing.value) return
+	if (innerForm.value !== 'bot') {
+		transformTo('bot')
+		greetTimer = window.setTimeout(() => {
+			if (innerForm.value === 'bot' && !morphing.value) greet()
+		}, (MORPH_SHEET.durationMs || 720) + 180)
+		return
+	}
+	clearGreetTimer()
+	clearHoldTimer()
+	greeting.value = true
+	play('dance')
+	greetTimer = window.setTimeout(() => {
+		greeting.value = false
+		greetTimer = 0
+	}, PET_STATE_MAP.dance.holdMs + 80)
+}
+
 const finishMorph = (next: IceBotForm) => {
 	clearFrameTimer()
+	window.clearTimeout(morphTimer)
 	morphPlaying.value = false
 	morphing.value = false
+	morphProgress.value = 0
 	innerForm.value = next
 	emit('update:form', next)
 	emit('morph', next)
+	settling.value = true
+	window.clearTimeout(settleTimer)
+	settleTimer = window.setTimeout(() => {
+		settling.value = false
+	}, 420)
 	if (next === 'bot') play('idle')
 }
 
 const playMorphSequence = (next: IceBotForm) => {
 	clearHoldTimer()
 	clearFrameTimer()
+	window.clearTimeout(settleTimer)
+	settling.value = false
 	innerAction.value = 'idle'
 	morphing.value = true
 	morphPlaying.value = true
+	morphProgress.value = 0
 	morphRow.value = next === 'fly' ? MORPH_SHEET.rowBotToFly : MORPH_SHEET.rowFlyToBot
 	frame.value = 0
 
-	const ms = Math.max(70, Math.round(1000 / MORPH_SHEET.fps))
 	const total = MORPH_SHEET.frames
-	frameTimer = window.setInterval(() => {
-		const nextFrame = frame.value + 1
-		if (nextFrame >= total) {
+	const duration = Math.max(480, MORPH_SHEET.durationMs || Math.round((1000 / MORPH_SHEET.fps) * total))
+	const started = performance.now()
+
+	const tick = (now: number) => {
+		if (!morphPlaying.value) return
+		const raw = Math.min(1, (now - started) / duration)
+		// 帧序列匀速播放，避免中间帧被缓动挤在一起；光效单独缓动
+		morphProgress.value = easeInOutCubic(raw)
+		const idx = Math.min(total - 1, Math.floor(raw * total))
+		if (idx !== frame.value) frame.value = idx
+		if (raw >= 1) {
 			finishMorph(next)
 			return
 		}
-		frame.value = nextFrame
-	}, ms)
+		morphRaf = window.requestAnimationFrame(tick)
+	}
+	morphRaf = window.requestAnimationFrame(tick)
 
-	// safety: never hang if interval stalls
 	window.clearTimeout(morphTimer)
 	morphTimer = window.setTimeout(() => {
 		if (morphPlaying.value) finishMorph(next)
-	}, ms * total + 240)
+	}, duration + 320)
 }
 
 const transformTo = (next: IceBotForm) => {
@@ -313,7 +465,7 @@ const playRandom = () => {
 		transformTo('bot')
 		window.setTimeout(
 			() => play(RANDOM_PET_STATES[Math.floor(Math.random() * RANDOM_PET_STATES.length)]),
-			MORPH_SHEET.frames * Math.round(1000 / MORPH_SHEET.fps) + 120
+			(MORPH_SHEET.durationMs || MORPH_SHEET.frames * Math.round(1000 / MORPH_SHEET.fps)) + 160
 		)
 		return
 	}
@@ -329,11 +481,12 @@ const clearClickDelay = () => {
 
 const onFigureClick = () => {
 	if (props.clickToMorph) {
-		// 延迟变身，避免双击打开对话时误触发
+		// 延迟通知父级，避免双击打开对话时误触发；完整步骤由父级 morphNow 编排
+		if (morphing.value) return
 		clearClickDelay()
 		clickDelayTimer = window.setTimeout(() => {
 			clickDelayTimer = 0
-			transform()
+			if (!morphing.value) emit('morph-request')
 		}, 220)
 		return
 	}
@@ -400,6 +553,11 @@ onMounted(() => {
 		morphSheetUrl.value = MORPH_SHEET.fallbackSrc
 	}
 	morphProbe.src = MORPH_SHEET.src
+	const danceProbe = new Image()
+	danceProbe.onerror = () => {
+		danceSheetUrl.value = DANCE_SHEET.fallbackSrc
+	}
+	danceProbe.src = DANCE_SHEET.src
 	if (props.pet) play(props.action || 'idle')
 })
 
@@ -407,8 +565,10 @@ onBeforeUnmount(() => {
 	clearAuto()
 	clearHoldTimer()
 	clearFrameTimer()
+	clearGreetTimer()
 	clearClickDelay()
 	window.clearTimeout(morphTimer)
+	window.clearTimeout(settleTimer)
 })
 
 defineExpose({
@@ -416,9 +576,11 @@ defineExpose({
 	transformTo,
 	play,
 	playRandom,
+	greet,
 	form,
 	action,
-	morphing
+	morphing,
+	greeting
 })
 </script>
 
@@ -480,11 +642,12 @@ defineExpose({
 	outline: none;
 	contain: layout paint;
 	filter: drop-shadow(0 10px 16px rgba(5, 70, 102, 0.14));
+	transform-origin: center 58%;
+	will-change: transform, filter;
+	transition: filter 0.2s ease;
 
 	&.morph {
-		filter:
-			drop-shadow(0 10px 16px rgba(5, 70, 102, 0.14))
-			drop-shadow(0 0 18px rgba(56, 189, 248, 0.45));
+		animation: morph-sheet-shimmy 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
 	}
 }
 
@@ -495,6 +658,7 @@ defineExpose({
 	pointer-events: none;
 	will-change: transform;
 	image-rendering: auto;
+	backface-visibility: hidden;
 }
 
 .ice-bot.sprite .bot-figure,
@@ -522,14 +686,120 @@ defineExpose({
 	animation: head-hover 2.8s ease-in-out infinite;
 }
 
+.bot-figure.settling {
+	animation: morph-settle 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bot-figure.greeting:not(.dancing) {
+	animation: greet-sway 1.05s ease-in-out infinite;
+}
+
+.ice-bot.greeting .bot-sprite-clip,
+.ice-bot.dancing .bot-sprite-clip {
+	filter:
+		drop-shadow(0 10px 16px rgba(5, 70, 102, 0.14))
+		drop-shadow(0 0 14px rgba(56, 189, 248, 0.35));
+}
+
+.greet-halo {
+	position: absolute;
+	inset: 10% 12% 28%;
+	z-index: 0;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(125, 211, 252, 0.42), transparent 70%);
+	pointer-events: none;
+	animation: greet-halo-pulse 1.2s ease-in-out infinite;
+}
+
+.greet-dot {
+	position: absolute;
+	z-index: 3;
+	left: 50%;
+	top: 36%;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: radial-gradient(circle, #fff 0%, #7dd3fc 55%, transparent 75%);
+	box-shadow: 0 0 8px rgba(125, 211, 252, 0.85);
+	pointer-events: none;
+	opacity: 0;
+}
+
+.greet-dot.d1 { animation: greet-dot-pop 1.4s 0.05s ease-out infinite; --gx: -34px; --gy: -28px; }
+.greet-dot.d2 { animation: greet-dot-pop 1.35s 0.22s ease-out infinite; --gx: 36px; --gy: -22px; width: 5px; height: 5px; }
+.greet-dot.d3 { animation: greet-dot-pop 1.45s 0.38s ease-out infinite; --gx: -28px; --gy: 10px; width: 6px; height: 6px; }
+.greet-dot.d4 { animation: greet-dot-pop 1.3s 0.15s ease-out infinite; --gx: 30px; --gy: 16px; width: 5px; height: 5px; }
+
+.morph-aura {
+	position: absolute;
+	inset: 6%;
+	z-index: 0;
+	border-radius: 50%;
+	background:
+		radial-gradient(circle at 50% 42%, rgba(125, 211, 252, 0.55), transparent 62%),
+		radial-gradient(circle at 50% 60%, rgba(14, 165, 233, 0.28), transparent 70%);
+	pointer-events: none;
+	animation: morph-aura-pulse 0.72s ease-out both;
+	filter: blur(1px);
+}
+
+.morph-ring {
+	position: absolute;
+	left: 50%;
+	top: 48%;
+	z-index: 2;
+	width: 42%;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	border: 2px solid rgba(125, 211, 252, 0.85);
+	box-shadow:
+		0 0 12px rgba(56, 189, 248, 0.55),
+		inset 0 0 10px rgba(186, 230, 253, 0.35);
+	pointer-events: none;
+	transform: translate(-50%, -50%) scale(0.35);
+}
+
+.morph-ring-a {
+	animation: morph-ring-expand 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.morph-ring-b {
+	border-color: rgba(186, 230, 253, 0.7);
+	animation: morph-ring-expand 0.72s 0.08s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .morph-burst {
 	position: absolute;
-	inset: 12%;
+	inset: 10%;
+	z-index: 1;
 	border-radius: 50%;
-	background: radial-gradient(circle, rgba(94, 200, 240, 0.5), transparent 72%);
+	background:
+		radial-gradient(circle, rgba(224, 242, 254, 0.75) 0%, rgba(94, 200, 240, 0.35) 32%, transparent 70%);
 	pointer-events: none;
-	animation: burst 0.9s ease-out both;
+	animation: burst 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+	mix-blend-mode: screen;
 }
+
+.morph-spark {
+	position: absolute;
+	z-index: 3;
+	left: 50%;
+	top: 48%;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: radial-gradient(circle, #fff 0%, #7dd3fc 45%, transparent 72%);
+	box-shadow: 0 0 8px rgba(125, 211, 252, 0.9);
+	pointer-events: none;
+	opacity: 0;
+}
+
+.morph-spark.s1 { animation: morph-spark-fly 0.7s 0.02s ease-out both; --dx: -38px; --dy: -46px; }
+.morph-spark.s2 { animation: morph-spark-fly 0.68s 0.06s ease-out both; --dx: 42px; --dy: -40px; width: 5px; height: 5px; }
+.morph-spark.s3 { animation: morph-spark-fly 0.74s 0.04s ease-out both; --dx: -48px; --dy: 12px; width: 4px; height: 4px; }
+.morph-spark.s4 { animation: morph-spark-fly 0.7s 0.1s ease-out both; --dx: 46px; --dy: 18px; }
+.morph-spark.s5 { animation: morph-spark-fly 0.66s 0.08s ease-out both; --dx: -12px; --dy: -58px; width: 5px; height: 5px; }
+.morph-spark.s6 { animation: morph-spark-fly 0.72s 0.12s ease-out both; --dx: 16px; --dy: 44px; width: 4px; height: 4px; }
 
 .ice-bot.sm .bot-figure {
 	width: 56px;
@@ -631,15 +901,120 @@ defineExpose({
 @keyframes burst {
 	0% {
 		opacity: 0;
-		transform: scale(0.4);
+		transform: scale(0.35);
 	}
-	35% {
-		opacity: 1;
-		transform: scale(1.15);
+	28% {
+		opacity: 0.95;
+		transform: scale(1.08);
 	}
 	100% {
 		opacity: 0;
-		transform: scale(1.65);
+		transform: scale(1.78);
+	}
+}
+
+@keyframes morph-aura-pulse {
+	0% {
+		opacity: 0;
+		transform: scale(0.7);
+	}
+	40% {
+		opacity: 1;
+		transform: scale(1.05);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1.35);
+	}
+}
+
+@keyframes morph-ring-expand {
+	0% {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.28);
+		filter: blur(0);
+	}
+	18% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(2.15);
+		filter: blur(1.5px);
+	}
+}
+
+@keyframes morph-spark-fly {
+	0% {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.4);
+	}
+	18% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2);
+	}
+}
+
+@keyframes morph-sheet-shimmy {
+	0% {
+		opacity: 0.72;
+	}
+	18% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes morph-settle {
+	0% {
+		transform: scale(1.06);
+		filter: brightness(1.12);
+	}
+	100% {
+		transform: scale(1);
+		filter: brightness(1);
+	}
+}
+
+@keyframes greet-sway {
+	0%,
+	100% {
+		transform: translateY(0) rotate(-1.2deg);
+	}
+	50% {
+		transform: translateY(-4px) rotate(1.4deg);
+	}
+}
+
+
+@keyframes greet-halo-pulse {
+	0%,
+	100% {
+		opacity: 0.45;
+		transform: scale(0.92);
+	}
+	50% {
+		opacity: 0.95;
+		transform: scale(1.08);
+	}
+}
+
+@keyframes greet-dot-pop {
+	0% {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.3);
+	}
+	22% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translate(calc(-50% + var(--gx)), calc(-50% + var(--gy))) scale(0.2);
 	}
 }
 

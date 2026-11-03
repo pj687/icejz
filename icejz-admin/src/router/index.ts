@@ -34,21 +34,22 @@ const constantRoutes: RouteRecordRaw[] = [
 	}
 ]
 
+const profileRoute: RouteRecordRaw = {
+	path: '/profile',
+	name: 'ProfileIndex',
+	component: () => import('../views/profile/index.vue'),
+	meta: {
+		title: '个人中心',
+		cache: true
+	}
+}
+
 const asyncRoutes: RouteRecordRaw = {
 	path: '/',
+	name: 'LayoutRoot',
 	component: () => import('../layout/index.vue'),
 	redirect: '/dashboard/index',
-	children: [
-		{
-			path: '/profile',
-			name: 'ProfileIndex',
-			component: () => import('../views/profile/index.vue'),
-			meta: {
-				title: '个人中心',
-				cache: true
-			}
-		}
-	]
+	children: [profileRoute]
 }
 
 // 配置控制台菜单
@@ -74,6 +75,13 @@ export const dashboardMenu = [
 				url: 'dashboard/workbench',
 				openStyle: 0,
 				icon: 'icon-desktop'
+			},
+			{
+				id: 103,
+				name: '我的消息',
+				url: 'sys/message/inbox',
+				openStyle: 0,
+				icon: 'icon-message-fill'
 			}
 		]
 	}
@@ -150,6 +158,7 @@ export const constantMenu = [
 
 export const errorRoute: RouteRecordRaw = {
 	path: '/:pathMatch(.*)',
+	name: 'ErrorPage',
 	redirect: '/404'
 }
 
@@ -157,6 +166,33 @@ export const router = createRouter({
 	history: createWebHistory(),
 	routes: constantRoutes
 })
+
+const constantRouteNames = new Set(
+	constantRoutes
+		.flatMap(route => {
+			const names: string[] = []
+			if (route.name) names.push(String(route.name))
+			route.children?.forEach(child => {
+				if (child.name) names.push(String(child.name))
+			})
+			return names
+		})
+)
+
+/** 退出登录时重置动态路由，防止下一账号残留上一账号菜单 */
+export const resetRouter = () => {
+	const routerStore = useRouterStore()
+
+	router.getRoutes().forEach(route => {
+		const name = route.name && String(route.name)
+		if (name && !constantRouteNames.has(name) && router.hasRoute(name)) {
+			router.removeRoute(name)
+		}
+	})
+
+	asyncRoutes.children = [{ ...profileRoute, children: [] }]
+	routerStore.resetMenuRoutes()
+}
 
 // 白名单列表
 const whiteList = ['/login']
@@ -181,20 +217,23 @@ router.beforeEach(async (to, from, next) => {
 					await userStore.getAuthorityListAction()
 					await appStore.getDictListAction()
 				} catch (error) {
-					// 请求异常，则跳转到登录页
+					// 请求异常，则跳转到登录页并清空菜单缓存
 					userStore?.setToken('')
+					userStore?.setRefreshToken('')
+					await userStore?.clearSessionState?.()
 					next('/login')
 					return Promise.reject(error)
 				}
 
-				// 动态菜单+常量菜单
+				// 动态菜单+常量菜单（先重置，避免换账号叠加旧路由）
+				resetRouter()
 				const menuRoutes = await routerStore.getMenuRoutes()
 
 				// 获取扁平化路由，将多级路由转换成一级路由
 				const keepAliveRoutes = getKeepAliveRoutes(menuRoutes, [])
 
-				// 添加菜单路由
-				asyncRoutes.children?.push(...keepAliveRoutes)
+				// 添加菜单路由（始终基于初始 children，避免 push 残留）
+				asyncRoutes.children = [{ ...profileRoute, children: [] }, ...keepAliveRoutes]
 				router.addRoute(asyncRoutes)
 
 				// 错误路由

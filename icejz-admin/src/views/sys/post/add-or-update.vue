@@ -1,18 +1,31 @@
 <template>
-	<el-dialog v-model="visible" :title="!dataForm.id ? '新增' : '修改'" :close-on-click-modal="false" draggable>
-		<el-form ref="dataFormRef" :model="dataForm" :rules="dataRules" label-width="80px" @keyup.enter="submitHandle()">
-			<el-form-item label="岗位编码" prop="postCode">
-				<el-input v-model="dataForm.postCode"></el-input>
-			</el-form-item>
-			<el-form-item label="岗位名称" prop="postName">
-				<el-input v-model="dataForm.postName"></el-input>
-			</el-form-item>
-			<el-form-item label="排序" prop="sort">
-				<el-input-number v-model="dataForm.sort" :min="0"></el-input-number>
-			</el-form-item>
-			<el-form-item label="状态" prop="status">
-				<ma-dict-radio v-model="dataForm.status" dict-type="post_status"></ma-dict-radio>
-			</el-form-item>
+	<el-dialog
+		v-model="visible"
+		class="org-auth-dialog"
+		:title="!dataForm.id ? '新增岗位' : '修改岗位'"
+		:close-on-click-modal="false"
+		width="520px"
+		draggable
+	>
+		<el-form ref="dataFormRef" :model="dataForm" :rules="dataRules" label-width="88px" @keyup.enter="submitHandle()">
+			<section class="form-block">
+				<header class="block-head">
+					<strong>岗位信息</strong>
+					<span>编码、名称与启用状态</span>
+				</header>
+				<el-form-item label="岗位编码" prop="postCode">
+					<el-input v-model="dataForm.postCode" placeholder="如 DEV / HR"></el-input>
+				</el-form-item>
+				<el-form-item label="岗位名称" prop="postName">
+					<el-input v-model="dataForm.postName" placeholder="岗位名称"></el-input>
+				</el-form-item>
+				<el-form-item label="排序" prop="sort">
+					<el-input-number v-model="dataForm.sort" :min="0" controls-position="right"></el-input-number>
+				</el-form-item>
+				<el-form-item label="状态" prop="status">
+					<ma-dict-radio v-model="dataForm.status" dict-type="post_status"></ma-dict-radio>
+				</el-form-item>
+			</section>
 		</el-form>
 		<template #footer>
 			<el-button @click="visible = false">取消</el-button>
@@ -43,19 +56,17 @@ const init = (id?: number) => {
 	visible.value = true
 	dataForm.id = ''
 
-	// 重置表单数据
 	if (dataFormRef.value) {
 		dataFormRef.value.resetFields()
 	}
 
-	// id 存在则为修改
 	if (id) {
 		getPost(id)
 	}
 }
 
 const getPost = (id: number) => {
-	usePostApi(id).then(res => {
+	usePostApi(id).then((res) => {
 		Object.assign(dataForm, res.data)
 	})
 }
@@ -65,7 +76,6 @@ const dataRules = ref({
 	postName: [{ required: true, message: '必填项不能为空', trigger: 'blur' }]
 })
 
-// 表单提交
 const submitHandle = () => {
 	dataFormRef.value.validate((valid: boolean) => {
 		if (!valid) {
@@ -89,3 +99,29 @@ defineExpose({
 	init
 })
 </script>
+
+<style scoped lang="scss">
+.form-block {
+	padding: 14px;
+	border-radius: 14px;
+	border: 1px solid #e8eef5;
+	background: #fbfcfe;
+}
+
+.block-head {
+	margin-bottom: 12px;
+
+	strong {
+		display: block;
+		font-size: 14px;
+		color: #122033;
+	}
+
+	span {
+		display: block;
+		margin-top: 2px;
+		font-size: 12px;
+		color: #7a8796;
+	}
+}
+</style>

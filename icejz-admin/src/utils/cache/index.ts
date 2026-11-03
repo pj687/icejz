@@ -54,14 +54,27 @@ class Cache {
 	}
 
 	getTheme = (): ITheme => {
-		return (SessionStorage.getItem(CacheKey.ThemeKey) as ITheme) || themeConfig
+		// 优先读取本地持久化配置；兼容旧版 session 缓存
+		const localTheme = Storage.getItem(CacheKey.ThemeKey) as ITheme | null
+		if (localTheme) {
+			return { ...themeConfig, ...localTheme }
+		}
+		const sessionTheme = SessionStorage.getItem(CacheKey.ThemeKey) as ITheme | null
+		if (sessionTheme) {
+			Storage.setItem(CacheKey.ThemeKey, sessionTheme)
+			SessionStorage.removeItem(CacheKey.ThemeKey)
+			return { ...themeConfig, ...sessionTheme }
+		}
+		return { ...themeConfig }
 	}
 
 	setTheme = (value: ITheme) => {
-		SessionStorage.setItem(CacheKey.ThemeKey, value)
+		Storage.setItem(CacheKey.ThemeKey, value)
+		SessionStorage.removeItem(CacheKey.ThemeKey)
 	}
 
 	removeTheme = () => {
+		Storage.removeItem(CacheKey.ThemeKey)
 		SessionStorage.removeItem(CacheKey.ThemeKey)
 	}
 
@@ -71,6 +84,10 @@ class Cache {
 
 	setRedirect = (value: string) => {
 		Storage.setItem(CacheKey.Redirect, value)
+	}
+
+	clearRedirect = () => {
+		Storage.removeItem(CacheKey.Redirect)
 	}
 }
 

@@ -1,7 +1,7 @@
 <template>
-	<div style="border: 1px solid #ccc; z-index: 100">
+	<div class="ma-editor-shell">
 		<!-- 工具栏 -->
-		<Toolbar :editor="editorRef" :mode="mode" style="border-bottom: 1px solid #ccc" />
+		<Toolbar class="ma-editor-toolbar" :editor="editorRef" :mode="mode" />
 		<!-- 编辑器 -->
 		<Editor
 			:model-value="modelValue"
@@ -88,3 +88,17 @@ const handleChange = (editor: IDomEditor) => {
 	emit('update:modelValue', editor.getHtml())
 }
 </script>
+
+<style scoped lang="scss">
+.ma-editor-shell {
+	z-index: 100;
+	overflow: hidden;
+	border: 1px solid var(--icejz-card-border, #dbe5ef);
+	border-radius: 14px;
+	background: var(--icejz-card-bg, #fff);
+}
+
+.ma-editor-toolbar {
+	border-bottom: 1px solid var(--icejz-card-border, #dbe5ef) !important;
+}
+</style>

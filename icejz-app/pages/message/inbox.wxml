@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-copy">
+      <view class="hero-kicker">站内消息</view>
+      <view class="hero-title">我的收件箱</view>
+      <view class="hero-sub">与管理端消息同步，点击即可查看并标记已读</view>
+    </view>
+    <view class="hero-stat">
+      <view class="hero-stat-num">{{unreadCount}}</view>
+      <view class="hero-stat-label">未读</view>
+    </view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-head">
+      <view class="panel-title">消息列表</view>
+      <view class="panel-action" bindtap="onReadAll">全部已读</view>
+    </view>
+
+    <view wx:if="{{loading}}" class="empty">
+      <view class="empty-mark">···</view>
+      <view class="empty-title">正在同步消息</view>
+    </view>
+    <view wx:elif="{{!list.length}}" class="empty">
+      <view class="empty-mark">信</view>
+      <view class="empty-title">暂无消息</view>
+      <view class="empty-desc">可在管理端「站内消息」向当前账号发送</view>
+    </view>
+
+    <view
+      wx:for="{{list}}"
+      wx:key="id"
+      class="msg-item {{item.readStatus === 0 ? 'is-unread' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onOpen"
+    >
+      <view class="msg-dot" wx:if="{{item.readStatus === 0}}"></view>
+      <view class="msg-body">
+        <view class="msg-top">
+          <view class="msg-title">{{item.title}}</view>
+          <view class="msg-time">{{item.sendTime || item.createTime}}</view>
+        </view>
+        <view class="msg-meta">{{item.senderName || '系统通知'}}</view>
+        <view class="msg-content">{{item.content}}</view>
+      </view>
+    </view>
+  </view>
+</view>

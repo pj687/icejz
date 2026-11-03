@@ -15,9 +15,9 @@ import java.util.Objects;
 @AllArgsConstructor
 public enum UserStatusEnum {
     /**
-     * 停用
+     * 封禁
      */
-    DISABLE(0, "停用"),
+    DISABLE(0, "封禁"),
     /**
      * 正常
      */

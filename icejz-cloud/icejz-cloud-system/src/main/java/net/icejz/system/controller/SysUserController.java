@@ -3,14 +3,17 @@ package net.icejz.system.controller;
 import cn.hutool.core.util.StrUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import net.icejz.framework.common.exception.ServerException;
 import net.icejz.framework.common.utils.PageResult;
 import net.icejz.framework.common.utils.Result;
 import net.icejz.framework.operatelog.annotations.OperateLog;
 import net.icejz.framework.operatelog.enums.OperateTypeEnum;
 import net.icejz.framework.security.user.SecurityUser;
 import net.icejz.framework.security.user.UserDetail;
+import net.icejz.framework.security.utils.TokenUtils;
 import net.icejz.system.convert.SysUserConvert;
 import net.icejz.system.entity.SysUserEntity;
 import net.icejz.system.query.SysUserQuery;
@@ -18,9 +21,12 @@ import net.icejz.system.service.SysPostService;
 import net.icejz.system.service.SysUserPostService;
 import net.icejz.system.service.SysUserRoleService;
 import net.icejz.system.service.SysUserService;
+import net.icejz.system.service.SysUserTokenService;
 import net.icejz.system.vo.SysUserAvatarVO;
 import net.icejz.system.vo.SysUserBaseVO;
+import net.icejz.system.vo.SysUserDeviceVO;
 import net.icejz.system.vo.SysUserPasswordVO;
+import net.icejz.system.vo.SysUserStatusVO;
 import net.icejz.system.vo.SysUserVO;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,6 +52,7 @@ public class SysUserController {
     private final SysUserRoleService sysUserRoleService;
     private final SysUserPostService sysUserPostService;
     private final SysPostService sysPostService;
+    private final SysUserTokenService sysUserTokenService;
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping("page")
@@ -90,6 +97,35 @@ public class SysUserController {
         user.setPostNameList(postNameList);
 
         return Result.ok(user);
+    }
+
+    @GetMapping("device")
+    @Operation(summary = "当前用户登录设备列表")
+    public Result<List<SysUserDeviceVO>> deviceList(HttpServletRequest request) {
+        UserDetail user = SecurityUser.getUser();
+        String accessToken = TokenUtils.getAccessToken(request);
+        return Result.ok(sysUserTokenService.listOnlineDevices(user.getId(), accessToken, request));
+    }
+
+    @DeleteMapping("device/{accessToken}")
+    @Operation(summary = "下线指定登录设备")
+    @OperateLog(type = OperateTypeEnum.UPDATE)
+    public Result<String> kickDevice(@PathVariable("accessToken") String accessToken, HttpServletRequest request) {
+        if (StrUtil.isBlank(accessToken)) {
+            return Result.error("token不能为空");
+        }
+        String current = TokenUtils.getAccessToken(request);
+        if (accessToken.equals(current)) {
+            throw new ServerException("不能下线当前设备，请使用退出登录");
+        }
+        UserDetail user = SecurityUser.getUser();
+        boolean owned = sysUserTokenService.listOnlineDevices(user.getId(), current).stream()
+                .anyMatch(d -> accessToken.equals(d.getAccessToken()));
+        if (!owned) {
+            throw new ServerException("设备不存在或不属于当前用户");
+        }
+        sysUserTokenService.expireByAccessToken(accessToken);
+        return Result.ok();
     }
 
     @PutMapping("info")
@@ -159,6 +195,15 @@ public class SysUserController {
 
         sysUserService.update(vo);
 
+        return Result.ok();
+    }
+
+    @PutMapping("status")
+    @Operation(summary = "封禁/解封用户")
+    @OperateLog(type = OperateTypeEnum.UPDATE)
+    @PreAuthorize("hasAuthority('sys:user:update')")
+    public Result<String> updateStatus(@RequestBody @Valid SysUserStatusVO vo) {
+        sysUserService.updateStatus(vo.getId(), vo.getStatus(), vo.getReason());
         return Result.ok();
     }
 

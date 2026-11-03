@@ -64,9 +64,15 @@ public class SysUserVO implements Serializable, TransPojo {
     @Trans(type = TransType.SIMPLE, target = SysOrgEntity.class, fields = "name", ref = "orgName")
     private Long orgId;
 
-    @Schema(description = "状态 0：停用    1：正常", required = true)
+    @Schema(description = "状态 0：封禁    1：正常", required = true)
     @Range(min = 0, max = 1, message = "用户状态不正确")
     private Integer status;
+
+    @Schema(description = "多设备登录：null跟随系统 0单设备 1多设备")
+    private Integer multiDeviceLogin;
+
+    @Schema(description = "个人多设备上限：null跟随系统")
+    private Integer multiDeviceMax;
 
     @Schema(description = "角色ID列表")
     private List<Long> roleIdList;

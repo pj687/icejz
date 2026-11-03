@@ -27,28 +27,12 @@
 		</el-form-item>
 
 		<el-form-item v-if="captchaVisible" prop="captcha" class="login-captcha">
-			<div class="captcha-row">
-				<el-input
-					v-model="loginForm.captcha"
-					class="captcha-input"
-					:placeholder="$t('app.captcha')"
-					size="large"
-					maxlength="8"
-				>
-					<template #prefix>
-						<div class="input-icon">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-							</svg>
-						</div>
-					</template>
-				</el-input>
-				<button type="button" class="captcha-box" title="点击刷新验证码" @click="onCaptcha">
-					<img v-if="captchaBase64" :src="captchaBase64" alt="验证码" />
-					<span v-else class="captcha-loading">加载中</span>
-					<span class="captcha-refresh">刷新</span>
-				</button>
-			</div>
+			<LoginCaptcha
+				ref="captchaRef"
+				v-model="loginForm.captcha"
+				v-model:captcha-key="loginForm.key"
+				channel="pc"
+			/>
 		</el-form-item>
 
 		<el-form-item class="login-button">
@@ -62,20 +46,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, inject } from 'vue'
-import { useCaptchaApi, useCaptchaEnabledApi } from '@/api/auth'
+import { ref, reactive, onMounted, inject, watch } from 'vue'
+import { useCaptchaEnabledApi } from '@/api/auth'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import constant from '@/utils/constant'
 import { sm2Encrypt } from '@/utils/smCrypto'
 import cache from '@/utils/cache'
 import { useUserStore } from '@/store/modules/user'
+import LoginCaptcha from './LoginCaptcha.vue'
 
 const userStore = useUserStore()
 const router = useRouter()
 const { t } = useI18n()
 const loginFormRef = ref()
-const captchaBase64 = ref()
+const captchaRef = ref<{ refresh: () => Promise<void>; ensureVerified?: () => Promise<boolean> }>()
 const loading = ref(false)
 const ensureAgreement = inject<() => boolean>('ensureAgreement', () => true)
 const setLoginLoading = inject<(val: boolean) => void>('setLoginLoading', () => undefined)
@@ -90,10 +75,20 @@ const loginForm = reactive({
 const loginRules = ref({
 	username: [{ required: true, message: t('required'), trigger: 'blur' }],
 	password: [{ required: true, message: t('required'), trigger: 'blur' }],
-	captcha: [{ required: true, message: t('required'), trigger: 'blur' }]
+	captcha: [{ required: true, message: '请先确认验证码', trigger: 'change' }]
 })
 
 const captchaVisible = ref(false)
+
+/** 交互验证码通过后清掉表单项错误，避免「验证通过」仍挂着必填提示 */
+watch(
+	() => loginForm.captcha,
+	val => {
+		if (val) {
+			loginFormRef.value?.clearValidate?.('captcha')
+		}
+	}
+)
 
 onMounted(() => {
 	onCaptchaEnabled()
@@ -102,29 +97,23 @@ onMounted(() => {
 const onCaptchaEnabled = async () => {
 	const { data } = await useCaptchaEnabledApi()
 	captchaVisible.value = data
-
-	if (data) {
-		await onCaptcha()
-	}
-}
-
-const onCaptcha = async () => {
-	const { data } = await useCaptchaApi()
-	if (data.enabled) {
-		captchaVisible.value = true
-	}
-	loginForm.key = data.key
-	captchaBase64.value = data.image
 }
 
 const onLogin = () => {
-	loginFormRef.value.validate((valid: boolean) => {
+	loginFormRef.value.validate(async (valid: boolean) => {
 		if (!valid) {
 			return false
 		}
 
 		if (!ensureAgreement()) {
 			return false
+		}
+
+		if (captchaVisible.value) {
+			const ok = await captchaRef.value?.ensureVerified?.()
+			if (ok === false) {
+				return false
+			}
 		}
 
 		loading.value = true
@@ -140,11 +129,13 @@ const onLogin = () => {
 		userStore
 			.accountLoginAction(loginData)
 			.then(() => {
-				router.push({ path: cache.getRedirect() || constant.loginPage })
+				const redirect = cache.getRedirect()
+				cache.clearRedirect()
+				router.push({ path: redirect || constant.loginPage })
 			})
 			.catch(() => {
 				if (captchaVisible.value) {
-					onCaptcha()
+					captchaRef.value?.refresh()
 				}
 			})
 			.finally(() => {
@@ -232,79 +223,45 @@ const onLogin = () => {
 }
 
 .login-captcha {
+	margin-bottom: 12px !important;
+
 	:deep(.el-form-item__content) {
 		display: block;
 		width: 100%;
-	}
-}
-
-.captcha-row {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) 200px;
-	gap: 12px;
-	width: 100%;
-	align-items: stretch;
-}
-
-.captcha-input {
-	width: 100%;
-	min-width: 0;
-}
-
-.captcha-box {
-	position: relative;
-	width: 200px;
-	min-height: 50px;
-	height: 50px;
-	padding: 0;
-	border: 1px solid #d4e6f2;
-	border-radius: 13px;
-	overflow: hidden;
-	cursor: pointer;
-	background:
-		linear-gradient(135deg, rgba(0, 168, 232, 0.06), transparent),
-		#eef5fa;
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-	flex-shrink: 0;
-	transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-	img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
+		/* 错误文案走文档流，避免绝对定位挤进验证码与登录按钮夹缝 */
+		position: relative;
 	}
 
-	.captcha-loading {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 100%;
+	:deep(.el-form-item__error) {
+		position: static;
+		padding: 8px 4px 0;
+		line-height: 1.35;
 		font-size: 12px;
-		color: #8b93a7;
 	}
 
-	.captcha-refresh {
-		position: absolute;
-		right: 8px;
-		bottom: 6px;
-		padding: 3px 9px;
-		border-radius: 999px;
-		font-size: 11px;
-		color: #fff;
-		background: rgba(0, 144, 200, 0.78);
-		opacity: 0;
-		transform: translateY(4px);
-		transition: all 0.2s ease;
+	&.is-error {
+		margin-bottom: 6px !important;
 	}
 
-	&:hover {
-		border-color: rgba(0, 168, 232, 0.45);
-		box-shadow: 0 8px 18px rgba(0, 168, 232, 0.12);
+	&:has(.slider-wrap) {
+		margin-bottom: 8px !important;
+	}
 
-		.captcha-refresh {
-			opacity: 1;
-			transform: translateY(0);
+	&:has(.click-wrap),
+	&:has(.word-wrap) {
+		margin-bottom: 10px !important;
+	}
+
+	/* 滑动/点选已有面板内状态提示，表单错误改为底部轻提示，不再贴边重叠 */
+	&:has(.slider-wrap),
+	&:has(.click-wrap),
+	&:has(.word-wrap),
+	&:has(.pow-wrap),
+	&:has(.turnstile-wrap) {
+		:deep(.el-form-item__error) {
+			padding: 6px 2px 2px;
+			text-align: center;
+			background: transparent;
 		}
 	}
 }
@@ -374,13 +331,4 @@ const onLogin = () => {
 	}
 }
 
-@media (max-width: 480px) {
-	.captcha-row {
-		grid-template-columns: minmax(0, 1fr) 150px;
-	}
-
-	.captcha-box {
-		width: 150px;
-	}
-}
 </style>

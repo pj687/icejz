@@ -1,18 +1,54 @@
-<view>
-  <t-swiper current="{{current}}" autoplay="{{autoplay}}" duration="{{duration}}" interval="{{interval}}" navigation="{{ { type: 'dots' } }}" list="{{swiperList}}">
-  </t-swiper>
-  <t-grid column="{{4}}">
-    <t-grid-item text="用户管理" icon="user" bindclick="onClick" t-class="red" />
-    <t-grid-item text="机构管理" icon="member" bindclick="onClick" t-class="red" />
-    <t-grid-item text="角色管理" icon="cloud" bindclick="onClick" t-class="red" />
-    <t-grid-item text="权限管理" image="{{img1}}" bindclick="onClick" />
-    <t-grid-item text="我的通知" image="{{img2}}" bindclick="onClick" badge-props="{{ { count: 6 } }}" />
-    <t-grid-item text="我发起的" image="{{img3}}" bindclick="onClick" />
-    <t-grid-item text="认领流程" icon="application" bindclick="onClick" t-class="red" />
-    <t-grid-item text="我的审批" icon="discount" bindclick="onClick" badge-props="{{ { count: 2 } }}" t-class="red" />
-    <t-grid-item text="系统设置" icon="setting" bindclick="onClick" t-class="red" />
-    <t-grid-item text="修改密码" icon="adjustment" bindclick="onClick" t-class="red" />
-    <t-grid-item text="个人资料" icon="edit-1" bindclick="onClick" t-class="red" />
-    <t-grid-item text="关于我们" icon="chat" bindclick="onClick" t-class="red" />
-  </t-grid>
+<view class="workbench-page">
+  <view class="hero-card">
+    <view class="hero-kicker">{{brand.workspaceKicker}}</view>
+    <view class="hero-title">{{brand.workspaceTitle}}</view>
+    <view class="hero-sub">{{brand.workspaceSub}}</view>
+    <view class="hero-chips">
+      <view class="chip">用户</view>
+      <view class="chip">机构</view>
+      <view class="chip">角色</view>
+      <view class="chip accent">消息 {{unreadCount}}</view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-head">
+      <view class="section-title">系统管理</view>
+      <view class="section-note">只读查阅</view>
+    </view>
+    <view class="grid">
+      <view
+        class="grid-item"
+        wx:for="{{sysMenus}}"
+        wx:key="name"
+        data-path="{{item.path}}"
+        bindtap="onNavigate"
+      >
+        <view class="grid-icon" style="background: {{item.color}};">{{item.icon}}</view>
+        <view class="grid-name">{{item.name}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-head">
+      <view class="section-title">个人服务</view>
+      <view class="section-note">账号相关</view>
+    </view>
+    <view class="grid">
+      <view
+        class="grid-item"
+        wx:for="{{personalMenus}}"
+        wx:key="name"
+        data-path="{{item.path}}"
+        bindtap="onNavigate"
+      >
+        <view class="grid-icon" style="background: {{item.color}};">
+          {{item.icon}}
+          <view wx:if="{{item.badge}}" class="badge">{{item.badge}}</view>
+        </view>
+        <view class="grid-name">{{item.name}}</view>
+      </view>
+    </view>
+  </view>
 </view>

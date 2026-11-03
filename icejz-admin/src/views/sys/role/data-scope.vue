@@ -1,15 +1,40 @@
 <template>
-	<el-dialog v-model="visible" title="数据权限" :close-on-click-modal="false" :width="600" draggable>
-		<el-form ref="dataFormRef" :model="dataForm" label-width="120px" @keyup.enter="submitHandle()">
-			<el-form-item prop="name" label="名称">
-				<el-input v-model="dataForm.name" disabled></el-input>
-			</el-form-item>
-			<el-form-item prop="dataScope" label="数据范围">
-				<ma-dict-select v-model="dataForm.dataScope" dict-type="role_data_scope" placeholder="数据范围" style="width: 100%"></ma-dict-select>
-			</el-form-item>
-			<el-form-item v-show="dataForm.dataScope == 4" label="数据权限">
-				<el-tree ref="orgListTree" :data="orgList" :props="{ label: 'name', children: 'children' }" node-key="id" accordion show-checkbox> </el-tree>
-			</el-form-item>
+	<el-dialog v-model="visible" class="org-auth-dialog" title="数据权限" :close-on-click-modal="false" :width="620" draggable>
+		<el-form ref="dataFormRef" :model="dataForm" label-width="88px" @keyup.enter="submitHandle()">
+			<section class="scope-block">
+				<header class="block-head">
+					<strong>范围设置</strong>
+					<span>控制角色可访问的业务数据边界</span>
+				</header>
+				<el-form-item prop="name" label="角色">
+					<el-input v-model="dataForm.name" disabled></el-input>
+				</el-form-item>
+				<el-form-item prop="dataScope" label="数据范围">
+					<ma-dict-select v-model="dataForm.dataScope" dict-type="role_data_scope" placeholder="数据范围" style="width: 100%"></ma-dict-select>
+				</el-form-item>
+			</section>
+
+			<section v-show="dataForm.dataScope == 4" class="scope-block org-block">
+				<header class="block-head">
+					<div>
+						<strong>自定义机构</strong>
+						<span>勾选后仅可访问所选机构数据</span>
+					</div>
+					<div class="tree-actions">
+						<el-button link type="primary" @click="checkAllOrgs(true)">全选</el-button>
+						<el-button link type="primary" @click="checkAllOrgs(false)">清空</el-button>
+					</div>
+				</header>
+				<div class="org-tree-wrap">
+					<el-tree
+						ref="orgListTree"
+						:data="orgList"
+						:props="{ label: 'name', children: 'children' }"
+						node-key="id"
+						show-checkbox
+					></el-tree>
+				</div>
+			</section>
 		</el-form>
 		<template #footer>
 			<el-button @click="visible = false">取消</el-button>
@@ -19,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { nextTick, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus/es'
 import { useRoleApi, useRoleDataScopeSubmitApi } from '@/api/sys/role'
 import { useOrgListApi } from '@/api/sys/orgs'
@@ -37,45 +62,55 @@ const dataForm = reactive({
 	remark: ''
 })
 
+const collectIds = (nodes: any[] = [], bag: any[] = []) => {
+	nodes.forEach((node) => {
+		bag.push(node.id)
+		if (node.children?.length) collectIds(node.children, bag)
+	})
+	return bag
+}
+
+const checkAllOrgs = (checked: boolean) => {
+	if (!orgListTree.value) return
+	orgListTree.value.setCheckedKeys(checked ? collectIds(orgList.value) : [])
+}
+
 const init = (id?: number) => {
 	visible.value = true
 	dataForm.id = ''
 
-	// 重置表单数据
 	if (dataFormRef.value) {
 		dataFormRef.value.resetFields()
 	}
-	if (orgListTree.value) {
-		orgListTree.value.setCheckedKeys([])
-	}
+	nextTick(() => {
+		if (orgListTree.value) {
+			orgListTree.value.setCheckedKeys([])
+		}
+	})
 
-	// id 存在则为修改
 	if (id) {
 		getRole(id)
 	}
 
-	// 机构列表
 	getOrgList()
 }
 
-// 获取机构列表
 const getOrgList = async () => {
 	const res = await useOrgListApi()
 	orgList.value = res.data
 }
 
-// 获取信息
 const getRole = (id: number) => {
-	useRoleApi(id).then(res => {
+	useRoleApi(id).then((res) => {
 		Object.assign(dataForm, res.data)
-
-		orgListTree.value.setCheckedKeys(dataForm.orgIdList)
+		nextTick(() => {
+			orgListTree.value?.setCheckedKeys(dataForm.orgIdList || [])
+		})
 	})
 }
 
-// 表单提交
 const submitHandle = () => {
-	dataForm.orgIdList = orgListTree.value.getCheckedKeys()
+	dataForm.orgIdList = orgListTree.value?.getCheckedKeys?.() || []
 
 	useRoleDataScopeSubmitApi(dataForm).then(() => {
 		ElMessage.success({
@@ -92,3 +127,51 @@ defineExpose({
 	init
 })
 </script>
+
+<style scoped lang="scss">
+.scope-block {
+	padding: 14px;
+	border-radius: 14px;
+	border: 1px solid #e8eef5;
+	background: #fbfcfe;
+
+	& + .scope-block {
+		margin-top: 12px;
+	}
+}
+
+.block-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+	margin-bottom: 12px;
+
+	strong {
+		display: block;
+		font-size: 14px;
+		color: #122033;
+	}
+
+	span {
+		display: block;
+		margin-top: 2px;
+		font-size: 12px;
+		color: #7a8796;
+	}
+}
+
+.tree-actions {
+	display: flex;
+	gap: 2px;
+}
+
+.org-tree-wrap {
+	max-height: 320px;
+	overflow: auto;
+	padding: 8px 6px;
+	border-radius: 12px;
+	background: var(--icejz-card-bg, #fff);
+	border: 1px solid var(--icejz-card-border, #eef3f8);
+}
+</style>

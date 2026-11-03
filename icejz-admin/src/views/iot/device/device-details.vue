@@ -1,6 +1,6 @@
 <template>
-	<el-card>
-		<el-tabs v-model="activeName">
+	<div class="iot-device-details">
+		<el-tabs v-model="activeName" class="sys-admin-tabs">
 			<el-tab-pane v-auth="'iot:device:info'" label="设备详情" name="info">
 				<DeviceInfo :device-id="props.deviceId" />
 			</el-tab-pane>
@@ -14,7 +14,7 @@
 				<DeviceDebug :device-id="props.deviceId" :protocol-type="props.protocolType" />
 			</el-tab-pane>
 		</el-tabs>
-	</el-card>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -24,7 +24,6 @@ import DeviceEvent from './device-event.vue'
 import DeviceInfo from './device-info.vue'
 import DeviceDebug from './device-debug.vue'
 
-// 接收来自第一个页面的 deviceId
 const props = defineProps({
 	deviceId: {
 		type: Number,
@@ -36,6 +35,11 @@ const props = defineProps({
 	}
 })
 
-// 默认显示的标签页名称
 const activeName = ref('info')
 </script>
+
+<style scoped lang="scss">
+.iot-device-details {
+	padding: 2px 2px 8px;
+}
+</style>

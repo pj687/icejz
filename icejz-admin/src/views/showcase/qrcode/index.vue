@@ -50,7 +50,7 @@ const presets = ['https://icejz.net', 'ICEJZ 小冰', 'hello@icejz.net']
 .panel {
 	border-radius: 20px;
 	border: 1px solid rgba(0, 168, 232, 0.12);
-	background: rgba(255, 255, 255, 0.9);
+	background: color-mix(in srgb, var(--sc-panel, #fff) 90%, transparent);
 	box-shadow: 0 10px 24px rgba(15, 40, 64, 0.04);
 }
 
@@ -96,7 +96,7 @@ const presets = ['https://icejz.net', 'ICEJZ 小冰', 'hello@icejz.net']
 		border-radius: 999px;
 		border: 1px solid rgba(0, 168, 232, 0.16);
 		background: rgba(0, 168, 232, 0.06);
-		color: #0f4f6e;
+		color: var(--sc-brand, #0f4f6e);
 		font-size: 12px;
 		cursor: pointer;
 
@@ -112,19 +112,21 @@ const presets = ['https://icejz.net', 'ICEJZ 小冰', 'hello@icejz.net']
 	padding: 28px 20px;
 	background:
 		radial-gradient(circle at 50% 30%, rgba(0, 168, 232, 0.08), transparent 55%),
-		rgba(255, 255, 255, 0.9);
+		color-mix(in srgb, var(--sc-soft, #f7fbfe) 90%, transparent);
 
 	p {
 		margin: 16px 0 0;
 		font-size: 12.5px;
-		color: #94a3b8;
+		color: var(--sc-muted, #94a3b8);
 	}
 }
 
 .qr-frame {
 	display: grid;
 	place-items: center;
+	padding: 12px;
 	border-radius: 18px;
+	/* 二维码本身保持浅色底板，保证扫码对比度 */
 	background: #fff;
 	border: 1px solid rgba(15, 23, 36, 0.06);
 	box-shadow: 0 16px 36px rgba(15, 40, 64, 0.08);

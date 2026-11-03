@@ -8,4 +8,5 @@ auth:
     - /swagger-ui.html
     - /swagger-ui/**
     - /doc.html
+    - /icejz-knife4j.css
     - /

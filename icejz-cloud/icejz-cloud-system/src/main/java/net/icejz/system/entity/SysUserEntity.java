@@ -1,5 +1,6 @@
 package net.icejz.system.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -57,6 +58,16 @@ public class SysUserEntity extends BaseEntity {
      * 状态  {@link UserStatusEnum}
      */
     private Integer status;
+    /**
+     * 多设备登录：null 跟随系统；0 单设备；1 多设备
+     */
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    private Integer multiDeviceLogin;
+    /**
+     * 个人多设备上限：null 跟随系统
+     */
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    private Integer multiDeviceMax;
     /**
      * 机构名称
      */

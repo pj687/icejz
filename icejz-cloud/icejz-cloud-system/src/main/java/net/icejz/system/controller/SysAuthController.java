@@ -33,8 +33,8 @@ public class SysAuthController {
 
     @GetMapping("captcha")
     @Operation(summary = "验证码")
-    public Result<SysCaptchaVO> captcha() {
-        SysCaptchaVO captchaVO = sysCaptchaService.generate();
+    public Result<SysCaptchaVO> captcha(@RequestParam(value = "channel", required = false, defaultValue = "pc") String channel) {
+        SysCaptchaVO captchaVO = sysCaptchaService.generate(channel);
 
         return Result.ok(captchaVO);
     }
@@ -57,15 +57,15 @@ public class SysAuthController {
 
     @PostMapping("send/code")
     @Operation(summary = "发送短信验证码")
-    public Result<String> sendCode(String mobile) {
-        boolean flag = sysAuthService.sendCode(mobile);
+    public Result<String> sendCode(@RequestBody SysSendCodeVO send) {
+        boolean flag = sysAuthService.sendCode(send);
         if (!flag) {
             return Result.error("短信发送失败！");
         }
 
         // 模拟模式：回传验证码（真实短信场景不返回）
         if (smsMock) {
-            return Result.ok(smsSendCache.getCode(mobile));
+            return Result.ok(smsSendCache.getCode(send.getMobile()));
         }
 
         return Result.ok();

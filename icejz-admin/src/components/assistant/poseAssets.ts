@@ -9,7 +9,6 @@ export const POSE_SRC: Record<string, string> = {
 	'walk-b': `/mascot/xiaobing-pet/poses/walk-b.png?${V}`,
 	'walk-left-a': `/mascot/xiaobing-pet/poses/walk-left-a.png?${V}`,
 	'walk-left-b': `/mascot/xiaobing-pet/poses/walk-left-b.png?${V}`,
-	wave: `/mascot/xiaobing-pet/poses/wave.png?${V}`,
 	jump: `/mascot/xiaobing-pet/poses/jump.png?${V}`,
 	fail: `/mascot/xiaobing-pet/poses/fail.png?${V}`,
 	wait: `/mascot/xiaobing-pet/poses/wait.png?${V}`,
@@ -32,7 +31,7 @@ export const POSE_FRAMES: Record<IcePetState, string[]> = {
 		'walk-left-b',
 		'walk-left-b'
 	],
-	waving: ['wave', 'wave', 'wave', 'wave'],
+	dance: ['idle', 'idle', 'idle', 'idle', 'idle', 'idle'],
 	jumping: ['idle', 'jump', 'jump', 'jump', 'idle'],
 	failed: ['fail', 'fail', 'fail', 'fail', 'fail', 'fail', 'fail', 'fail'],
 	waiting: ['wait', 'wait', 'wait', 'wait', 'wait', 'wait'],

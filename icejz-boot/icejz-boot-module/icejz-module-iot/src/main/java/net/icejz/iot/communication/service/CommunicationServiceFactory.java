@@ -1,7 +1,8 @@
 package net.icejz.iot.communication.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import net.icejz.framework.common.exception.ServerException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,27 +11,27 @@ import org.springframework.stereotype.Service;
  * @author LSF icejz_lsf@163.com
  */
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CommunicationServiceFactory {
 
-    private final MQTTService mqttService;
+    private final ObjectProvider<MQTTService> mqttService;
     private final TCPService tcpService;
 
     public BaseCommunication getProtocol(String protocolType) {
         if (protocolType == null) {
-            new ServerException("协议不存在！");
+            throw new ServerException("协议不存在！");
         }
         switch (protocolType) {
             case "MQTT":
-                return mqttService;
+                MQTTService mqtt = mqttService.getIfAvailable();
+                if (mqtt == null) {
+                    throw new ServerException("MQTT 未启用，请在配置中设置 spring.mqtt.enabled=true");
+                }
+                return mqtt;
             case "TCP":
                 return tcpService;
-//            case "Modbus":
-//                return tcpService;
             default:
                 return null;
         }
     }
-
-
 }

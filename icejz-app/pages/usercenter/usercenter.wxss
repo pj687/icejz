@@ -10,6 +10,7 @@ page {
   height: 480rpx;
   background:
     radial-gradient(circle at 88% 18%, rgba(62, 198, 255, 0.35), transparent 36%),
+    radial-gradient(circle at 12% 80%, rgba(0, 168, 232, 0.2), transparent 40%),
     linear-gradient(135deg, #121a28 0%, #143047 55%, #0c6f9c 100%);
   padding: 0 24rpx;
   box-sizing: border-box;
@@ -35,13 +36,24 @@ page {
   border: 3rpx solid rgba(255, 255, 255, 0.35);
 }
 
+.user-center-card__header__meta {
+  margin-left: 24rpx;
+  margin-right: 16rpx;
+  min-width: 0;
+}
+
 .user-center-card__header__name {
   font-size: 36rpx;
   line-height: 48rpx;
   color: #fff;
   font-weight: bold;
-  margin-left: 24rpx;
-  margin-right: 16rpx;
+}
+
+.user-center-card__header__sub {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 2rpx;
 }
 
 .content-wrapper {

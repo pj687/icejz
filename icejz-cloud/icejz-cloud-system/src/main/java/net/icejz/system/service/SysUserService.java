@@ -26,6 +26,8 @@ public interface SysUserService extends BaseService<SysUserEntity> {
 
     void update(SysUserVO vo);
 
+    void updateStatus(Long id, Integer status, String reason);
+
     void updateLoginInfo(SysUserBaseVO vo);
 
     void updateAvatar(SysUserAvatarVO avatar);

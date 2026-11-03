@@ -36,6 +36,18 @@ export const useUserSubmitApi = (dataForm: any) => {
 	}
 }
 
+/** 封禁 / 解封：status 0 封禁，1 正常；封禁会踢掉全部在线会话 */
+export const useUserStatusApi = (data: {
+	id: number
+	status: number
+	reason?: string
+	banDuration?: string
+	banExpireTime?: string
+	sendNotify?: boolean
+}) => {
+	return service.put('/sys/user/status', data)
+}
+
 export const useOrgUserListApi = (orgId: number) => {
 	return service.get(`/sys/user/orgUserList/${orgId}`)
 }

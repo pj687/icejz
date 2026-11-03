@@ -27,7 +27,7 @@ const plainLength = computed(() => editorValue.value.replace(/<[^>]+>/g, '').tri
 	padding: 16px;
 	border-radius: 20px;
 	border: 1px solid rgba(0, 168, 232, 0.12);
-	background: rgba(255, 255, 255, 0.92);
+	background: color-mix(in srgb, var(--sc-panel, #fff) 92%, transparent);
 	box-shadow: 0 10px 24px rgba(15, 40, 64, 0.04);
 }
 
@@ -39,11 +39,11 @@ const plainLength = computed(() => editorValue.value.replace(/<[^>]+>/g, '').tri
 
 	span {
 		font-weight: 700;
-		color: #0f4f6e;
+		color: var(--sc-brand, #0f4f6e);
 	}
 	em {
 		font-style: normal;
-		color: #94a3b8;
+		color: var(--sc-muted, #94a3b8);
 	}
 }
 
@@ -52,8 +52,8 @@ const plainLength = computed(() => editorValue.value.replace(/<[^>]+>/g, '').tri
 	padding: 14px 16px;
 	border-radius: 14px;
 	border: 1px dashed rgba(0, 168, 232, 0.22);
-	background: linear-gradient(180deg, #f7fbfe, #fff);
-	color: #1e293b;
+	background: linear-gradient(180deg, var(--sc-soft, #f7fbfe), var(--sc-panel, #fff));
+	color: var(--sc-ink, #1e293b);
 	line-height: 1.7;
 
 	:deep(p) {

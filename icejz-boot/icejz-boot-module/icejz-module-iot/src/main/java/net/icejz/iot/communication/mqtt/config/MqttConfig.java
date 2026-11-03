@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.icejz.iot.communication.mqtt.factory.MqttMessageHandlerFactory;
 import net.icejz.iot.enums.DeviceTopicEnum;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +32,12 @@ import org.springframework.messaging.MessageHandler;
 @Configuration
 @IntegrationComponentScan
 @ConfigurationProperties(prefix = "spring.mqtt")
+@ConditionalOnProperty(prefix = "spring.mqtt", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class MqttConfig {
+    /**
+     * 是否启用 MQTT（配置 spring.mqtt.enabled=false 可关闭）
+     */
+    private boolean enabled = true;
     public static final String OUTBOUND_CHANNEL = "mqttOutboundChannel";
     public static final String INPUT_CHANNEL = "mqttInputChannel";
 

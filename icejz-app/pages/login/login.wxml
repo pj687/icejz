@@ -1,52 +1,43 @@
 <view class="login-page">
-
   <view class="brand">
-
     <image class="brand-logo" src="/images/logo.png" mode="aspectFit" />
-
-    <view class="login-title">ICEJZ</view>
-
-    <view class="login-sub">低代码开发平台</view>
-
+    <view class="login-title">{{brand.name}}</view>
+    <view class="login-sub">{{brand.slogan}}</view>
+    <view class="login-tag">{{brand.tagline}}</view>
   </view>
 
   <form bindsubmit="onLogin">
-
     <view class="login">
-
       <t-input name="username" value="admin" placeholder="账号">
-
-        <view slot="label" class="require"> 账号 </view>
-
+        <view slot="label" class="require">账号</view>
       </t-input>
 
-      <t-input type="password" name="password" value="admin" placeholder="密码">
-
-        <view slot="label" class="require"> 密码 </view>
-
+      <t-input type="password" name="password" value="123456" placeholder="密码">
+        <view slot="label" class="require">密码</view>
       </t-input>
 
-      <t-input wx:if="{{captchaVisible}}" name="captcha" placeholder="输入验证码">
-
-        <view slot="label" class="require"> 验证码 </view>
-
-        <view slot="suffix">
-
-          <image class="image" src="{{captchaBase64}}" mode="heightFix" bind:tap="onCaptcha" />
-
-        </view>
-
-      </t-input>
-
-      <view class="login-btn">
-
-        <t-button block type="submit">登录</t-button>
-
+      <view wx:if="{{captchaVisible}}" class="captcha-block">
+        <login-captcha-popup
+          id="captchaPopup"
+          mode="{{captchaMode}}"
+          tip="{{captchaTip}}"
+          image="{{captchaBase64}}"
+          jigsawImage="{{jigsawImage}}"
+          jigsawY="{{jigsawY}}"
+          words="{{captchaWords}}"
+          value="{{captchaValue}}"
+          bind:refresh="onCaptcha"
+          bind:change="onCaptchaChange"
+          bind:confirm="onCaptchaConfirm"
+        />
+        <input name="captcha" value="{{captchaValue}}" hidden />
       </view>
 
+      <login-agreement id="agreement" value="{{agreed}}" bind:change="onAgreementChange" />
+
+      <view class="login-btn">
+        <t-button block type="submit">登录</t-button>
+      </view>
     </view>
-
   </form>
-
 </view>
-

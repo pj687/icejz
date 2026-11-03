@@ -1,3 +1,7 @@
+const brand = require('@/config/brand.js')
+
 Page({
-  data: {}
+  data: {
+    brand
+  }
 })

@@ -12,7 +12,7 @@
 				<div class="sidebar-menu">
 					<el-scrollbar class="sidebar-scroll">
 						<div class="menu-label" v-show="appStore.sidebarOpened">
-							<span class="label-text">导航菜单</span>
+							<span class="label-text">{{ $t('layout.navMenu') }}</span>
 							<span class="label-line"></span>
 						</div>
 						<el-menu

@@ -7,7 +7,11 @@
     "pages/usercenter/password/password",
     "pages/usercenter/userinfo/userinfo",
     "pages/usercenter/about/about",
-    "pages/usercenter/userinfo/input/input"
+    "pages/usercenter/userinfo/input/input",
+    "pages/message/inbox",
+    "pages/sys/user/index",
+    "pages/sys/org/index",
+    "pages/sys/role/index"
   ],
   "tabBar": {
     "custom": true,

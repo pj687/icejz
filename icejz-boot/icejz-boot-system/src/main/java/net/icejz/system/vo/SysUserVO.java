@@ -70,9 +70,26 @@ public class SysUserVO implements Serializable, TransPojo {
     @Schema(description = "直属主管ID")
     private Long leaderId;
 
-    @Schema(description = "状态 0：停用    1：正常", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "状态 0：封禁    1：正常", requiredMode = Schema.RequiredMode.REQUIRED)
     @Range(min = 0, max = 1, message = "用户状态不正确")
     private Integer status;
+
+    @Schema(description = "封禁原因")
+    private String banReason;
+
+    @Schema(description = "封禁时间")
+    @JsonFormat(pattern = DateUtils.DATE_TIME_PATTERN)
+    private LocalDateTime banTime;
+
+    @Schema(description = "封禁到期时间（空表示永久）")
+    @JsonFormat(pattern = DateUtils.DATE_TIME_PATTERN)
+    private LocalDateTime banExpireTime;
+
+    @Schema(description = "多设备登录：null跟随系统 0单设备 1多设备")
+    private Integer multiDeviceLogin;
+
+    @Schema(description = "个人多设备上限：null跟随系统")
+    private Integer multiDeviceMax;
 
     @Schema(description = "角色ID列表")
     private List<Long> roleIdList;

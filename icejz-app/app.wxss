@@ -10,7 +10,7 @@
 
 .require::after {
   content: '*';
-  color: red;
+  color: #ef4444;
   font-size: 32rpx;
   margin-left: 4rpx;
 }

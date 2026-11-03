@@ -77,22 +77,26 @@ export const useConfirmElderBindApi = (data) => {
 };
 
 /**
- * 我的消息通知
+ * 我的消息通知（与管理端站内消息互通）
  */
 export const useNoticePageApi = (params) => {
-    return request.get('/member/notice/page', params);
+    return request.get('/sys/message/my/page', params);
 };
 
 export const useNoticeUnreadCountApi = () => {
-    return request.get('/member/notice/unread-count');
+    return request.get('/sys/message/my/unread-count');
 };
 
 export const useNoticeReadApi = (id) => {
-    return request.put(`/member/notice/${id}/read`);
+    return request.put(`/sys/message/my/${id}/read`);
 };
 
 export const useNoticeReadAllApi = () => {
-    return request.put('/member/notice/read-all');
+    return request.put('/sys/message/my/read-all');
+};
+
+export const useNoticeDetailApi = (id) => {
+    return request.get(`/sys/message/my/${id}`);
 };
 
 /**

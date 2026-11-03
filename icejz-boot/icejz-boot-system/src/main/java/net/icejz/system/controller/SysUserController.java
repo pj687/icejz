@@ -4,20 +4,22 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import net.icejz.framework.common.exception.ServerException;
 import net.icejz.framework.common.utils.PageResult;
 import net.icejz.framework.common.utils.Result;
 import net.icejz.framework.operatelog.annotations.OperateLog;
 import net.icejz.framework.operatelog.enums.OperateTypeEnum;
 import net.icejz.framework.security.user.SecurityUser;
 import net.icejz.framework.security.user.UserDetail;
-import net.icejz.system.entity.SysUserEntity;
+import net.icejz.framework.security.utils.TokenUtils;
 import net.icejz.system.query.SysUserQuery;
 import net.icejz.system.service.SysPostService;
 import net.icejz.system.service.SysUserPostService;
-import net.icejz.system.service.SysUserRoleService;
 import net.icejz.system.service.SysUserService;
+import net.icejz.system.service.SysUserTokenService;
 import net.icejz.system.vo.*;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,9 +42,9 @@ import java.util.List;
 @Tag(name = "用户管理")
 public class SysUserController {
     private final SysUserService sysUserService;
-    private final SysUserRoleService sysUserRoleService;
     private final SysUserPostService sysUserPostService;
     private final SysPostService sysPostService;
+    private final SysUserTokenService sysUserTokenService;
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping("page")
@@ -55,21 +57,9 @@ public class SysUserController {
 
     @GetMapping("{id}")
     @Operation(summary = "信息")
-    @PreAuthorize("hasAuthority('sys:user:info')")
+    @PreAuthorize("hasAnyAuthority('sys:user:info', 'sys:user:page')")
     public Result<SysUserVO> get(@PathVariable("id") Long id) {
-        SysUserEntity entity = sysUserService.getById(id);
-
-        SysUserVO vo = BeanUtil.copyProperties(entity, SysUserVO.class);
-
-        // 用户角色列表
-        List<Long> roleIdList = sysUserRoleService.getRoleIdList(id);
-        vo.setRoleIdList(roleIdList);
-
-        // 用户岗位列表
-        List<Long> postIdList = sysUserPostService.getPostIdList(id);
-        vo.setPostIdList(postIdList);
-
-        return Result.ok(vo);
+        return Result.ok(sysUserService.getDetail(id));
     }
 
     @GetMapping("info")
@@ -86,6 +76,62 @@ public class SysUserController {
         user.setPostNameList(postNameList);
 
         return Result.ok(user);
+    }
+
+    @GetMapping("member-summary")
+    @Operation(summary = "用户端个人中心概览")
+    public Result<java.util.Map<String, Object>> memberSummary() {
+        java.util.Map<String, Object> summary = new java.util.HashMap<>(8);
+        summary.put("elderArchive", null);
+        summary.put("familyBindingCount", 0);
+        summary.put("familyBindings", java.util.Collections.emptyList());
+        summary.put("monthServiceCount", 0);
+        summary.put("todoCount", 0);
+        summary.put("healthScore", "--");
+        return Result.ok(summary);
+    }
+
+    @GetMapping("login-security")
+    @Operation(summary = "当前用户多设备登录设置")
+    public Result<SysUserLoginSecurityVO> myLoginSecurity() {
+        return Result.ok(sysUserService.getMyLoginSecurity());
+    }
+
+    @PutMapping("login-security")
+    @Operation(summary = "保存当前用户多设备登录设置")
+    @OperateLog(type = OperateTypeEnum.UPDATE)
+    public Result<String> saveMyLoginSecurity(@RequestBody SysUserLoginSecurityVO vo) {
+        sysUserService.updateMyLoginSecurity(vo);
+        return Result.ok();
+    }
+
+    @GetMapping("device")
+    @Operation(summary = "当前用户登录设备列表")
+    public Result<List<SysUserDeviceVO>> deviceList(HttpServletRequest request) {
+        UserDetail user = SecurityUser.getUser();
+        String accessToken = TokenUtils.getAccessToken(request);
+        return Result.ok(sysUserTokenService.listOnlineDevices(user.getId(), accessToken, request));
+    }
+
+    @DeleteMapping("device/{accessToken}")
+    @Operation(summary = "下线指定登录设备")
+    @OperateLog(type = OperateTypeEnum.UPDATE)
+    public Result<String> kickDevice(@PathVariable("accessToken") String accessToken, HttpServletRequest request) {
+        if (StrUtil.isBlank(accessToken)) {
+            return Result.error("token不能为空");
+        }
+        String current = TokenUtils.getAccessToken(request);
+        if (accessToken.equals(current)) {
+            throw new ServerException("不能下线当前设备，请使用退出登录");
+        }
+        UserDetail user = SecurityUser.getUser();
+        boolean owned = sysUserTokenService.listOnlineDevices(user.getId(), current).stream()
+                .anyMatch(d -> accessToken.equals(d.getAccessToken()));
+        if (!owned) {
+            throw new ServerException("设备不存在或不属于当前用户");
+        }
+        sysUserTokenService.expireByAccessToken(accessToken);
+        return Result.ok();
     }
 
     @PutMapping("info")
@@ -164,6 +210,15 @@ public class SysUserController {
 
         sysUserService.update(vo);
 
+        return Result.ok();
+    }
+
+    @PutMapping("status")
+    @Operation(summary = "封禁/解封用户")
+    @OperateLog(type = OperateTypeEnum.UPDATE)
+    @PreAuthorize("hasAuthority('sys:user:update')")
+    public Result<String> updateStatus(@RequestBody @Valid SysUserStatusVO vo) {
+        sysUserService.updateStatus(vo);
         return Result.ok();
     }
 

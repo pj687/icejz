@@ -1,6 +1,7 @@
 package net.icejz.iot.utils;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.integration.mqtt.inbound.AbstractMqttMessageDrivenChannelAdapter;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "spring.mqtt", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class MqttUtils {
     private final AbstractMqttMessageDrivenChannelAdapter mqttMessageAdapter;
 

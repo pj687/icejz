@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.icejz.framework.common.utils.DateUtils;
 
 import java.io.Serializable;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
  * <a href="https://icejz.net">ICEJZ</a>
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "用户Token")
 public class SysUserTokenVO implements Serializable {

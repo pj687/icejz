@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import net.icejz.api.feign.system.UserTokenFeign;
 import net.icejz.framework.common.cache.RedisCache;
 import net.icejz.framework.common.cache.RedisKeys;
 import net.icejz.framework.common.query.Query;
@@ -28,18 +29,17 @@ import java.util.List;
 public class UserOnlineController {
     private final TokenStoreCache tokenStoreCache;
     private final RedisCache redisCache;
+    private final UserTokenFeign userTokenFeign;
 
     @GetMapping("page")
     @Operation(summary = "分页")
     @PreAuthorize("hasAuthority('monitor:user:all')")
     public Result<PageResult<UserOnlineVO>> page(@ParameterObject @Valid Query query) {
-        // 获取登录用户的全部key
         List<String> keys = tokenStoreCache.getUserKeyList();
-
-        // 逻辑分页
         List<String> keyList = ListUtil.page(query.getPage() - 1, query.getLimit(), keys);
 
         List<UserOnlineVO> userOnlineList = new ArrayList<>();
+        String prefix = RedisKeys.getAccessTokenKey("");
         keyList.forEach(key -> {
             UserDetail user = (UserDetail) redisCache.get(key);
             if (user != null) {
@@ -49,11 +49,13 @@ public class UserOnlineController {
                 userOnlineVO.setRealName(user.getRealName());
                 userOnlineVO.setGender(user.getGender());
                 userOnlineVO.setEmail(user.getEmail());
-                userOnlineVO.setAccessToken(key.replace(RedisKeys.getAccessTokenKey(""), ""));
-
+                userOnlineVO.setAccessToken(key.startsWith(prefix) ? key.substring(prefix.length()) : key.replace(prefix, ""));
+                userOnlineVO.setLoginIp(user.getLoginIp());
+                userOnlineVO.setUserAgent(user.getUserAgent());
+                userOnlineVO.setClientType(user.getClientType());
+                userOnlineVO.setLoginTime(user.getLoginTime());
                 userOnlineList.add(userOnlineVO);
             }
-
         });
 
         return Result.ok(new PageResult<>(userOnlineList, keys.size()));
@@ -63,14 +65,10 @@ public class UserOnlineController {
     @Operation(summary = "强制退出")
     @PreAuthorize("hasAuthority('monitor:user:all')")
     public Result<String> forceLogout(@PathVariable("accessToken") String accessToken) {
-        // token不能为空
         if (StrUtil.isBlank(accessToken)) {
-            Result.error("token不能为空");
+            return Result.error("token不能为空");
         }
-
-        // 删除用户信息
-        tokenStoreCache.deleteUser(accessToken);
-
+        userTokenFeign.expireByAccessToken(accessToken);
         return Result.ok();
     }
 }

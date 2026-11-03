@@ -1,50 +1,122 @@
 <template>
-	<el-dialog v-model="visible" :title="!dataForm.id ? '新增' : '修改'" :close-on-click-modal="false" draggable>
-		<el-form ref="dataFormRef" :model="dataForm" :rules="dataRules" label-width="120px" @keyup.enter="submitHandle()">
-			<el-row>
-				<el-col :span="12">
-					<el-form-item prop="username" label="用户名">
-						<el-input v-model="dataForm.username" placeholder="用户名"></el-input>
-					</el-form-item>
-					<el-form-item prop="orgId" label="所属机构">
-						<ma-org-select v-model="dataForm.orgId" placeholder="请选择"></ma-org-select>
-					</el-form-item>
-					<el-form-item prop="leaderId" label="直属主管">
-						<ma-user-input v-model="dataForm.leaderId" placeholder="请选择"></ma-user-input>
-					</el-form-item>
-					<el-form-item prop="mobile" label="手机号">
-						<el-input v-model="dataForm.mobile" placeholder="手机号"></el-input>
-					</el-form-item>
-					<el-form-item prop="password" label="密码">
-						<el-input v-model="dataForm.password" type="password" placeholder="密码"></el-input>
-					</el-form-item>
-					<el-form-item prop="postIdList" label="所属岗位">
-						<el-select v-model="dataForm.postIdList" multiple placeholder="所属岗位" style="width: 100%">
-							<el-option v-for="post in postList" :key="post.id" :label="post.postName" :value="post.id"></el-option>
-						</el-select>
-					</el-form-item>
-				</el-col>
+	<el-dialog
+		v-model="visible"
+		class="org-auth-dialog"
+		:title="!dataForm.id ? '新增用户' : '修改用户'"
+		:close-on-click-modal="false"
+		width="760px"
+		draggable
+	>
+		<el-form ref="dataFormRef" :model="dataForm" :rules="dataRules" label-width="88px" @keyup.enter="submitHandle()">
+			<section class="form-block">
+				<header class="block-head">
+					<strong>账号信息</strong>
+					<span>登录身份与基础资料</span>
+				</header>
+				<el-row :gutter="16">
+					<el-col :span="12">
+						<el-form-item prop="username" label="用户名">
+							<el-input v-model="dataForm.username" placeholder="用户名"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item prop="realName" label="姓名">
+							<el-input v-model="dataForm.realName" placeholder="姓名"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item prop="mobile" label="手机号">
+							<el-input v-model="dataForm.mobile" placeholder="手机号"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item prop="email" label="邮箱">
+							<el-input v-model="dataForm.email" placeholder="邮箱"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item prop="password" label="密码">
+							<el-input v-model="dataForm.password" type="password" show-password placeholder="密码"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item prop="gender" label="性别">
+							<ma-dict-radio v-model="dataForm.gender" dict-type="user_gender"></ma-dict-radio>
+						</el-form-item>
+					</el-col>
+				</el-row>
+			</section>
 
-				<el-col :span="12">
-					<el-form-item prop="realName" label="姓名">
-						<el-input v-model="dataForm.realName" placeholder="姓名"></el-input>
-					</el-form-item>
-					<el-form-item prop="gender" label="性别">
-						<ma-dict-radio v-model="dataForm.gender" dict-type="user_gender"></ma-dict-radio>
-					</el-form-item>
-					<el-form-item prop="email" label="邮箱">
-						<el-input v-model="dataForm.email" placeholder="邮箱"></el-input>
-					</el-form-item>
-					<el-form-item prop="roleIdList" label="所属角色">
-						<el-select v-model="dataForm.roleIdList" multiple placeholder="所属角色" style="width: 100%">
-							<el-option v-for="role in roleList" :key="role.id" :label="role.name" :value="role.id"></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item prop="status" label="状态">
-						<ma-dict-radio v-model="dataForm.status" dict-type="user_status"></ma-dict-radio>
-					</el-form-item>
-				</el-col>
-			</el-row>
+			<section class="form-block">
+				<header class="block-head">
+					<strong>组织归属</strong>
+					<span>机构、角色与岗位配置</span>
+				</header>
+				<el-row :gutter="16">
+					<el-col :span="12">
+						<el-form-item prop="orgId" label="所属机构">
+							<ma-org-select v-model="dataForm.orgId" placeholder="请选择"></ma-org-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item prop="leaderId" label="直属主管">
+							<ma-user-input v-model="dataForm.leaderId" placeholder="请选择"></ma-user-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item prop="roleIdList" label="所属角色">
+							<el-select v-model="dataForm.roleIdList" multiple filterable placeholder="所属角色" style="width: 100%">
+								<el-option v-for="role in roleList" :key="role.id" :label="role.name" :value="role.id"></el-option>
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item prop="postIdList" label="所属岗位">
+							<el-select v-model="dataForm.postIdList" multiple filterable placeholder="所属岗位" style="width: 100%">
+								<el-option v-for="post in postList" :key="post.id" :label="post.postName" :value="post.id"></el-option>
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item prop="status" label="状态">
+							<ma-dict-radio v-model="dataForm.status" dict-type="user_status"></ma-dict-radio>
+						</el-form-item>
+					</el-col>
+				</el-row>
+			</section>
+
+			<section class="form-block">
+				<header class="block-head">
+					<strong>登录设备</strong>
+					<span>可覆盖系统「登录安全」默认策略；留空则跟随系统</span>
+				</header>
+				<el-row :gutter="16">
+					<el-col :span="12">
+						<el-form-item label="多设备登录">
+							<el-select v-model="dataForm.multiDeviceLogin" clearable placeholder="跟随系统" style="width: 100%">
+								<el-option :value="1" label="允许多设备" />
+								<el-option :value="0" label="仅单设备（互踢）" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item :label="`设备上限(≤${systemMax})`">
+							<el-input-number
+								v-model="dataForm.multiDeviceMax"
+								:min="1"
+								:max="systemMax"
+								:disabled="dataForm.multiDeviceLogin !== 1"
+								controls-position="right"
+								placeholder="跟随系统"
+								style="width: 100%"
+							/>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<p class="field-tip">
+					选「允许多设备」时可单独设上限（不得超过系统上限 {{ systemMax }}）；选「仅单设备」则无视系统总开关。清空选项后重新跟随系统配置。
+				</p>
+			</section>
 		</el-form>
 		<template #footer>
 			<el-button @click="visible = false">取消</el-button>
@@ -59,6 +131,7 @@ import { ElMessage } from 'element-plus/es'
 import { useUserApi, useUserSubmitApi } from '@/api/sys/user'
 import { usePostListApi } from '@/api/sys/post'
 import { useRoleListApi } from '@/api/sys/role'
+import { useLoginSecurityConfigApi } from '@/api/sys/login-security'
 import MaUserInput from '@/components/ma-user/ma-user-input/index.vue'
 
 const emit = defineEmits(['refreshDataList'])
@@ -67,6 +140,7 @@ const visible = ref(false)
 const postList = ref<any[]>([])
 const roleList = ref<any[]>([])
 const dataFormRef = ref()
+const systemMax = ref(5)
 
 const dataForm = reactive({
 	id: '',
@@ -80,19 +154,31 @@ const dataForm = reactive({
 	mobile: '',
 	roleIdList: [] as any[],
 	postIdList: [] as any[],
-	status: 1
+	status: 1,
+	multiDeviceLogin: null as number | null,
+	multiDeviceMax: null as number | null
 })
+
+const loadSystemMax = async () => {
+	try {
+		const { data } = await useLoginSecurityConfigApi()
+		systemMax.value = Math.max(1, data?.multiDeviceMax ?? 5)
+	} catch {
+		systemMax.value = 5
+	}
+}
 
 const init = (id?: number) => {
 	visible.value = true
 	dataForm.id = ''
+	dataForm.multiDeviceLogin = null
+	dataForm.multiDeviceMax = null
 
-	// 重置表单数据
 	if (dataFormRef.value) {
 		dataFormRef.value.resetFields()
 	}
 
-	// id 存在则为修改
+	loadSystemMax()
 	if (id) {
 		getUser(id)
 	}
@@ -101,23 +187,38 @@ const init = (id?: number) => {
 	getRoleList()
 }
 
-// 获取岗位列表
 const getPostList = async () => {
 	let res = await usePostListApi()
 	postList.value = res.data
 }
 
-// 获取角色列表
 const getRoleList = async () => {
 	let res = await useRoleListApi()
 	roleList.value = res.data
 }
 
-// 获取信息
 const getUser = (id: number) => {
-	useUserApi(id).then(res => {
+	useUserApi(id).then((res) => {
 		Object.assign(dataForm, res.data)
+		if (dataForm.multiDeviceLogin === undefined) {
+			dataForm.multiDeviceLogin = null
+		}
+		if (dataForm.multiDeviceLogin !== 1) {
+			dataForm.multiDeviceMax = dataForm.multiDeviceLogin === 0 ? null : dataForm.multiDeviceMax
+		} else if (dataForm.multiDeviceMax != null) {
+			dataForm.multiDeviceMax = Math.max(1, Math.min(dataForm.multiDeviceMax, systemMax.value))
+		}
 	})
+}
+
+const submitPayload = () => {
+	const payload: any = { ...dataForm }
+	if (payload.multiDeviceLogin !== 1) {
+		payload.multiDeviceMax = null
+	} else if (payload.multiDeviceMax != null) {
+		payload.multiDeviceMax = Math.max(1, Math.min(payload.multiDeviceMax, systemMax.value))
+	}
+	return payload
 }
 
 const dataRules = ref({
@@ -127,14 +228,13 @@ const dataRules = ref({
 	orgId: [{ required: true, message: '必填项不能为空', trigger: 'blur' }]
 })
 
-// 表单提交
 const submitHandle = () => {
 	dataFormRef.value.validate((valid: boolean) => {
 		if (!valid) {
 			return false
 		}
 
-		useUserSubmitApi(dataForm).then(() => {
+		useUserSubmitApi(submitPayload()).then(() => {
 			ElMessage.success({
 				message: '操作成功',
 				duration: 500,
@@ -151,3 +251,40 @@ defineExpose({
 	init
 })
 </script>
+
+<style scoped lang="scss">
+.form-block {
+	padding: 14px;
+	border-radius: 14px;
+	border: 1px solid #e8eef5;
+	background: #fbfcfe;
+
+	& + .form-block {
+		margin-top: 12px;
+	}
+}
+
+.block-head {
+	margin-bottom: 12px;
+
+	strong {
+		display: block;
+		font-size: 14px;
+		color: #122033;
+	}
+
+	span {
+		display: block;
+		margin-top: 2px;
+		font-size: 12px;
+		color: #7a8796;
+	}
+}
+
+.field-tip {
+	margin: -4px 0 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: #94a3b8;
+}
+</style>

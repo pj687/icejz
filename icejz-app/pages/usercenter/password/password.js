@@ -1,8 +1,15 @@
 const { validateForm } = require('@/utils/validator.js')
+const cache = require('@/utils/cache.js')
 const { updatePasswordApi } = require('@/api/user.js')
 
 Page({
   data: {},
+
+  onShow() {
+    if (!cache.getToken()) {
+      wx.reLaunch({ url: '/pages/login/login' })
+    }
+  },
 
   onLoad(options) {},
 

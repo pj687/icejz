@@ -2130,7 +2130,17 @@ onUnmounted(() => {
 }
 
 .login-card {
-	width: min(520px, 100%);
+	/* 默认（无验证码 / 输入型）：中等宽度 */
+	--card-pad-x: 28px;
+	--card-head-y: 24px 28px 12px;
+	--card-body-y: 10px;
+	--card-foot-y: 6px 28px 20px;
+	--card-body-min-h: 220px;
+	--field-gap: 16px;
+	--input-h: 50px;
+	--btn-h: 52px;
+
+	width: min(420px, 100%);
 	position: relative;
 	overflow: hidden;
 	display: flex;
@@ -2149,13 +2159,214 @@ onUnmounted(() => {
 		0 0 0 1px rgba(0, 168, 232, 0.1),
 		0 0 60px rgba(0, 168, 232, 0.1),
 		inset 0 1px 0 rgba(255, 255, 255, 0.95);
-	transition: box-shadow 0.25s ease, transform 0.25s ease;
+	transition:
+		box-shadow 0.28s ease,
+		transform 0.28s ease,
+		width 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 
 	&:hover {
 		box-shadow:
 			0 44px 110px rgba(0, 0, 0, 0.44),
 			0 0 0 1px rgba(0, 168, 232, 0.22),
 			0 0 70px rgba(0, 168, 232, 0.18);
+	}
+
+	.card-head {
+		padding: var(--card-head-y);
+		padding-left: var(--card-pad-x);
+		padding-right: var(--card-pad-x);
+	}
+
+	.login-tabs {
+		margin-left: var(--card-pad-x);
+		margin-right: var(--card-pad-x);
+	}
+
+	.card-body {
+		padding: var(--card-body-y) var(--card-pad-x) 4px;
+	}
+
+	.card-agree {
+		padding: 0 var(--card-pad-x);
+	}
+
+	.card-foot {
+		padding: var(--card-foot-y);
+		padding-left: var(--card-pad-x);
+		padding-right: var(--card-pad-x);
+	}
+
+	:deep(.login-form .el-form-item) {
+		margin-bottom: var(--field-gap);
+	}
+
+	:deep(.login-form .el-input__wrapper) {
+		min-height: var(--input-h);
+	}
+
+	:deep(.login-button .submit-btn.el-button--primary) {
+		height: var(--btn-h);
+	}
+
+	/* 输入型验证码：略加宽，容纳输入框 + 图码并排 */
+	&:has([data-mode='input']) {
+		--card-pad-x: 26px;
+		--card-head-y: 22px 26px 12px;
+		--card-body-min-h: 236px;
+		--field-gap: 14px;
+		width: min(440px, 100%);
+	}
+
+	/* 滑动拼图：图宽约 310，卡片收窄并压缩纵向间距，避免过高 */
+	&:has([data-mode='slider']) {
+		--card-pad-x: 22px;
+		--card-head-y: 14px 22px 6px;
+		--card-body-y: 6px;
+		--card-foot-y: 2px 22px 14px;
+		--card-body-min-h: 0px;
+		--field-gap: 10px;
+		--input-h: 44px;
+		--btn-h: 46px;
+		width: min(392px, 100%);
+
+		.card-logo-wrap {
+			width: 40px;
+			height: 40px;
+			border-radius: 12px;
+		}
+
+		.card-logo {
+			width: 28px;
+			height: 28px;
+		}
+
+		.card-head-text h2 {
+			font-size: 20px;
+		}
+
+		.card-head-text p {
+			font-size: 12px;
+			margin-top: 2px;
+		}
+
+		.login-tabs {
+			margin-bottom: 2px;
+		}
+
+		:deep(.login-button) {
+			margin-top: 2px;
+		}
+
+		:deep(.login-captcha) {
+			margin-bottom: 6px !important;
+
+			&.is-error {
+				margin-bottom: 2px !important;
+			}
+		}
+	}
+
+	/* 图案点选：大图 310×155 + 面板边距，纵向压缩头尾 */
+	&:has([data-mode='click']) {
+		--card-pad-x: 22px;
+		--card-head-y: 14px 22px 6px;
+		--card-body-y: 6px;
+		--card-foot-y: 2px 22px 14px;
+		--card-body-min-h: 0px;
+		--field-gap: 10px;
+		--input-h: 44px;
+		--btn-h: 46px;
+		width: min(404px, 100%);
+
+		.card-logo-wrap {
+			width: 42px;
+			height: 42px;
+			border-radius: 12px;
+		}
+
+		.card-logo {
+			width: 30px;
+			height: 30px;
+		}
+
+		.card-head-text h2 {
+			font-size: 20px;
+		}
+
+		.card-head-text p {
+			font-size: 12px;
+			margin-top: 2px;
+		}
+
+		:deep(.login-captcha) {
+			margin-bottom: 8px !important;
+
+			&.is-error {
+				margin-bottom: 2px !important;
+			}
+		}
+
+		:deep(.login-button) {
+			margin-top: 4px;
+		}
+	}
+
+	/* 文字点选：同大图，略留出点选进度区 */
+	&:has([data-mode='word']) {
+		--card-pad-x: 22px;
+		--card-head-y: 14px 22px 6px;
+		--card-body-y: 6px;
+		--card-foot-y: 2px 22px 14px;
+		--card-body-min-h: 0px;
+		--field-gap: 10px;
+		--input-h: 44px;
+		--btn-h: 46px;
+		width: min(404px, 100%);
+
+		.card-logo-wrap {
+			width: 42px;
+			height: 42px;
+			border-radius: 12px;
+		}
+
+		.card-logo {
+			width: 30px;
+			height: 30px;
+		}
+
+		.card-head-text h2 {
+			font-size: 20px;
+		}
+
+		:deep(.login-captcha) {
+			margin-bottom: 8px !important;
+
+			&.is-error {
+				margin-bottom: 2px !important;
+			}
+		}
+	}
+
+	/* PoW：内容矮，卡片收窄 */
+	&:has([data-mode='pow']) {
+		--card-pad-x: 24px;
+		--card-head-y: 18px 24px 10px;
+		--card-body-y: 8px;
+		--card-foot-y: 4px 24px 16px;
+		--card-body-min-h: 200px;
+		--field-gap: 12px;
+		width: min(400px, 100%);
+	}
+
+	/* Turnstile：给 widget 留足宽度 */
+	&:has([data-mode='turnstile']) {
+		--card-pad-x: 24px;
+		--card-head-y: 18px 24px 10px;
+		--card-body-y: 8px;
+		--card-foot-y: 4px 24px 16px;
+		--card-body-min-h: 220px;
+		--field-gap: 12px;
+		width: min(420px, 100%);
 	}
 }
 
@@ -2253,7 +2464,6 @@ onUnmounted(() => {
 	display: flex;
 	align-items: center;
 	gap: 14px;
-	padding: 26px 30px 14px;
 }
 
 .card-logo-wrap {
@@ -2339,7 +2549,8 @@ onUnmounted(() => {
 	position: relative;
 	z-index: 1;
 	display: flex;
-	margin: 0 30px 4px;
+	margin-top: 0;
+	margin-bottom: 4px;
 	padding: 4px;
 	border-radius: 14px;
 	background:
@@ -2390,21 +2601,18 @@ onUnmounted(() => {
 .card-body {
 	position: relative;
 	z-index: 1;
-	padding: 14px 30px 4px;
-	min-height: 244px;
+	min-height: var(--card-body-min-h, 220px);
 	animation: form-fade 0.28s ease;
 }
 
 .card-agree {
 	position: relative;
 	z-index: 1;
-	padding: 0 30px 2px;
 }
 
 .card-foot {
 	position: relative;
 	z-index: 1;
-	padding: 2px 30px 20px;
 }
 
 .card-secure {
@@ -2868,20 +3076,9 @@ onUnmounted(() => {
 	}
 
 	.login-card {
+		--card-pad-x: 18px;
 		border-radius: 20px;
-	}
-
-	.card-head,
-	.card-body,
-	.card-foot,
-	.card-agree {
-		padding-left: 18px;
-		padding-right: 18px;
-	}
-
-	.login-tabs {
-		margin-left: 18px;
-		margin-right: 18px;
+		width: min(100%, 100%);
 	}
 
 	.topbar-meta {

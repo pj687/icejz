@@ -6,6 +6,7 @@ import net.icejz.framework.security.user.UserDetail;
 import net.icejz.system.dao.SysUserDao;
 import net.icejz.system.entity.SysUserEntity;
 import net.icejz.system.service.SysUserDetailsService;
+import net.icejz.system.service.SysUserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final SysUserDetailsService sysUserDetailsService;
     private final SysUserDao sysUserDao;
+    private final SysUserService sysUserService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -29,6 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (userEntity == null) {
             throw new UsernameNotFoundException("用户名或密码错误");
         }
+        userEntity = sysUserService.releaseIfBanExpired(userEntity);
 
         return sysUserDetailsService.getUserDetails(BeanUtil.copyProperties(userEntity, UserDetail.class));
     }

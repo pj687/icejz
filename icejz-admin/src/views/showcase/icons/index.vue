@@ -55,7 +55,7 @@ const handleCopy = (icon: string) => {
 	padding: 14px;
 	border-radius: 20px;
 	border: 1px solid rgba(0, 168, 232, 0.12);
-	background: rgba(255, 255, 255, 0.86);
+	background: color-mix(in srgb, var(--sc-panel, #fff) 86%, transparent);
 	box-shadow: 0 10px 24px rgba(15, 40, 64, 0.04);
 }
 
@@ -69,7 +69,7 @@ const handleCopy = (icon: string) => {
 	padding: 12px 8px;
 	border: 1px solid transparent;
 	border-radius: 16px;
-	background: linear-gradient(180deg, #f7fbfe, #fff);
+	background: linear-gradient(180deg, var(--sc-soft, #f7fbfe), var(--sc-panel, #fff));
 	cursor: pointer;
 	transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 

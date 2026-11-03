@@ -1,0 +1,121 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(0, 168, 232, 0.1), transparent 36%),
+    #f4f7fb;
+  padding: 24rpx 24rpx calc(40rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.hero {
+  padding: 34rpx 30rpx;
+  border-radius: 28rpx;
+  margin-bottom: 20rpx;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(62, 198, 255, 0.32), transparent 36%),
+    linear-gradient(135deg, #121a28 0%, #0c6f9c 100%);
+  box-shadow: 0 16rpx 40rpx rgba(15, 23, 36, 0.16);
+}
+
+.hero-kicker {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 20rpx;
+  letter-spacing: 4rpx;
+}
+
+.hero-title {
+  margin-top: 10rpx;
+  color: #fff;
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.hero-sub {
+  margin-top: 10rpx;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 22rpx;
+}
+
+.empty {
+  padding: 80rpx 24rpx;
+  text-align: center;
+}
+
+.empty-mark {
+  width: 88rpx;
+  height: 88rpx;
+  margin: 0 auto;
+  border-radius: 24rpx;
+  background: #e8f7fd;
+  color: #00a8e8;
+  font-size: 34rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-title {
+  margin-top: 18rpx;
+  color: #475569;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.tree {
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 16rpx 12rpx;
+  border: 1rpx solid rgba(232, 238, 245, 0.95);
+  box-shadow: 0 8rpx 24rpx rgba(15, 23, 36, 0.04);
+}
+
+.node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 18rpx 16rpx;
+  margin-bottom: 8rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(180deg, #f8fbfe, #f3f8fc);
+}
+
+.node.root {
+  background: linear-gradient(180deg, #eef9fe, #e7f5fc);
+}
+
+.node-icon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 16rpx;
+  background: #00a8e8;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.node.root .node-icon {
+  background: #121a28;
+}
+
+.node-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.node-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.node-meta {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #64748b;
+}

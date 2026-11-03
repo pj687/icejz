@@ -197,8 +197,8 @@ const handleDataForm = () => {
 	margin-bottom: 18px;
 	padding: 12px 14px;
 	border-radius: 16px;
-	background: linear-gradient(135deg, #f7fbfe, #eef8fc);
-	border: 1px solid #e4eef6;
+	background: var(--soft, #f7fbfe);
+	border: 1px solid var(--line, #e4eef6);
 }
 
 .secure-art {
@@ -217,7 +217,7 @@ const handleDataForm = () => {
 		display: block;
 		margin-bottom: 4px;
 		font-size: 14px;
-		color: #122033;
+		color: var(--ink, #122033);
 	}
 	p {
 		margin: 0;
@@ -230,7 +230,7 @@ const handleDataForm = () => {
 .profile-form {
 	:deep(.el-form-item__label) {
 		font-weight: 650;
-		color: #334155;
+		color: var(--ink, #334155);
 		padding-bottom: 6px;
 	}
 
@@ -256,12 +256,12 @@ const handleDataForm = () => {
 	width: 100%;
 	padding: 0 12px 0 10px;
 	border-radius: 14px;
-	background: #f7fbfe;
-	border: 1px solid #e4eef6;
+	background: var(--soft, #f7fbfe);
+	border: 1px solid var(--line, #e4eef6);
 	transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 
 	&:focus-within {
-		background: #fff;
+		background: var(--panel, var(--icejz-card-bg, #fff));
 		border-color: #00a8e8;
 		box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.12);
 	}
@@ -328,8 +328,8 @@ const handleDataForm = () => {
 	grid-template-columns: 1fr 1fr;
 	gap: 8px 12px;
 	border-radius: 14px;
-	background: #f8fbfd;
-	border: 1px solid #eaf1f7;
+	background: var(--soft, #f8fbfd);
+	border: 1px solid var(--line, #eaf1f7);
 
 	li {
 		position: relative;

@@ -22,6 +22,10 @@ Page({
   },
 
   async onShow() {
+    if (!cache.getToken()) {
+      wx.reLaunch({ url: '/pages/login/login' })
+      return
+    }
     // 获取用户信息
     const { data } = await useUserInfoApi()
     cache.setUserInfo(data)

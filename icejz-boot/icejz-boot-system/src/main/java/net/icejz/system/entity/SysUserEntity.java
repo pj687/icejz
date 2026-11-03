@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 import net.icejz.framework.mybatis.entity.BaseEntity;
 import net.icejz.system.enums.UserStatusEnum;
 
+import java.time.LocalDateTime;
+
 /**
  * 用户
  *
@@ -67,6 +69,28 @@ public class SysUserEntity extends BaseEntity {
      * 状态  {@link UserStatusEnum}
      */
     private Integer status;
+    /**
+     * 封禁原因
+     */
+    private String banReason;
+    /**
+     * 封禁时间
+     */
+    private LocalDateTime banTime;
+    /**
+     * 封禁到期时间（空表示永久）
+     */
+    private LocalDateTime banExpireTime;
+    /**
+     * 多设备登录：null 跟随系统；0 单设备；1 多设备
+     */
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    private Integer multiDeviceLogin;
+    /**
+     * 个人多设备上限：null 跟随系统
+     */
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    private Integer multiDeviceMax;
     /**
      * 机构名称
      */

@@ -47,7 +47,9 @@ const thirdLogin = (openType: string) => {
 		}
 
 		userStore.thirdLoginAction(e.data).then(() => {
-			router.push({ path: cache.getRedirect() || constant.loginPage })
+			const redirect = cache.getRedirect()
+			cache.clearRedirect()
+			router.push({ path: redirect || constant.loginPage })
 		})
 	}
 }

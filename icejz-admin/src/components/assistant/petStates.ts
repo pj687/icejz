@@ -3,7 +3,7 @@ export type IcePetState =
 	| 'idle'
 	| 'running-right'
 	| 'running-left'
-	| 'waving'
+	| 'dance'
 	| 'jumping'
 	| 'failed'
 	| 'waiting'
@@ -23,6 +23,33 @@ export const PET_SHEET = {
 	height: 1872
 } as const
 
+/**
+ * 奶龙合拍手势舞专用条（hatch-pet 192×208 单元格）
+ * 列：哭高、哭低、交叉、打开、左抓、右抓、左圈、右圈
+ * sequence 按五组节拍展开播放索引
+ */
+export const DANCE_SHEET = {
+	src: '/mascot/xiaobing-dance/spritesheet.webp?v=hepai1',
+	fallbackSrc: '/mascot/xiaobing-dance/spritesheet.png?v=hepai1',
+	cellW: 192,
+	cellH: 208,
+	cols: 8,
+	rows: 1,
+	width: 1536,
+	height: 208,
+	/** 精灵表唯一姿势数 */
+	frames: 8,
+	fps: 5,
+	/** 合拍序列：右手哭×2 → 交叉打开 → 抓手 → 交叉×4 → 画圈×3 */
+	sequence: [
+		0, 1, 0, 1, // 右手哭两次
+		2, 3, // 交叉再打开
+		4, 3, 5, 3, // 依次抓手
+		2, 3, 2, 3, 2, 3, 2, 3, // 交叉四次
+		6, 7, 6, 7, 6, 7 // 左右画圈三次
+	] as const
+} as const
+
 /** 机体 ↔ 飞行 变身专用条（非 Codex 九态行） */
 export const MORPH_SHEET = {
 	src: '/mascot/xiaobing-morph/spritesheet.webp?v=1',
@@ -34,7 +61,10 @@ export const MORPH_SHEET = {
 	width: 1152,
 	height: 416,
 	frames: 6,
-	fps: 9,
+	/** 略提帧率，配合缓动节奏更顺 */
+	fps: 14,
+	/** 整段变身目标时长（毫秒），帧间隔按 ease 分配 */
+	durationMs: 720,
 	/** row0: 机体→飞行；row1: 飞行→机体 */
 	rowBotToFly: 0,
 	rowFlyToBot: 1
@@ -55,6 +85,8 @@ export const PET_STATES: Array<{
 	/** 越低单次动作越长、越顺滑可读 */
 	fps: number
 	loop: boolean
+	/** 循环帧来回播（举手→放下更自然，避免硬切回第 0 帧） */
+	pingPong?: boolean
 	/** 循环动作持续多久后回 idle（毫秒） */
 	holdMs: number
 	short: string
@@ -99,15 +131,16 @@ export const PET_STATES: Array<{
 		group: 'move'
 	},
 	{
-		name: 'waving',
-		row: 3,
-		frames: 4,
-		fps: 5.5,
+		/** 合拍手势舞：DANCE_SHEET.sequence 逐拍播放（非九态行） */
+		name: 'dance',
+		row: 0,
+		frames: DANCE_SHEET.sequence.length,
+		fps: DANCE_SHEET.fps,
 		loop: true,
-		holdMs: 1800,
-		short: '招呼',
-		label: '挥手打招呼',
-		tip: '嗨～小冰跟你打招呼！',
+		holdMs: Math.round((DANCE_SHEET.sequence.length / DANCE_SHEET.fps) * 1000) + 400,
+		short: '合拍',
+		label: '合拍手势舞',
+		tip: '合拍！哭两下、交叉、抓手、再交叉、画圈～',
 		group: 'react'
 	},
 	{
@@ -182,4 +215,4 @@ export const PET_STATE_MAP = Object.fromEntries(PET_STATES.map(s => [s.name, s])
 	(typeof PET_STATES)[number]
 >
 
-export const RANDOM_PET_STATES: IcePetState[] = ['waving', 'waiting', 'review', 'running', 'failed']
+export const RANDOM_PET_STATES: IcePetState[] = ['dance', 'waiting', 'review', 'running', 'failed']
