@@ -7,8 +7,8 @@
 						type="button"
 						class="avatar-btn"
 						:disabled="avatarUploading"
-						aria-label="更换头像"
-						@click="pickAvatar"
+						:aria-label="userStore.user.avatar ? '查看头像' : '上传头像'"
+						@click="onAvatarClick"
 					>
 						<img
 							v-if="userStore.user.avatar"
@@ -22,10 +22,30 @@
 						</span>
 						<span class="avatar-veil" aria-hidden="true">
 							<span class="veil-card">
-								<el-icon v-if="!avatarUploading"><Camera /></el-icon>
-								<em>{{ avatarUploading ? '上传中…' : '更换头像' }}</em>
+								<template v-if="avatarUploading">
+									<em>上传中…</em>
+								</template>
+								<template v-else-if="userStore.user.avatar">
+									<el-icon><ZoomIn /></el-icon>
+									<em>查看大图</em>
+								</template>
+								<template v-else>
+									<el-icon><Camera /></el-icon>
+									<em>上传头像</em>
+								</template>
 							</span>
 						</span>
+					</button>
+					<button
+						v-if="userStore.user.avatar"
+						type="button"
+						class="avatar-change"
+						:disabled="avatarUploading"
+						aria-label="更换头像"
+						title="更换头像"
+						@click.stop="pickAvatar"
+					>
+						<el-icon><Camera /></el-icon>
 					</button>
 					<span class="avatar-ring" aria-hidden="true"></span>
 					<input
@@ -36,6 +56,14 @@
 						@change="onAvatarChange"
 					/>
 				</div>
+
+				<el-image-viewer
+					v-if="avatarPreviewVisible && userStore.user.avatar"
+					teleported
+					:z-index="5000"
+					:url-list="[userStore.user.avatar]"
+					@close="avatarPreviewVisible = false"
+				/>
 
 				<div class="hero-meta">
 					<span class="hero-kicker">个人资料</span>
@@ -146,7 +174,7 @@
 
 <script setup lang="ts" name="ProfileIndex">
 import { computed, ref } from 'vue'
-import { Avatar, Camera } from '@element-plus/icons-vue'
+import { Avatar, Camera, ZoomIn } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/modules/user'
 import Password from '@/views/profile/password.vue'
 import UserInfo from '@/views/profile/user-info.vue'
@@ -161,12 +189,24 @@ const userStore = useUserStore()
 const activeName = ref('info')
 const avatarInputRef = ref<HTMLInputElement | null>(null)
 const avatarUploading = ref(false)
+const avatarPreviewVisible = ref(false)
 
 const pickAvatar = () => {
 	if (avatarUploading.value) {
 		return
 	}
 	avatarInputRef.value?.click()
+}
+
+const onAvatarClick = () => {
+	if (avatarUploading.value) {
+		return
+	}
+	if (userStore.user.avatar) {
+		avatarPreviewVisible.value = true
+		return
+	}
+	pickAvatar()
 }
 
 const onAvatarChange = async (event: Event) => {
@@ -413,6 +453,41 @@ const overviewGroups = computed(() => [
 	}
 }
 
+.avatar-change {
+	position: absolute;
+	right: 2px;
+	bottom: 2px;
+	z-index: 2;
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	color: #fff;
+	background: linear-gradient(145deg, #00a8e8, #007eb8);
+	box-shadow: 0 8px 16px rgba(0, 126, 184, 0.28);
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+	.el-icon {
+		font-size: 15px;
+	}
+
+	&:hover,
+	&:focus-visible {
+		transform: translateY(-1px) scale(1.04);
+		box-shadow: 0 10px 18px rgba(0, 126, 184, 0.34);
+		outline: none;
+	}
+
+	&:disabled {
+		cursor: wait;
+		opacity: 0.72;
+	}
+}
+
 .avatar-ring {
 	position: absolute;
 	inset: 0;
@@ -424,7 +499,7 @@ const overviewGroups = computed(() => [
 }
 
 .hero-avatar:hover .avatar-ring,
-.avatar-btn:focus-visible + .avatar-ring,
+.hero-avatar:focus-within .avatar-ring,
 .hero-avatar.uploading .avatar-ring {
 	border-color: rgba(0, 168, 232, 0.42);
 	box-shadow: 0 0 0 5px rgba(0, 168, 232, 0.12);

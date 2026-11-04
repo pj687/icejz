@@ -4,15 +4,41 @@ export const useCaptchaEnabledApi = () => {
   return request.get('/sys/auth/captcha/enabled')
 }
 
-export const useCaptchaApi = () => {
-  return request.get('/sys/auth/captcha')
+export const useCaptchaApi = (channel = 'app') => {
+  return request.get('/sys/auth/captcha', { channel })
+}
+
+/** 交互验证码预校验（不消耗验证码，登录时再正式校验） */
+export const useCaptchaCheckApi = (data) => {
+  return request.post('/sys/auth/captcha/check', data)
 }
 
 /**
- * 登录接口
+ * 账号登录接口
  */
 export const useLoginApi = (data) => {
   return request.post('/sys/auth/login', data)
+}
+
+/**
+ * 发送手机验证码（需先通过图形验证码）
+ */
+export const useSendCodeApi = (data) => {
+  return request.post('/sys/auth/send/code', data)
+}
+
+/**
+ * 手机验证码登录接口
+ */
+export const useMobileLoginApi = (data) => {
+  return request.post('/sys/auth/mobile', data)
+}
+
+/**
+ * 首次登录完善信息
+ */
+export const useCompleteProfileApi = (data) => {
+  return request.post('/sys/auth/complete-profile', data)
 }
 
 /**

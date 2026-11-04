@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "echarts": "^5.5.0",
     "miniprogram-sm-crypto": "^0.3.13",
     "tdesign-miniprogram": "^1.8.4"
   },

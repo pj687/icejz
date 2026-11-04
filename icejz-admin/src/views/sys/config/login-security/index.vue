@@ -4,7 +4,7 @@
 			<div class="hero-copy">
 				<span class="hero-kicker"><i class="hero-mark" aria-hidden="true"></i>系统管理</span>
 				<h2>登录安全</h2>
-				<p>管理员配置系统默认多设备策略。普通用户请在「个人中心 → 登录设备」自行覆盖；也可在用户管理中代为设置。</p>
+				<p>系统总开关优先：关闭后全员强制单设备互踢，个人与用户管理均不可再开启；开启后用户可在「个人中心 → 登录设备」覆盖为关/开。</p>
 			</div>
 			<div class="hero-meta">
 				<span class="hero-chip" :class="{ on: form.multiDeviceLogin }">
@@ -18,8 +18,8 @@
 			<el-form label-position="top" class="security-form">
 				<section class="block">
 					<div class="block-head">
-						<strong>多设备登录（系统默认）</strong>
-						<em>面向管理员 / 技术人员的全局默认。未单独配置的用户跟随此处；个人覆盖入口在个人中心。</em>
+						<strong>多设备登录（系统总开关）</strong>
+						<em>关闭即全员强制单设备；开启后未单独配置的用户跟随多设备，个人仍可主动关掉。</em>
 					</div>
 					<div class="switch-panel" :class="{ on: form.multiDeviceLogin }">
 						<div class="switch-copy">
@@ -27,8 +27,8 @@
 							<span class="switch-desc">
 								{{
 									form.multiDeviceLogin
-										? '已开启：同一账号可在多端同时在线；超过上限将踢掉最早登录的会话。'
-										: '已关闭：同一账号仅保留最新一次登录，旧设备 accessToken 立即失效。'
+										? '已开启：允许多端在线；个人可覆盖关闭。超过上限将踢掉最早会话。'
+										: '已关闭：全员强制单设备互踢，个人与用户管理均无法开启多设备。'
 								}}
 							</span>
 						</div>

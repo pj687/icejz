@@ -1,0 +1,134 @@
+<view class="guide tone-{{current.tone}}">
+  <view class="bg" aria-hidden="true">
+    <view class="bg-base" />
+    <view class="aurora a1" />
+    <view class="aurora a2" />
+    <view class="blob b1" />
+    <view class="blob b2" />
+    <view class="beam" />
+    <view class="grid" />
+    <view class="grain" />
+    <view class="vignette" />
+    <view class="corner tl"><view class="ch" /><view class="cv" /></view>
+    <view class="corner tr"><view class="ch" /><view class="cv" /></view>
+    <view class="corner bl"><view class="ch" /><view class="cv" /></view>
+    <view class="corner br"><view class="ch" /><view class="cv" /></view>
+  </view>
+
+  <view class="chrome" style="padding-top: {{statusBarPx + 6}}px;">
+    <view class="mark-row">
+      <view class="mark-line" />
+      <text class="mark-text">STUDIO</text>
+      <view class="mark-line" />
+    </view>
+    <view class="skip-btn" bindtap="finish">{{copy.skip}}</view>
+  </view>
+
+  <view class="progress">
+    <view class="track">
+      <view class="fill" style="width: {{progressPct}}%;">
+        <view class="fill-tip" />
+      </view>
+    </view>
+    <text class="progress-lab">{{progressText}}</text>
+  </view>
+
+  <swiper class="board" current="{{step}}" duration="420" bindchange="onSwipe">
+    <swiper-item wx:for="{{steps}}" wx:key="key">
+      <view class="pane {{index === step ? 'on' : ''}}">
+        <view class="orb-wrap">
+          <view class="halo" />
+          <view class="halo soft" />
+          <view class="ring r1" />
+          <view class="ring r2" />
+          <view class="orbit">
+            <view class="orbit-dot" />
+          </view>
+          <view class="orbit slow">
+            <view class="orbit-dot mini" />
+          </view>
+          <view class="tick t1" />
+          <view class="tick t2" />
+          <view class="tick t3" />
+          <view class="tick t4" />
+
+          <view class="orb {{item.tone}}">
+            <view class="orb-sheen" />
+            <view class="orb-rim" />
+
+            <view wx:if="{{item.key === 'welcome'}}" class="viz welcome">
+              <view class="logo-frame">
+                <image class="logo" src="/images/logo.png" mode="aspectFill" />
+              </view>
+              <view class="wm">
+                <text class="ice">ICE</text><text class="jz">JZ</text>
+              </view>
+            </view>
+
+            <view wx:elif="{{item.key === 'workbench'}}" class="viz mosaic">
+              <view class="tile a">
+                <view class="spark" />
+                <view class="bar b1" />
+                <view class="bar b2" />
+                <view class="bar b3" />
+              </view>
+              <view class="tile b">
+                <image src="/images/tab/work-active.svg" mode="aspectFit" />
+              </view>
+              <view class="tile c">
+                <view class="dot on" />
+                <view class="dot" />
+                <view class="dot" />
+              </view>
+            </view>
+
+            <view wx:elif="{{item.key === 'assistant'}}" class="viz bot">
+              <image class="mascot" src="/images/mascot/xiaobing-main.png" mode="aspectFit" />
+            </view>
+
+            <view wx:else class="viz safe">
+              <view class="shield">
+                <image src="/images/icons/lock.svg" mode="aspectFit" />
+              </view>
+              <view class="safe-gems">
+                <view class="gem"><image src="/images/icons/profile.svg" mode="aspectFit" /></view>
+                <view class="gem"><image src="/images/icons/device.svg" mode="aspectFit" /></view>
+                <view class="gem"><image src="/images/tab/me-active.svg" mode="aspectFit" /></view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="copy">
+          <view class="meta">
+            <text class="num">{{item.num}}</text>
+            <view class="meta-rule" />
+            <text class="kicker">{{item.kicker}}</text>
+          </view>
+          <text class="title">{{item.title}}</text>
+          <text class="desc">{{item.desc}}</text>
+          <view class="feats">
+            <view wx:for="{{item.chips}}" wx:for-item="chip" wx:key="*this" class="feat">
+              <view class="feat-diamond" />
+              <text>{{chip}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <view class="footer">
+    <view class="ctrl back {{step <= 0 ? 'ghost' : ''}}" bindtap="prev">
+      <text>‹</text>
+    </view>
+    <view wx:if="{{!isLast}}" class="ctrl skip-foot" bindtap="finish">
+      {{copy.skip}}
+    </view>
+    <view class="ctrl primary {{isLast ? 'final' : ''}}" bindtap="next">
+      <view class="primary-sheen" />
+      <text>{{isLast ? copy.start : copy.next}}</text>
+      <text wx:if="{{!isLast}}" class="arrow">›</text>
+    </view>
+  </view>
+</view>

@@ -17,6 +17,12 @@ public enum CaptchaTypeEnum {
     BLOCK_PUZZLE("block_puzzle", "slider", "请拖动滑块完成拼图"),
     /** 文字点选（AJ-Captcha 同类交互） */
     CLICK_WORD("click_word", "word", "请依次点击图中文字"),
+    /** 滑动曲线：两端钉在底图端点，拖动滑块摆动中点对齐绳影 */
+    CURVE("curve", "curve", "拖动滑块摆动绳子，使中点对齐"),
+    /** 旋转验证码：拖动滑块将图片旋转至正向 */
+    ROTATE("rotate", "rotate", "请拖动滑块将图片旋转至正向"),
+    /** 角度验证码：拖动滑块旋转指针至正上方 */
+    ANGLE("angle", "angle", "请拖动滑块旋转指针至正上方"),
     /** 浏览器工作量证明（无感算力校验） */
     POW("pow", "pow", "正在进行安全校验…"),
     /** Cloudflare Turnstile（需配置站点密钥） */
@@ -45,6 +51,7 @@ public enum CaptchaTypeEnum {
     }
 
     public boolean isBehavior() {
-        return this == BLOCK_PUZZLE || this == CLICK_WORD || this == POW || this == TURNSTILE;
+        return this == BLOCK_PUZZLE || this == CLICK_WORD || this == CURVE
+                || this == ROTATE || this == ANGLE || this == POW || this == TURNSTILE;
     }
 }

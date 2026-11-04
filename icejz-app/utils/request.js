@@ -4,8 +4,7 @@ const cache = require('@/utils/cache.js')
 const baseUrl = 'http://localhost:8080'
 // const baseUrl = 'https://demo.icejz.net/icejz-boot-server'
 
-const request = (method, url, data = {}, header = {}) => {
-  // 如果token存在，则设置token
+const request = (method, url, data = {}, header = {}, options = {}) => {
   if (cache.getToken()) {
     header.Authorization = cache.getToken()
   }
@@ -16,8 +15,8 @@ const request = (method, url, data = {}, header = {}) => {
       method: method,
       data: data,
       header: header,
+      timeout: options.timeout || 15000,
       success: (res) => {
-        // 处理响应
         response(res.data, resolve, reject)
       },
       fail: (err) => {
@@ -28,7 +27,6 @@ const request = (method, url, data = {}, header = {}) => {
 }
 
 const upload = (url, filePath, name, formData = {}, header = {}) => {
-  // 如果token存在，则设置token
   if (cache.getToken()) {
     header.Authorization = cache.getToken()
   }
@@ -41,7 +39,6 @@ const upload = (url, filePath, name, formData = {}, header = {}) => {
       formData: formData,
       header: header,
       success: (res) => {
-        // 处理响应
         response(JSON.parse(res.data), resolve, reject)
       },
       fail: (err) => {
@@ -57,11 +54,8 @@ const response = (data, resolve, reject) => {
     return
   }
 
-  // 未登录或token失效
   if (data.code === 401) {
     cache.removeToken()
-
-    // 跳转到登录页
     wx.reLaunch({
       url: '/pages/login/login'
     })
@@ -77,22 +71,24 @@ const response = (data, resolve, reject) => {
   reject(data)
 }
 
-const get = (url, data = {}, header = {}) => {
-  // 为了防止缓存，携带时间戳
+const get = (url, data = {}, header = {}, options = {}) => {
   data.t = new Date().getTime()
-  return request('GET', url, data, header)
+  return request('GET', url, data, header, options)
 }
 
-const post = (url, data = {}, header = {}) => {
-  return request('POST', url, data, header)
+const post = (url, data = {}, header = {}, options = {}) => {
+  return request('POST', url, data, {
+    'content-type': 'application/json',
+    ...header
+  }, options)
 }
 
-const put = (url, data = {}, header = {}) => {
-  return request('PUT', url, data, header)
+const put = (url, data = {}, header = {}, options = {}) => {
+  return request('PUT', url, data, header, options)
 }
 
-const del = (url, data = {}, header = {}) => {
-  return request('DELETE', url, data, header)
+const del = (url, data = {}, header = {}, options = {}) => {
+  return request('DELETE', url, data, header, options)
 }
 
 export { get, post, put, del, upload }

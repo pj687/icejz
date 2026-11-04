@@ -1,447 +1,353 @@
 <template>
-    <view class="input-page">
-        <view class="page-bg">
-            <view class="bg-orb orb-gold"></view>
-            <view class="bg-orb orb-blue"></view>
+  <view class="page ice-subpage">
+    <ice-nav-bar :title="activeField.title" :sub="activeField.desc" />
+
+    <view class="body">
+      <view class="panel">
+        <view class="field-head">
+          <view class="mark" :class="activeField.theme">
+            <image class="mark-img" :src="activeField.icon" mode="aspectFit" />
+          </view>
+          <view class="field-meta">
+            <text class="label">{{ activeField.label }}</text>
+            <text class="tip">{{ activeField.tip }}</text>
+          </view>
         </view>
 
-        <view class="hero-card glass-card">
-            <text class="hero-eyebrow">资料编辑</text>
-            <text class="hero-title">{{ activeField.title }}</text>
-            <text class="hero-desc">{{ activeField.desc }}</text>
+        <view class="input-shell">
+          <input
+            v-model.trim="formValue"
+            :type="activeField.inputType"
+            :maxlength="activeField.maxlength"
+            :placeholder="activeField.placeholder"
+            :cursor-spacing="20"
+            class="field-input"
+            :focus="true"
+            confirm-type="done"
+            @confirm="onSubmit"
+          />
         </view>
 
-        <view class="editor-card glass-card">
-            <view class="field-head">
-                <view class="field-icon" :class="activeField.theme">
-                    <uni-icons :type="activeField.icon" size="18" color="#ffffff" />
-                </view>
-                <view class="field-meta">
-                    <text class="field-label">{{ activeField.label }}</text>
-                    <text class="field-tip">{{ activeField.tip }}</text>
-                </view>
-            </view>
-
-            <view class="input-shell">
-                <input
-                    v-model.trim="formValue"
-                    :type="activeField.inputType"
-                    :maxlength="activeField.maxlength"
-                    :placeholder="activeField.placeholder"
-                    :cursor-spacing="20"
-                    class="field-input"
-                    :focus="true"
-                    confirm-type="done"
-                    @confirm="onSubmit"
-                />
-            </view>
-
-            <view class="preview-card">
-                <view class="compare-row">
-                    <view class="compare-item">
-                        <text class="preview-label">原值</text>
-                        <text class="preview-value">{{ originalValue || activeField.emptyText }}</text>
-                    </view>
-                    <view class="compare-arrow">
-                        <uni-icons type="arrowright" size="16" color="#94a3b8" />
-                    </view>
-                    <view class="compare-item">
-                        <text class="preview-label">新值</text>
-                        <text class="preview-value">{{ formValue || activeField.emptyText }}</text>
-                    </view>
-                </view>
-            </view>
+        <view class="compare">
+          <view class="compare-item">
+            <text class="compare-label">{{ $t('profile.original') }}</text>
+            <text class="compare-value">{{ originalValue || activeField.emptyText }}</text>
+          </view>
+          <text class="compare-arrow">→</text>
+          <view class="compare-item">
+            <text class="compare-label">{{ $t('profile.next') }}</text>
+            <text class="compare-value accent">{{ formValue || activeField.emptyText }}</text>
+          </view>
         </view>
+      </view>
 
-        <view class="action-bar">
-            <button class="save-btn" :loading="saving" @click="onSubmit">保存修改</button>
-        </view>
+      <button class="save-btn" :loading="saving" @click="onSubmit">{{ $t('profile.saveEdit') }}</button>
     </view>
+  </view>
 </template>
 
 <script>
-import cache from '../../../../utils/cache.js';
-import { useUserInfoApi, useUserInfoSubmitApi } from '../../../../api/user.js';
+import cache from '@/utils/cache.js'
+import { useUserInfoApi, useUserInfoSubmitApi } from '@/api/user.js'
+import IceNavBar from '@/components/layout/IceNavBar.vue'
 
-const FIELD_MAP = {
-    realName: {
-        key: 'realName',
-        title: '修改姓名',
-        label: '姓名',
-        desc: '请填写真实姓名，方便服务人员与家属准确识别。',
-        tip: '建议填写身份证或常用姓名',
-        placeholder: '请输入姓名',
-        emptyText: '暂未填写姓名',
-        inputType: 'text',
-        maxlength: 20,
-        icon: 'person-filled',
-        theme: 'dark'
-    },
-    mobile: {
-        key: 'mobile',
-        title: '修改手机号',
-        label: '手机号',
-        desc: '手机号将用于登录、通知提醒和服务联系，请确保可正常接收消息。',
-        tip: '请输入本人常用手机号',
-        placeholder: '请输入手机号',
-        emptyText: '暂未填写手机号',
-        inputType: 'number',
-        maxlength: 11,
-        icon: 'phone-filled',
-        theme: 'blue'
-    },
-    email: {
-        key: 'email',
-        title: '修改邮箱',
-        label: '邮箱',
-        desc: '邮箱可用于接收重要通知、账号提醒和后续服务消息。',
-        tip: '请输入常用邮箱地址',
-        placeholder: '请输入邮箱',
-        emptyText: '暂未填写邮箱',
-        inputType: 'text',
-        maxlength: 50,
-        icon: 'email-filled',
-        theme: 'violet'
-    }
-};
+const FIELD_META = {
+  realName: {
+    key: 'realName',
+    inputType: 'text',
+    maxlength: 20,
+    icon: '/static/icons/name.svg',
+    theme: 'dark',
+    titleKey: 'profile.editName',
+    labelKey: 'profile.name',
+    descKey: 'profile.nameDesc',
+    tipKey: 'profile.nameLabelTip',
+    phKey: 'profile.namePh',
+    emptyKey: 'profile.emptyName'
+  },
+  mobile: {
+    key: 'mobile',
+    inputType: 'number',
+    maxlength: 11,
+    icon: '/static/icons/phone.svg',
+    theme: 'cyan',
+    titleKey: 'profile.editMobile',
+    labelKey: 'profile.mobile',
+    descKey: 'profile.mobileDesc',
+    tipKey: 'profile.mobileLabelTip',
+    phKey: 'profile.mobilePh',
+    emptyKey: 'profile.emptyMobile'
+  },
+  email: {
+    key: 'email',
+    inputType: 'text',
+    maxlength: 50,
+    icon: '/static/icons/email.svg',
+    theme: 'sky',
+    titleKey: 'profile.editEmail',
+    labelKey: 'profile.email',
+    descKey: 'profile.emailDesc',
+    tipKey: 'profile.emailLabelTip',
+    phKey: 'profile.emailPh',
+    emptyKey: 'profile.emptyEmail'
+  }
+}
 
 export default {
-    name: 'UserInfoInput',
-    data() {
-        return {
-            fieldKey: 'realName',
-            formValue: '',
-            originalValue: '',
-            saving: false,
-            user: {
-                realName: '',
-                mobile: '',
-                email: '',
-                gender: 2
-            }
-        };
-    },
-    computed: {
-        activeField() {
-            return FIELD_MAP[this.fieldKey] || FIELD_MAP.realName;
-        }
-    },
-    onLoad(options) {
-        const nextKey = options?.key;
-        this.fieldKey = FIELD_MAP[nextKey] ? nextKey : 'realName';
-
-        const userInfo = cache.getUserInfo() || {};
-        this.user = {
-            realName: userInfo.realName || '',
-            mobile: userInfo.mobile || '',
-            email: userInfo.email || '',
-            gender: userInfo.gender ?? 2
-        };
-        this.formValue = this.user[this.fieldKey] || '';
-        this.originalValue = this.formValue;
-        uni.setNavigationBarTitle({ title: this.activeField.title });
-    },
-    methods: {
-        validateValue() {
-            const value = (this.formValue || '').trim();
-            if (this.fieldKey === 'realName') {
-                if (!value) {
-                    uni.showToast({ title: '姓名不能为空', icon: 'none' });
-                    return false;
-                }
-            }
-            if (this.fieldKey === 'mobile') {
-                if (!value) {
-                    uni.showToast({ title: '手机号不能为空', icon: 'none' });
-                    return false;
-                }
-                if (!/^1[3-9]\d{9}$/.test(value)) {
-                    uni.showToast({ title: '手机号格式不正确', icon: 'none' });
-                    return false;
-                }
-            }
-            if (this.fieldKey === 'email') {
-                if (!value) {
-                    uni.showToast({ title: '邮箱不能为空', icon: 'none' });
-                    return false;
-                }
-                if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(value)) {
-                    uni.showToast({ title: '邮箱格式不正确', icon: 'none' });
-                    return false;
-                }
-            }
-            return true;
-        },
-        async onSubmit() {
-            if (this.saving) return;
-            if (!this.validateValue()) return;
-
-            const value = (this.formValue || '').trim();
-            if (value === (this.originalValue || '').trim()) {
-                uni.showToast({ title: '内容未发生变化', icon: 'none' });
-                return;
-            }
-
-            this.saving = true;
-            try {
-                const payload = {
-                    ...this.user,
-                    [this.fieldKey]: value
-                };
-                await useUserInfoSubmitApi(payload);
-                const userResponse = await useUserInfoApi();
-                const latestUser = userResponse?.data || payload;
-                this.user = {
-                    ...this.user,
-                    ...latestUser
-                };
-                this.formValue = latestUser[this.fieldKey] || value;
-                this.originalValue = latestUser[this.fieldKey] || value;
-                cache.setUserInfo({
-                    ...cache.getUserInfo(),
-                    ...latestUser
-                });
-                uni.showToast({ title: '保存成功', icon: 'success' });
-                const pages = getCurrentPages();
-                // 通知页面栈中所有相关页面刷新
-                pages.forEach(page => {
-                    const vm = page.$vm;
-                    if (!vm) return;
-                    if (typeof vm.loadUserInfo === 'function') vm.loadUserInfo();
-                    if (typeof vm.loadMemberSummary === 'function') vm.loadMemberSummary();
-                });
-                setTimeout(() => {
-                    uni.navigateBack();
-                }, 600);
-            } catch (error) {
-                console.error('update user info error', error);
-                uni.showToast({ title: error?.msg || '保存失败', icon: 'none' });
-            } finally {
-                this.saving = false;
-            }
-        }
+  name: 'UserInfoInput',
+  components: { IceNavBar },
+  data() {
+    return {
+      fieldKey: 'realName',
+      formValue: '',
+      originalValue: '',
+      saving: false,
+      user: {
+        realName: '',
+        mobile: '',
+        email: '',
+        gender: 2
+      }
     }
-};
+  },
+  computed: {
+    activeField() {
+      void this.$i18n.locale
+      const meta = FIELD_META[this.fieldKey] || FIELD_META.realName
+      return {
+        ...meta,
+        title: this.$t(meta.titleKey),
+        label: this.$t(meta.labelKey),
+        desc: this.$t(meta.descKey),
+        tip: this.$t(meta.tipKey),
+        placeholder: this.$t(meta.phKey),
+        emptyText: this.$t(meta.emptyKey)
+      }
+    }
+  },
+  onLoad(options) {
+    const nextKey = options?.key
+    this.fieldKey = FIELD_META[nextKey] ? nextKey : 'realName'
+    const userInfo = cache.getUserInfo() || {}
+    this.user = {
+      realName: userInfo.realName || '',
+      mobile: userInfo.mobile || '',
+      email: userInfo.email || '',
+      gender: userInfo.gender ?? 2
+    }
+    this.formValue = this.user[this.fieldKey] || ''
+    this.originalValue = this.formValue
+  },
+  methods: {
+    validateValue() {
+      const value = (this.formValue || '').trim()
+      if (this.fieldKey === 'realName' && !value) {
+        uni.showToast({ title: this.$t('profile.nameRequired'), icon: 'none' })
+        return false
+      }
+      if (this.fieldKey === 'mobile') {
+        if (!value) {
+          uni.showToast({ title: this.$t('profile.mobileRequired'), icon: 'none' })
+          return false
+        }
+        if (!/^1[3-9]\d{9}$/.test(value)) {
+          uni.showToast({ title: this.$t('profile.mobileInvalid'), icon: 'none' })
+          return false
+        }
+      }
+      if (this.fieldKey === 'email') {
+        if (!value) {
+          uni.showToast({ title: this.$t('profile.emailRequired'), icon: 'none' })
+          return false
+        }
+        if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(value)) {
+          uni.showToast({ title: this.$t('profile.emailInvalid'), icon: 'none' })
+          return false
+        }
+      }
+      return true
+    },
+    async onSubmit() {
+      if (this.saving) return
+      if (!this.validateValue()) return
+      const value = (this.formValue || '').trim()
+      if (value === (this.originalValue || '').trim()) {
+        uni.showToast({ title: this.$t('profile.noChange'), icon: 'none' })
+        return
+      }
+      this.saving = true
+      try {
+        const payload = { ...this.user, [this.fieldKey]: value }
+        await useUserInfoSubmitApi(payload)
+        const userResponse = await useUserInfoApi()
+        const latestUser = userResponse?.data || payload
+        this.user = { ...this.user, ...latestUser }
+        this.formValue = latestUser[this.fieldKey] || value
+        this.originalValue = latestUser[this.fieldKey] || value
+        cache.setUserInfo({ ...cache.getUserInfo(), ...latestUser })
+        uni.showToast({ title: this.$t('profile.saveOk'), icon: 'success' })
+        const pages = getCurrentPages()
+        pages.forEach((page) => {
+          const vm = page.$vm
+          if (!vm) return
+          if (typeof vm.loadUser === 'function') vm.loadUser()
+          if (typeof vm.loadUserInfo === 'function') vm.loadUserInfo()
+        })
+        setTimeout(() => uni.navigateBack(), 600)
+      } catch (error) {
+        uni.showToast({ title: error?.msg || this.$t('common.fail'), icon: 'none' })
+      } finally {
+        this.saving = false
+      }
+    }
+  }
+}
 </script>
 
 <style scoped>
-.input-page {
-    min-height: 100vh;
-    position: relative;
-    overflow: hidden;
-    padding: 28rpx 24rpx 48rpx;
-    background:
-        radial-gradient(circle at top left, rgba(250, 204, 21, 0.18) 0%, rgba(250, 204, 21, 0) 28%),
-        radial-gradient(circle at top right, rgba(96, 165, 250, 0.16) 0%, rgba(96, 165, 250, 0) 30%),
-        linear-gradient(180deg, #f7f8fc 0%, #eef2f7 100%);
+.page {
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
-.page-bg {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+.body {
+  padding: 8rpx 28rpx 48rpx;
 }
 
-.bg-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(90rpx);
-    opacity: 0.55;
-}
-
-.orb-gold {
-    width: 320rpx;
-    height: 320rpx;
-    top: -40rpx;
-    left: -60rpx;
-    background: rgba(251, 191, 36, 0.28);
-}
-
-.orb-blue {
-    width: 360rpx;
-    height: 360rpx;
-    top: 220rpx;
-    right: -120rpx;
-    background: rgba(96, 165, 250, 0.26);
-}
-
-.glass-card {
-    position: relative;
-    z-index: 1;
-    background: rgba(255, 255, 255, 0.88);
-    border: 1rpx solid rgba(255, 255, 255, 0.72);
-    box-shadow: 0 24rpx 60rpx rgba(15, 23, 42, 0.08);
-    backdrop-filter: blur(20rpx);
-    -webkit-backdrop-filter: blur(20rpx);
-}
-
-.hero-card {
-    border-radius: 32rpx;
-    padding: 30rpx;
-    background: linear-gradient(145deg, rgba(17, 24, 39, 0.96) 0%, rgba(51, 65, 85, 0.92) 100%);
-    box-shadow: 0 30rpx 70rpx rgba(15, 23, 42, 0.22);
-}
-
-.hero-eyebrow {
-    display: block;
-    color: rgba(255, 255, 255, 0.72);
-    font-size: 22rpx;
-    letter-spacing: 4rpx;
-}
-
-.hero-title {
-    display: block;
-    margin-top: 12rpx;
-    color: #ffffff;
-    font-size: 42rpx;
-    font-weight: 700;
-}
-
-.hero-desc {
-    display: block;
-    margin-top: 12rpx;
-    color: #cbd5e1;
-    font-size: 24rpx;
-    line-height: 1.7;
-}
-
-.editor-card {
-    margin-top: 22rpx;
-    border-radius: 30rpx;
-    padding: 28rpx 24rpx;
+.panel {
+  margin-top: 0;
+  padding: 28rpx 24rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1rpx solid rgba(255, 255, 255, 0.98);
+  box-shadow: 0 14rpx 36rpx rgba(15, 35, 55, 0.05);
 }
 
 .field-head {
-    display: flex;
-    align-items: center;
-    gap: 18rpx;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
 }
 
-.field-icon {
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 22rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 12rpx 24rpx rgba(15, 23, 42, 0.1);
+.mark {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.field-icon.dark {
-    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+.mark-img {
+  width: 36rpx;
+  height: 36rpx;
 }
 
-.field-icon.blue {
-    background: linear-gradient(135deg, #00a8e8 0%, #3ec6ff 100%);
+.mark.dark {
+  background: rgba(2, 132, 199, 0.12);
 }
 
-.field-icon.violet {
-    background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+.mark.cyan {
+  background: rgba(0, 168, 232, 0.12);
+}
+
+.mark.sky {
+  background: rgba(14, 165, 233, 0.12);
 }
 
 .field-meta {
-    flex: 1;
-    min-width: 0;
+  flex: 1;
+  min-width: 0;
 }
 
-.field-label {
-    display: block;
-    color: #111827;
-    font-size: 30rpx;
-    font-weight: 700;
+.label {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #0f1724;
 }
 
-.field-tip {
-    display: block;
-    margin-top: 8rpx;
-    color: #94a3b8;
-    font-size: 22rpx;
-    line-height: 1.6;
+.tip {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #7a8899;
 }
 
 .input-shell {
-    margin-top: 28rpx;
-    padding: 0 24rpx;
-    height: 108rpx;
-    border-radius: 26rpx;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    border: 1rpx solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
+  margin-top: 28rpx;
+  height: 96rpx;
+  padding: 0 28rpx;
+  border-radius: 24rpx;
+  background: #f7fafc;
+  border: 1rpx solid rgba(232, 238, 245, 0.9);
+  display: flex;
+  align-items: center;
 }
 
 .field-input {
-    width: 100%;
-    font-size: 30rpx;
-    color: #0f172a;
+  width: 100%;
+  font-size: 30rpx;
+  color: #0f1724;
 }
 
-.preview-card {
-    margin-top: 22rpx;
-    padding: 24rpx;
-    border-radius: 24rpx;
-    background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
-}
-
-.compare-row {
-    display: flex;
-    align-items: center;
-    gap: 16rpx;
+.compare {
+  margin-top: 22rpx;
+  padding: 22rpx;
+  border-radius: 20rpx;
+  background: rgba(0, 168, 232, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
 }
 
 .compare-item {
-    flex: 1;
-    min-width: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.compare-label {
+  display: block;
+  font-size: 20rpx;
+  color: #7a8899;
+}
+
+.compare-value {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #0f1724;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.compare-value.accent {
+  color: #00a8e8;
 }
 
 .compare-arrow {
-    width: 44rpx;
-    height: 44rpx;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.78);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.preview-label {
-    display: block;
-    color: #64748b;
-    font-size: 22rpx;
-}
-
-.preview-value {
-    display: block;
-    margin-top: 12rpx;
-    color: #111827;
-    font-size: 28rpx;
-    font-weight: 600;
-    line-height: 1.7;
-    word-break: break-all;
-}
-
-.action-bar {
-    position: relative;
-    z-index: 1;
-    margin-top: 28rpx;
+  color: #94a3b8;
+  font-size: 28rpx;
+  flex-shrink: 0;
 }
 
 .save-btn {
-    width: 100%;
-    height: 92rpx;
-    line-height: 92rpx;
-    border-radius: 22rpx;
-    border: none;
-    font-size: 30rpx;
-    font-weight: 700;
-    color: #ffffff;
-    background: linear-gradient(135deg, #111827 0%, #374151 100%);
-    box-shadow: 0 18rpx 36rpx rgba(15, 23, 42, 0.16);
+  margin-top: 28rpx;
+  width: 100%;
+  height: 92rpx;
+  line-height: 92rpx;
+  border-radius: 999rpx;
+  border: none;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(145deg, #00a8e8, #2bb8ef);
+  box-shadow: 0 14rpx 28rpx rgba(0, 168, 232, 0.26);
 }
 
 .save-btn::after {
-    border: none;
+  border: none;
 }
 </style>

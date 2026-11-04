@@ -1,5 +1,5 @@
 /**
- * ICEJZ 用户端（小程序）品牌文案 — 与 icejz-admin 保持一致
+ * ICEJZ 用户端（小程序）品牌文案 — 与 icejz-admin / uniapp 对齐
  */
 module.exports = {
   name: 'ICEJZ',
@@ -8,6 +8,11 @@ module.exports = {
   tagline: '低代码开发平台 · ICECORE 引擎',
   description:
     '面向企业的低代码开发平台，支持代码生成、在线表单、工作流与多端接入，帮助团队更快交付业务系统。',
+  aboutIntro:
+    'ICEJZ 是面向企业的低代码开发平台，基于 ICECORE 引擎提供代码生成、在线表单、工作流与多端接入能力，帮助团队更快交付业务系统。',
+  poweredBy: 'ICEJZ',
+  footer: '© 2026 ICEJZ',
+  version: 'v1.0.3',
   workspaceKicker: 'ICEJZ WORKSPACE',
   workspaceTitle: '工作台',
   workspaceSub: '与管理端同源数据，移动端快速查阅',

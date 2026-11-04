@@ -1,18 +1,50 @@
 <template>
 	<view class="captcha-field" :data-mode="mode">
-		<!-- 滑动拼图 -->
-		<view v-if="mode === 'slider'" class="panel slider-panel" :class="statusClass">
+		<!-- 滑动拼图 / 滑动曲线 -->
+		<view v-if="mode === 'slider' || mode === 'curve'" class="panel slider-panel" :class="statusClass">
 			<view class="panel-head">
-				<text class="badge">滑动拼图</text>
-				<text class="tip">{{ tip || '向右拖动滑块完成拼图' }}</text>
+				<text class="badge">{{ mode === 'curve' ? '滑动曲线' : '滑动拼图' }}</text>
+				<text class="tip">{{ tip || (mode === 'curve' ? '拖动滑块摆动绳子，使中点对齐' : '向右拖动滑块完成拼图') }}</text>
 			</view>
 			<view class="puzzle-stage">
 				<image v-if="image" :src="image" mode="widthFix" class="puzzle-bg" />
-				<!-- 拼图块必须用定宽高容器：绝对定位 + widthFix 在 H5/小程序上经常高度为 0 -->
-				<view v-if="jigsawImage" class="puzzle-piece" :style="pieceStyle">
+				<!-- 拼图块必须用定宽高容器 -->
+				<view v-if="mode === 'slider' && jigsawImage" class="puzzle-piece" :style="pieceStyle">
 					<image :src="jigsawImage" mode="scaleToFill" class="puzzle-piece-img" />
 				</view>
-				<view v-if="status === 'ok'" class="mask ok">拼图已对齐</view>
+				<!-- V 绳子：两端钉死在底图端点，滑块只摆中点 -->
+				<svg
+					v-if="mode === 'curve' && curveMeta"
+					class="curve-rope-overlay"
+					:viewBox="'0 0 ' + PUZZLE_W + ' ' + PUZZLE_H"
+					preserveAspectRatio="none"
+				>
+					<path
+						fill="none"
+						stroke="rgba(255,255,255,0.32)"
+						stroke-width="13"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						:d="curveRopeD"
+					/>
+					<path
+						fill="none"
+						stroke="#ffffff"
+						stroke-width="5.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						:d="curveRopeD"
+					/>
+					<circle
+						:cx="curveVertex.x"
+						:cy="curveVertex.y"
+						r="6.5"
+						fill="#ffffff"
+						stroke="#00a8e8"
+						stroke-width="2.4"
+					/>
+				</svg>
+				<view v-if="status === 'ok'" class="mask ok">{{ mode === 'curve' ? '绳子已对齐' : '拼图已对齐' }}</view>
 				<view v-else-if="status === 'fail'" class="mask fail">未对齐</view>
 			</view>
 			<view
@@ -24,13 +56,61 @@
 				@touchcancel.stop.prevent="onTrackEnd"
 				@mousedown.stop.prevent="onMouseDown"
 			>
-				<view class="slider-fill" :style="{ width: sliderPercent + '%' }"></view>
-				<view class="slider-thumb" :class="status" :style="thumbStyle">
-					<text class="thumb-icon">{{ status === 'ok' ? '✓' : status === 'fail' ? '!' : '››' }}</text>
+				<view class="slider-fill" :style="{ width: sliderPercent + '%' }">
+					<view class="slider-fill-shine" />
 				</view>
-				<text v-if="sliderX === 0 && status === 'idle' && !dragging" class="slider-placeholder">拖动滑块对齐缺口</text>
+				<view class="slider-thumb" :class="[status, { drag: dragging }]" :style="thumbStyle">
+					<view class="thumb-ring" />
+					<view class="thumb-core">
+						<text class="thumb-icon">{{ status === 'ok' ? '✓' : status === 'fail' ? '!' : '››' }}</text>
+					</view>
+				</view>
+				<text v-if="sliderX === 0 && status === 'idle' && !dragging" class="slider-placeholder">
+					{{ mode === 'curve' ? '拖动滑块摆动绳子，使中点对齐' : '拖动滑块对齐缺口' }}
+				</text>
 			</view>
 			<text class="status-text" :class="status">{{ sliderHint }}</text>
+		</view>
+
+		<!-- 旋转 / 角度 -->
+		<view v-else-if="mode === 'rotate' || mode === 'angle'" class="panel rotate-panel" :class="statusClass">
+			<view class="panel-head">
+				<text class="badge">{{ mode === 'angle' ? '角度验证' : '旋转验证' }}</text>
+				<text class="tip">{{ tip || (mode === 'angle' ? '旋转指针至正上方' : '将图片旋转至正向') }}</text>
+			</view>
+			<view class="rotate-stage">
+				<image
+					v-if="image"
+					:src="image"
+					mode="aspectFit"
+					class="rotate-img"
+					:style="{ transform: 'rotate(' + rotateDeg + 'deg)' }"
+				/>
+				<text v-else class="loading">加载中</text>
+				<view v-if="status === 'ok'" class="mask ok">角度正确</view>
+				<view v-else-if="status === 'fail'" class="mask fail">角度错误</view>
+			</view>
+			<view
+				class="slider-track"
+				:class="{ busy: checking || status === 'ok', active: dragging }"
+				@touchstart.stop.prevent="onTrackStart"
+				@touchmove.stop.prevent="onTrackMove"
+				@touchend.stop.prevent="onTrackEnd"
+				@touchcancel.stop.prevent="onTrackEnd"
+				@mousedown.stop.prevent="onMouseDown"
+			>
+				<view class="slider-fill" :style="{ width: sliderPercent + '%' }">
+					<view class="slider-fill-shine" />
+				</view>
+				<view class="slider-thumb" :class="[status, { drag: dragging }]" :style="thumbStyle">
+					<view class="thumb-ring" />
+					<view class="thumb-core">
+						<text class="thumb-icon">{{ status === 'ok' ? '✓' : status === 'fail' ? '!' : '↻' }}</text>
+					</view>
+				</view>
+				<text v-if="sliderX === 0 && status === 'idle' && !dragging" class="slider-placeholder">拖动滑块旋转</text>
+			</view>
+			<text class="status-text" :class="status">{{ rotateHint }}</text>
 		</view>
 
 		<!-- 文字点选 -->
@@ -143,7 +223,34 @@ const PUZZLE_W = 310
 const PUZZLE_H = 155
 const PIECE = 42
 const PIECE_CANVAS = PIECE + Math.max(6, Math.floor(PIECE / 5))
-const SLIDER_MAX = PUZZLE_W - PIECE
+
+function parseCurveMeta(list) {
+	if (!list || list.length < 4) return null
+	const [lxs, lys] = String(list[0]).split(',')
+	const [rxs, rys] = String(list[1]).split(',')
+	const deepY = Number(list[2])
+	const [vbs, tvs] = String(list[3]).split(',')
+	const leftX = Number(lxs)
+	const leftY = Number(lys)
+	const rightX = Number(rxs)
+	const rightY = Number(rys)
+	const vertexBase = Number(vbs)
+	const travel = Number(tvs)
+	if (![leftX, leftY, rightX, rightY, deepY, vertexBase, travel].every(Number.isFinite)) return null
+	return { leftX, leftY, rightX, rightY, deepY, vertexBase, travel }
+}
+
+function buildVRopeD(lx, ly, vx, vy, rx, ry) {
+	const c1x = lx + (vx - lx) * 0.3
+	const c1y = ly + (vy - ly) * 0.68
+	const c2x = vx - (vx - lx) * 0.36
+	const c2y = vy - (vy - ly) * 0.04
+	const c3x = vx + (rx - vx) * 0.36
+	const c3y = vy - (vy - ry) * 0.04
+	const c4x = rx - (rx - vx) * 0.3
+	const c4y = ry + (vy - ry) * 0.68
+	return `M ${lx} ${ly} C ${c1x} ${c1y} ${c2x} ${c2y} ${vx} ${vy} C ${c3x} ${c3y} ${c4x} ${c4y} ${rx} ${ry}`
+}
 
 export default {
 	name: 'LoginCaptchaField',
@@ -162,6 +269,8 @@ export default {
 	emits: ['update:modelValue', 'refresh', 'verified', 'failed'],
 	data() {
 		return {
+			PUZZLE_W,
+			PUZZLE_H,
 			sliderX: 0,
 			wordMarks: [],
 			wordCoords: [],
@@ -179,8 +288,19 @@ export default {
 		statusClass() {
 			return { ok: this.status === 'ok', fail: this.status === 'fail' }
 		},
+		curveMeta() {
+			return this.mode === 'curve' ? parseCurveMeta(this.words) : null
+		},
+		sliderMax() {
+			const meta = this.curveMeta
+			if (this.mode === 'curve' && meta) return Math.max(1, meta.travel)
+			return PUZZLE_W - PIECE
+		},
 		sliderPercent() {
-			return (this.sliderX / SLIDER_MAX) * 100
+			return (this.sliderX / this.sliderMax) * 100
+		},
+		rotateDeg() {
+			return Math.round((this.sliderX / this.sliderMax) * 360)
 		},
 		/** 滑块始终完整落在轨道内：left% + translateX(-同%) */
 		thumbStyle() {
@@ -191,18 +311,40 @@ export default {
 			}
 		},
 		pieceStyle() {
+			const top = this.jigsawY || 0
+			const size = PIECE_CANVAS
 			return {
 				left: (this.sliderX / PUZZLE_W) * 100 + '%',
-				top: ((this.jigsawY || 0) / PUZZLE_H) * 100 + '%',
-				width: (PIECE_CANVAS / PUZZLE_W) * 100 + '%',
-				height: (PIECE_CANVAS / PUZZLE_H) * 100 + '%'
+				top: (top / PUZZLE_H) * 100 + '%',
+				width: (size / PUZZLE_W) * 100 + '%',
+				height: (size / PUZZLE_H) * 100 + '%'
 			}
 		},
+		curveVertex() {
+			const meta = this.curveMeta
+			if (!meta) return { x: 0, y: 0 }
+			const ox = Math.min(this.sliderMax, Math.max(0, this.sliderX))
+			return { x: meta.vertexBase + ox, y: meta.deepY }
+		},
+		curveRopeD() {
+			const meta = this.curveMeta
+			if (!meta) return ''
+			const ox = Math.min(this.sliderMax, Math.max(0, this.sliderX))
+			return buildVRopeD(meta.leftX, meta.leftY, meta.vertexBase + ox, meta.deepY, meta.rightX, meta.rightY)
+		},
 		sliderHint() {
-			if (this.checking) return '正在校验位置…'
-			if (this.status === 'ok') return '拼图已对齐，可继续'
+			if (this.checking) return '正在校验…'
+			if (this.status === 'ok') return this.mode === 'curve' ? '绳子已对齐，可继续' : '拼图已对齐，可继续'
 			if (this.status === 'fail') return '未对齐，正在换一张…'
-			return '拖动滑块，使拼图块嵌入缺口'
+			return this.mode === 'curve'
+				? '两端已固定在底图端点，拖动滑块摆动中点对齐'
+				: '拖动滑块，使拼图块嵌入缺口'
+		},
+		rotateHint() {
+			if (this.checking) return '正在校验角度…'
+			if (this.status === 'ok') return '角度正确，可继续'
+			if (this.status === 'fail') return '角度错误，正在换一张…'
+			return this.mode === 'angle' ? '拖动滑块，将指针旋至正上方' : '拖动滑块，将图片旋转至正向'
 		},
 		wordHint() {
 			const need = this.words.length || 3
@@ -280,7 +422,7 @@ export default {
 		},
 		applyClientX(clientX) {
 			const ratio = Math.min(1, Math.max(0, (clientX - this.trackLeft) / this.trackWidth))
-			this.sliderX = Math.round(ratio * SLIDER_MAX)
+			this.sliderX = Math.round(ratio * this.sliderMax)
 		},
 		async onTrackStart(e) {
 			if (this.checking || this.status === 'ok') return
@@ -303,6 +445,10 @@ export default {
 				this.sliderX = 0
 				this.status = 'idle'
 				this.$emit('update:modelValue', '')
+				return
+			}
+			if (this.mode === 'rotate' || this.mode === 'angle') {
+				await this.precheck(String(this.rotateDeg))
 				return
 			}
 			await this.precheck(String(this.sliderX))
@@ -512,17 +658,20 @@ export default {
 	display: flex;
 	flex-direction: column;
 	gap: 14rpx;
-	padding: 16rpx;
-	border-radius: 18rpx;
-	border: 1rpx solid #dceaf3;
-	background: linear-gradient(180deg, #ffffff, #f3f9fc);
+	padding: 18rpx;
+	border-radius: 24rpx;
+	border: 1rpx solid rgba(232, 238, 245, 0.95);
+	background: rgba(247, 250, 252, 0.96);
 	box-sizing: border-box;
+	box-shadow: 0 10rpx 24rpx rgba(15, 35, 55, 0.04);
 }
 .panel.ok {
 	border-color: rgba(16, 185, 129, 0.35);
+	background: rgba(16, 185, 129, 0.05);
 }
 .panel.fail {
 	border-color: rgba(239, 68, 68, 0.35);
+	background: rgba(239, 68, 68, 0.04);
 }
 .panel-head {
 	display: flex;
@@ -547,7 +696,7 @@ export default {
 	min-width: 0;
 	font-size: 24rpx;
 	font-weight: 650;
-	color: #0f4c66;
+	color: #3d4b5c;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -555,10 +704,19 @@ export default {
 .puzzle-stage {
 	position: relative;
 	width: 100%;
+	min-height: 0;
+	line-height: 0;
 	overflow: hidden;
-	border-radius: 14rpx;
-	background: #e8f2f8;
-	border: 1rpx solid #d5e6f0;
+	border-radius: 18rpx;
+	background: #eef6fb;
+	border: 1rpx solid rgba(213, 230, 240, 0.9);
+	box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+}
+/* 点选类保留最小高度，避免空图时塌陷 */
+.word-panel .puzzle-stage,
+.click-panel .puzzle-stage {
+	min-height: 280rpx;
+	line-height: normal;
 }
 .puzzle-stage.locked {
 	pointer-events: none;
@@ -582,6 +740,36 @@ export default {
 	height: 100%;
 	display: block;
 	filter: drop-shadow(0 4rpx 10rpx rgba(0, 0, 0, 0.4));
+}
+.curve-rope-overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 3;
+	pointer-events: none;
+}
+.rotate-stage {
+	position: relative;
+	width: 100%;
+	min-height: 360rpx;
+	border-radius: 18rpx;
+	background: #f1f5f9;
+	border: 1rpx solid rgba(213, 230, 240, 0.9);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	box-sizing: border-box;
+	padding: 24rpx;
+}
+.rotate-img {
+	width: 320rpx;
+	height: 320rpx;
+	display: block;
+	border-radius: 16rpx;
+	transition: transform 0.05s linear;
 }
 .mask {
 	position: absolute;
@@ -627,17 +815,25 @@ export default {
 }
 .slider-track {
 	position: relative;
-	height: 72rpx;
+	height: 96rpx;
 	border-radius: 999rpx;
-	background: linear-gradient(180deg, #f7fbfe, #eef4f8);
-	overflow: hidden;
+	background:
+		linear-gradient(180deg, #f4f8fb 0%, #eef4f8 100%);
+	overflow: visible;
 	touch-action: none;
 	user-select: none;
-	border: 1rpx solid #d7e6f0;
+	border: 1rpx solid rgba(198, 218, 232, 0.95);
+	box-shadow:
+		inset 0 2rpx 8rpx rgba(15, 40, 70, 0.06),
+		0 8rpx 18rpx rgba(15, 35, 55, 0.04);
 	box-sizing: border-box;
 }
 .slider-track.active {
-	border-color: rgba(0, 168, 232, 0.45);
+	border-color: rgba(0, 168, 232, 0.55);
+	box-shadow:
+		inset 0 2rpx 8rpx rgba(0, 168, 232, 0.08),
+		0 0 0 6rpx rgba(0, 168, 232, 0.08),
+		0 8rpx 18rpx rgba(15, 35, 55, 0.04);
 }
 .slider-track.busy {
 	pointer-events: none;
@@ -649,42 +845,94 @@ export default {
 	top: 0;
 	bottom: 0;
 	z-index: 1;
-	background: linear-gradient(90deg, rgba(0, 168, 232, 0.28), rgba(62, 198, 255, 0.5));
+	overflow: hidden;
+	background: linear-gradient(90deg, rgba(0, 168, 232, 0.22), rgba(43, 184, 239, 0.55));
 	border-radius: 999rpx;
 	pointer-events: none;
+}
+.slider-fill-shine {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.45) 48%, transparent 72%);
+	animation: slider-shine 2.8s ease-in-out infinite;
 }
 .slider-thumb {
 	position: absolute;
 	top: 50%;
 	left: 0;
 	z-index: 3;
-	width: 64rpx;
-	height: 64rpx;
+	width: 84rpx;
+	height: 84rpx;
 	border-radius: 50%;
-	background: linear-gradient(180deg, #ffffff, #f3faff);
-	border: 4rpx solid #00a8e8;
-	box-shadow: 0 6rpx 16rpx rgba(0, 144, 200, 0.35);
 	box-sizing: border-box;
 	pointer-events: none;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: #00a8e8;
 	transform: translate(0, -50%);
 }
-.slider-thumb.ok {
-	border-color: #10b981;
-	color: #059669;
+.thumb-ring {
+	position: absolute;
+	inset: -6rpx;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(0, 168, 232, 0.28), transparent 70%);
+	opacity: 0.75;
+	animation: thumb-pulse 2.2s ease-in-out infinite;
 }
-.slider-thumb.fail {
-	border-color: #ef4444;
-	color: #dc2626;
+.thumb-core {
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #2ec0f5 0%, #00a8e8 48%, #0284c7 100%);
+	border: 3rpx solid rgba(255, 255, 255, 0.95);
+	box-shadow:
+		0 10rpx 22rpx rgba(0, 144, 200, 0.38),
+		0 2rpx 0 rgba(255, 255, 255, 0.35) inset,
+		0 -4rpx 10rpx rgba(2, 100, 160, 0.25) inset;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	overflow: hidden;
+}
+.slider-thumb.drag .thumb-core {
+	transform: scale(1.06);
+	box-shadow:
+		0 14rpx 28rpx rgba(0, 144, 200, 0.45),
+		0 2rpx 0 rgba(255, 255, 255, 0.4) inset;
+}
+.slider-thumb.drag .thumb-ring {
+	opacity: 1;
+	transform: scale(1.12);
+}
+.slider-thumb.ok .thumb-core {
+	background: linear-gradient(145deg, #34d399 0%, #10b981 50%, #059669 100%);
+	box-shadow: 0 10rpx 22rpx rgba(16, 185, 129, 0.38);
+}
+.slider-thumb.ok .thumb-ring {
+	background: radial-gradient(circle, rgba(16, 185, 129, 0.3), transparent 70%);
+	animation: none;
+}
+.slider-thumb.fail .thumb-core {
+	background: linear-gradient(145deg, #f87171 0%, #ef4444 50%, #dc2626 100%);
+	box-shadow: 0 10rpx 22rpx rgba(239, 68, 68, 0.38);
+}
+.slider-thumb.fail .thumb-ring {
+	background: radial-gradient(circle, rgba(239, 68, 68, 0.3), transparent 70%);
+	animation: none;
 }
 .thumb-icon {
-	font-size: 28rpx;
-	font-weight: 800;
-	line-height: 1;
-	letter-spacing: -4rpx;
+	display: block;
+	width: 78rpx;
+	height: 78rpx;
+	line-height: 78rpx;
+	text-align: center;
+	font-size: 52rpx;
+	font-weight: 820;
+	letter-spacing: -2rpx;
+	text-shadow: 0 2rpx 4rpx rgba(0, 60, 100, 0.25);
 }
 .slider-placeholder {
 	position: absolute;
@@ -694,10 +942,31 @@ export default {
 	align-items: center;
 	justify-content: center;
 	font-size: 22rpx;
-	color: #94a3b8;
+	color: #8492a6;
 	pointer-events: none;
-	padding-left: 56rpx;
+	padding-left: 72rpx;
 	box-sizing: border-box;
+}
+@keyframes slider-shine {
+	0%,
+	55% {
+		transform: translateX(-120%);
+	}
+	80%,
+	100% {
+		transform: translateX(120%);
+	}
+}
+@keyframes thumb-pulse {
+	0%,
+	100% {
+		opacity: 0.45;
+		transform: scale(0.96);
+	}
+	50% {
+		opacity: 0.9;
+		transform: scale(1.08);
+	}
 }
 .panel-foot {
 	display: flex;
@@ -776,6 +1045,7 @@ export default {
 .input-panel {
 	width: 100%;
 	box-sizing: border-box;
+	padding: 4rpx 0;
 }
 .input-row {
 	display: flex;
@@ -788,22 +1058,29 @@ export default {
 	flex: 1;
 	min-width: 0;
 	width: 0;
-	height: 112rpx;
-	padding: 0 20rpx;
-	border-radius: 14rpx;
-	background: #f8fafc;
-	border: 1rpx solid #e2e8f0;
+	height: 96rpx;
+	padding: 0 24rpx;
+	border-radius: 22rpx;
+	background: #f7fafc;
+	border: 1rpx solid rgba(232, 238, 245, 0.95);
 	font-size: 28rpx;
+	color: #0f1b2d;
 	box-sizing: border-box;
 }
+.field-input:focus {
+	border-color: rgba(0, 168, 232, 0.42);
+	background: #fff;
+	box-shadow: 0 0 0 6rpx rgba(0, 168, 232, 0.08);
+}
 .captcha-thumb {
-	width: 280rpx;
+	width: 260rpx;
 	flex: none;
-	height: 112rpx;
-	border-radius: 14rpx;
+	height: 96rpx;
+	border-radius: 22rpx;
 	overflow: hidden;
 	background: #fff;
-	border: 1rpx solid #d4e6f2;
+	border: 1rpx solid rgba(212, 230, 242, 0.95);
+	box-shadow: 0 8rpx 18rpx rgba(15, 35, 55, 0.04);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -817,8 +1094,9 @@ export default {
 .input-hint {
 	display: block;
 	margin-top: 10rpx;
+	padding-left: 8rpx;
 	font-size: 20rpx;
-	color: #94a3b8;
+	color: #8492a6;
 	line-height: 1.4;
 }
 .loading {

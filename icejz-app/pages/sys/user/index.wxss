@@ -3,7 +3,7 @@
   background:
     radial-gradient(circle at top right, rgba(0, 168, 232, 0.1), transparent 36%),
     #f4f7fb;
-  padding: 24rpx 24rpx calc(40rpx + env(safe-area-inset-bottom));
+  padding: 0 24rpx calc(40rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
@@ -63,6 +63,12 @@
   font-size: 26rpx;
   font-weight: 600;
   box-shadow: 0 10rpx 22rpx rgba(0, 168, 232, 0.28);
+}
+
+.result-tip {
+  margin: 0 4rpx 14rpx;
+  font-size: 22rpx;
+  color: #8492a6;
 }
 
 .empty {

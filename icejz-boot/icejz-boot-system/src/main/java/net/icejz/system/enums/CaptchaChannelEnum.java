@@ -9,20 +9,18 @@ import lombok.Getter;
 @Getter
 public enum CaptchaChannelEnum {
     /** PC 管理端账号密码登录 */
-    PC("pc", "PC管理端-账号登录", SysParamsEnum.LOGIN_CAPTCHA_TYPE_PC),
+    PC("pc", "PC管理端-账号登录"),
     /** App / 小程序 / H5 移动端登录 */
-    APP("app", "移动端登录", SysParamsEnum.LOGIN_CAPTCHA_TYPE_APP),
+    APP("app", "移动端登录"),
     /** 短信发送前图形验证码（PC 手机登录 / App 发短信） */
-    SMS("sms", "短信发送图形码", SysParamsEnum.LOGIN_CAPTCHA_TYPE_SMS);
+    SMS("sms", "短信发送图形码");
 
     private final String code;
     private final String label;
-    private final SysParamsEnum typeParam;
 
-    CaptchaChannelEnum(String code, String label, SysParamsEnum typeParam) {
+    CaptchaChannelEnum(String code, String label) {
         this.code = code;
         this.label = label;
-        this.typeParam = typeParam;
     }
 
     public static CaptchaChannelEnum of(String code) {

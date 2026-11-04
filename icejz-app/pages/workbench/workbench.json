@@ -1,4 +1,7 @@
 {
+  "navigationStyle": "custom",
   "navigationBarTitleText": "工作台",
-  "usingComponents": {}
+  "usingComponents": {
+    "ice-echart": "/components/ice-echart/ice-echart"
+  }
 }

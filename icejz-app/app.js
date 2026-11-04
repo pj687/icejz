@@ -1,7 +1,10 @@
 const cache = require('./utils/cache.js')
+const { installIceToast } = require('./utils/iceToast.js')
+const { showIceConfirm } = require('./utils/iceConfirm.js')
 
 App({
   onLaunch() {
+    installIceToast()
     const token = cache.getToken()
     if (!token) {
       // 未登录时进入登录页；已登录由各页自行跳转
@@ -13,17 +16,17 @@ App({
     }
   },
   onShow() {
+    installIceToast()
     const updateManager = wx.getUpdateManager()
     updateManager.onCheckForUpdate(function () {})
     updateManager.onUpdateReady(function () {
-      wx.showModal({
+      showIceConfirm({
         title: '更新提示',
         content: '新版本已经准备好，是否重启应用？',
-        success(res) {
-          if (res.confirm) {
-            updateManager.applyUpdate()
-          }
-        }
+        confirmText: '重启',
+        cancelText: '稍后'
+      }).then((ok) => {
+        if (ok) updateManager.applyUpdate()
       })
     })
   },

@@ -38,6 +38,9 @@ public class SysCaptchaConfigController {
         options.add(opt(CaptchaTypeEnum.PATTERN, "点选图案"));
         options.add(opt(CaptchaTypeEnum.BLOCK_PUZZLE, "滑动拼图"));
         options.add(opt(CaptchaTypeEnum.CLICK_WORD, "文字点选"));
+        options.add(opt(CaptchaTypeEnum.CURVE, "滑动曲线"));
+        options.add(opt(CaptchaTypeEnum.ROTATE, "旋转验证码"));
+        options.add(opt(CaptchaTypeEnum.ANGLE, "角度验证码"));
         options.add(opt(CaptchaTypeEnum.POW, "算力校验 PoW"));
         options.add(opt(CaptchaTypeEnum.TURNSTILE, "Cloudflare Turnstile"));
         vo.setTypeOptions(options);

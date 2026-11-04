@@ -1,0 +1,27 @@
+<view wx:if="{{show}}" class="ice-toast-mask {{leaving ? 'out' : ''}}" catchtouchmove="noop">
+  <view class="ice-toast {{tone}} {{leaving ? 'out' : ''}}">
+    <view class="ice-toast-aura" />
+    <view class="ice-toast-sheen" />
+
+    <image wx:if="{{art}}" class="ice-toast-art" src="{{art}}" mode="aspectFill" />
+    <view wx:else class="ice-toast-icon {{tone}}">
+      <view class="ice-toast-ring" />
+      <view class="ice-toast-core">
+        <view wx:if="{{tone === 'ok' || tone === 'male'}}" class="ico-check" />
+        <view wx:elif="{{tone === 'fail'}}" class="ico-fail">
+          <view class="ico-fail-a" />
+          <view class="ico-fail-b" />
+        </view>
+        <view wx:elif="{{tone === 'female'}}" class="ico-dot pink" />
+        <view wx:elif="{{tone === 'unknown'}}" class="ico-dot slate" />
+        <view wx:else class="ico-info">
+          <view class="ico-info-dot" />
+          <view class="ico-info-stem" />
+        </view>
+      </view>
+    </view>
+
+    <text class="ice-toast-title">{{title}}</text>
+    <text wx:if="{{sub}}" class="ice-toast-sub">{{sub}}</text>
+  </view>
+</view>

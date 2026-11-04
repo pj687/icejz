@@ -20,7 +20,7 @@ import net.icejz.framework.security.cache.TokenStoreCache;
 import net.icejz.framework.security.user.SecurityUser;
 import net.icejz.framework.security.user.UserDetail;
 import net.icejz.framework.security.utils.TokenUtils;
-import net.icejz.system.dao.SysUserDao;
+import net.icejz.system.dao .SysUserDao;
 import net.icejz.system.entity.SysUserEntity;
 import net.icejz.system.enums.SuperAdminEnum;
 import net.icejz.system.enums.UserStatusEnum;
@@ -378,7 +378,9 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
         vo.setMultiDeviceLogin(user.getMultiDeviceLogin());
         vo.setMultiDeviceMax(user.getMultiDeviceMax());
 
-        boolean effectiveMulti = user.getMultiDeviceLogin() == null ? systemMulti : user.getMultiDeviceLogin() == 1;
+        // 系统关闭时全员强制单设备；系统开启时个人可关可开（null 跟随系统）
+        boolean effectiveMulti = systemMulti
+                && (user.getMultiDeviceLogin() == null || user.getMultiDeviceLogin() == 1);
         int effectiveMax = systemMax;
         if (effectiveMulti && user.getMultiDeviceMax() != null && user.getMultiDeviceMax() > 0) {
             // 个人上限不可超过系统上限
@@ -398,6 +400,9 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
         if (mode != null && mode != 0 && mode != 1) {
             throw new ServerException("多设备设置无效");
         }
+        if (!resolveSystemMultiDeviceEnabled() && mode != null && mode == 1) {
+            throw new ServerException("系统已关闭多设备登录，个人不可开启");
+        }
         int systemMax = resolveSystemMultiDeviceMax();
         if (mode == null || mode == 0) {
             max = null;
@@ -415,6 +420,12 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
         update(uw);
     }
 
+    /** 系统是否允许多设备（关闭时全员不可开启） */
+    private boolean resolveSystemMultiDeviceEnabled() {
+        SysLoginSecurityConfigVO system = sysLoginSecurityConfigService.getConfig();
+        return Boolean.TRUE.equals(system.getMultiDeviceLogin());
+    }
+
     /** 个人/用户级设备上限不得超过系统登录安全配置 */
     private int resolveSystemMultiDeviceMax() {
         SysLoginSecurityConfigVO system = sysLoginSecurityConfigService.getConfig();
@@ -429,6 +440,9 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
         Integer mode = entity.getMultiDeviceLogin();
         if (mode != null && mode != 0 && mode != 1) {
             throw new ServerException("多设备设置无效");
+        }
+        if (mode != null && mode == 1 && !resolveSystemMultiDeviceEnabled()) {
+            throw new ServerException("系统已关闭多设备登录，不可为用户开启");
         }
         if (mode == null || mode == 0) {
             entity.setMultiDeviceMax(null);

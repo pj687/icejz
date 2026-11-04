@@ -1,0 +1,330 @@
+<template>
+  <view
+    v-if="confirmState.show"
+    class="mask"
+    :class="{ out: confirmState.leaving }"
+    @touchmove.stop.prevent
+  >
+    <view class="card" :class="[confirmState.tone, { out: confirmState.leaving }]" @tap.stop>
+      <view class="aura" />
+      <view class="sheen" />
+
+      <view class="icon">
+        <view class="ring" />
+        <view class="core">
+          <view v-if="confirmState.tone === 'danger'" class="x">
+            <view class="x-a" />
+            <view class="x-b" />
+          </view>
+          <view v-else class="i">
+            <view class="i-dot" />
+            <view class="i-bar" />
+          </view>
+        </view>
+      </view>
+
+      <text class="title">{{ confirmState.title }}</text>
+      <text v-if="confirmState.content" class="desc">{{ confirmState.content }}</text>
+
+      <view class="foot" :class="{ single: !confirmState.showCancel }">
+        <view
+          v-if="confirmState.showCancel"
+          class="act cancel"
+          @tap="onCancel"
+        >{{ confirmState.cancelText }}</view>
+        <view class="split" v-if="confirmState.showCancel" />
+        <view
+          class="act ok"
+          :class="confirmState.tone"
+          @tap="onConfirm"
+        >{{ confirmState.confirmText }}</view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import {
+  confirmState,
+  registerIceConfirmHost,
+  unregisterIceConfirmHost,
+  resolveIceConfirm
+} from '@/utils/iceConfirm.js'
+
+export default {
+  name: 'IceConfirmHost',
+  data() {
+    return { confirmState }
+  },
+  mounted() {
+    registerIceConfirmHost()
+  },
+  beforeUnmount() {
+    unregisterIceConfirmHost()
+  },
+  methods: {
+    onCancel() {
+      resolveIceConfirm(false)
+    },
+    onConfirm() {
+      resolveIceConfirm(true)
+    }
+  }
+}
+</script>
+
+<style scoped>
+.mask {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+  box-sizing: border-box;
+  background: rgba(15, 27, 45, 0.22);
+  animation: mask-in 0.22s ease;
+}
+
+.mask.out {
+  animation: mask-out 0.18s ease forwards;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 540rpx;
+  padding: 44rpx 0 0;
+  border-radius: 36rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1rpx solid rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 28rpx 64rpx rgba(15, 35, 55, 0.14),
+    0 8rpx 20rpx rgba(0, 168, 232, 0.08),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  animation: card-in 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card.out {
+  animation: card-out 0.18s ease forwards;
+}
+
+.aura {
+  position: absolute;
+  top: -72rpx;
+  width: 240rpx;
+  height: 240rpx;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(0, 168, 232, 0.2), transparent 68%);
+}
+
+.card.danger .aura {
+  background: radial-gradient(circle, rgba(225, 29, 72, 0.16), transparent 68%);
+}
+
+.sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55) 0%, transparent 42%);
+}
+
+.icon {
+  position: relative;
+  z-index: 1;
+  width: 108rpx;
+  height: 108rpx;
+  margin-bottom: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2rpx solid rgba(0, 168, 232, 0.22);
+  animation: ring 1.4s ease-out infinite;
+}
+
+.card.danger .ring {
+  border-color: rgba(225, 29, 72, 0.2);
+}
+
+.core {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #00a8e8, #2bb8ef);
+  box-shadow:
+    0 14rpx 28rpx rgba(0, 168, 232, 0.28),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.35);
+}
+
+.card.danger .core {
+  background: linear-gradient(145deg, #fb7185, #e11d48);
+  box-shadow:
+    0 14rpx 28rpx rgba(225, 29, 72, 0.22),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.3);
+}
+
+.i {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.i-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.i-bar {
+  width: 6rpx;
+  height: 24rpx;
+  border-radius: 999rpx;
+  background: #fff;
+}
+
+.x {
+  position: relative;
+  width: 28rpx;
+  height: 28rpx;
+}
+
+.x-a,
+.x-b {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28rpx;
+  height: 5rpx;
+  margin-left: -14rpx;
+  margin-top: -2.5rpx;
+  border-radius: 999rpx;
+  background: #fff;
+}
+
+.x-a { transform: rotate(45deg); }
+.x-b { transform: rotate(-45deg); }
+
+.title {
+  position: relative;
+  z-index: 1;
+  padding: 0 40rpx;
+  font-size: 32rpx;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  color: #0f1b2d;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.desc {
+  position: relative;
+  z-index: 1;
+  margin-top: 12rpx;
+  padding: 0 40rpx 36rpx;
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: #8492a6;
+  text-align: center;
+}
+
+.foot {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  border-top: 1rpx solid rgba(15, 35, 55, 0.06);
+  background: rgba(248, 251, 253, 0.72);
+}
+
+.foot.single .act {
+  flex: 1;
+}
+
+.act {
+  flex: 1;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.act.cancel {
+  color: #8492a6;
+}
+
+.act.ok {
+  color: #00a8e8;
+}
+
+.act.ok.danger {
+  color: #e11d48;
+}
+
+.split {
+  width: 1rpx;
+  background: rgba(15, 35, 55, 0.06);
+  align-self: stretch;
+}
+
+@keyframes mask-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mask-out {
+  to { opacity: 0; }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes card-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8rpx) scale(0.96);
+  }
+}
+
+@keyframes ring {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+}
+</style>

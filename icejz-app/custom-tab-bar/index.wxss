@@ -1,11 +1,69 @@
-.t-tab-bar {
-  --td-tab-bar-color: #9ca3af;
-  --td-tab-bar-active-color: #00a8e8;
-  --td-tab-bar-bg-color: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 -8rpx 28rpx rgba(15, 23, 36, 0.06);
-  border-top: 1rpx solid rgba(232, 238, 245, 0.95);
+.tab-root {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: transparent;
 }
 
-.t-tab-bar-item {
-  font-weight: 500;
+.dock-wrap {
+  position: relative;
+  z-index: 1;
+  padding: 16rpx 28rpx calc(10rpx + constant(safe-area-inset-bottom));
+  padding: 16rpx 28rpx calc(10rpx + env(safe-area-inset-bottom));
+  pointer-events: none;
+  background: transparent;
+}
+
+.dock {
+  position: relative;
+  pointer-events: auto;
+  height: 108rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  border-radius: 999rpx;
+  background-color: #ffffff;
+  border: 1rpx solid rgba(12, 21, 32, 0.08);
+  overflow: hidden;
+}
+
+.dock-indicator {
+  position: absolute;
+  top: 10rpx;
+  bottom: 10rpx;
+  border-radius: 999rpx;
+  background-color: #00a8e8;
+  z-index: 0;
+}
+
+.dock-item {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  height: 108rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ico {
+  width: 40rpx;
+  height: 40rpx;
+  margin-bottom: 4rpx;
+}
+
+.label {
+  font-size: 20rpx;
+  color: #7d8b9a;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.dock-item.active .label {
+  color: #ffffff;
 }

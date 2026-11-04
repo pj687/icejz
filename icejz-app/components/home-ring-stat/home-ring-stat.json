@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "ice-echart": "/components/ice-echart/ice-echart"
+  }
+}

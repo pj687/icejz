@@ -1,15 +1,51 @@
 <template>
 	<div class="login-captcha-field" :data-mode="mode">
-		<!-- 滑动拼图 -->
-		<div v-if="mode === 'slider'" class="captcha-panel slider-wrap">
+		<!-- 滑动拼图 / 滑动曲线 -->
+		<div v-if="mode === 'slider' || mode === 'curve'" class="captcha-panel slider-wrap">
 			<div class="panel-head compact">
-				<span class="panel-badge">滑动拼图</span>
-				<span class="panel-tip">{{ tip || '向右拖动滑块完成拼图' }}</span>
+				<span class="panel-badge">{{ mode === 'curve' ? '滑动曲线' : '滑动拼图' }}</span>
+				<span class="panel-tip">{{ tip || (mode === 'curve' ? '拖动滑块摆动绳子，使中点对齐' : '向右拖动滑块完成拼图') }}</span>
 			</div>
 			<div class="puzzle-stage" ref="puzzleRef">
 				<img v-if="image" :src="image" class="puzzle-bg" alt="拼图底图" draggable="false" />
+				<!-- V 绳子：两端钉死在底图端点，滑块只摆中点 -->
+				<svg
+					v-if="mode === 'curve' && curveMeta"
+					class="curve-rope-overlay"
+					:viewBox="`0 0 ${puzzleW} ${puzzleH}`"
+					preserveAspectRatio="none"
+					aria-hidden="true"
+				>
+					<path
+						ref="curveRopeGlowRef"
+						fill="none"
+						stroke="rgba(255,255,255,0.35)"
+						stroke-width="14"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						:d="curveRopeD"
+					/>
+					<path
+						ref="curveRopeRef"
+						fill="none"
+						stroke="#ffffff"
+						stroke-width="5.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						:d="curveRopeD"
+					/>
+					<circle
+						ref="curveVertexRef"
+						:cx="curveVertex.x"
+						:cy="curveVertex.y"
+						r="7"
+						fill="#ffffff"
+						stroke="#00a8e8"
+						stroke-width="2.5"
+					/>
+				</svg>
 				<img
-					v-if="jigsawImage"
+					v-if="mode === 'slider' && jigsawImage"
 					ref="pieceRef"
 					:src="jigsawImage"
 					class="puzzle-piece"
@@ -24,7 +60,7 @@
 						<path d="M21 3v6h-6" />
 					</svg>
 				</button>
-				<div v-if="sliderStatus === 'ok'" class="puzzle-ok-mask">拼图已对齐</div>
+				<div v-if="sliderStatus === 'ok'" class="puzzle-ok-mask">{{ mode === 'curve' ? '绳子已对齐' : '拼图已对齐' }}</div>
 				<div v-else-if="sliderStatus === 'fail'" class="puzzle-fail-mask">未对齐</div>
 			</div>
 
@@ -52,9 +88,64 @@
 						<path d="M9 6l6 6-6 6" />
 					</svg>
 				</div>
-				<span v-show="!dragging && sliderX === 0 && sliderStatus === 'idle'" class="slide-tip">拖动滑块对齐缺口</span>
+				<span v-show="!dragging && sliderX === 0 && sliderStatus === 'idle'" class="slide-tip">
+					{{ mode === 'curve' ? '拖动滑块摆动绳子，使中点对齐' : '拖动滑块对齐缺口' }}
+				</span>
 			</div>
 			<div class="slider-hint" :class="sliderStatus">{{ sliderHintText }}</div>
+		</div>
+
+		<!-- 旋转 / 角度验证码 -->
+		<div v-else-if="mode === 'rotate' || mode === 'angle'" class="captcha-panel rotate-wrap">
+			<div class="panel-head compact">
+				<span class="panel-badge">{{ mode === 'angle' ? '角度验证' : '旋转验证' }}</span>
+				<span class="panel-tip">{{ tip || (mode === 'angle' ? '旋转指针至正上方' : '将图片旋转至正向') }}</span>
+			</div>
+			<div class="rotate-stage">
+				<img
+					v-if="image"
+					:src="image"
+					class="rotate-img"
+					:style="{ transform: `rotate(${rotateDeg}deg)` }"
+					alt="旋转验证码"
+					draggable="false"
+				/>
+				<button type="button" class="mini-refresh" title="刷新" @click="refresh">
+					<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4">
+						<path d="M21 12a9 9 0 1 1-2.5-6.2" />
+						<path d="M21 3v6h-6" />
+					</svg>
+				</button>
+				<div v-if="sliderStatus === 'ok'" class="puzzle-ok-mask">验证通过</div>
+				<div v-else-if="sliderStatus === 'fail'" class="puzzle-fail-mask">角度不正确</div>
+			</div>
+			<div
+				class="slide-track"
+				:class="{
+					active: dragging,
+					ok: sliderStatus === 'ok',
+					fail: sliderStatus === 'fail',
+					busy: checking
+				}"
+				ref="trackRef"
+				@mousedown.prevent="onDragStart"
+				@touchstart.prevent="onDragStart"
+			>
+				<div ref="fillRef" class="slide-fill"></div>
+				<div ref="thumbRef" class="slide-thumb">
+					<svg v-if="sliderStatus === 'ok'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3">
+						<path d="M5 13l4 4L19 7" />
+					</svg>
+					<svg v-else-if="sliderStatus === 'fail'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3">
+						<path d="M6 6l12 12M18 6L6 18" />
+					</svg>
+					<svg v-else viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4">
+						<path d="M9 6l6 6-6 6" />
+					</svg>
+				</div>
+				<span v-show="!dragging && sliderX === 0 && sliderStatus === 'idle'" class="slide-tip">拖动滑块旋转</span>
+			</div>
+			<div class="slider-hint" :class="sliderStatus">{{ rotateHintText }}</div>
 		</div>
 
 		<!-- 文字点选：点满后先预校验，通过才写入 captcha 允许登录 -->
@@ -208,6 +299,45 @@ const DEFAULT_PUZZLE_W = 310
 const DEFAULT_PUZZLE_H = 155
 const DEFAULT_PIECE = 42
 
+type CurveMeta = {
+	leftX: number
+	leftY: number
+	rightX: number
+	rightY: number
+	deepY: number
+	vertexBase: number
+	travel: number
+}
+
+const parseCurveMeta = (list: string[]): CurveMeta | null => {
+	if (!list || list.length < 4) return null
+	const [lxs, lys] = String(list[0]).split(',')
+	const [rxs, rys] = String(list[1]).split(',')
+	const deepY = Number(list[2])
+	const [vbs, tvs] = String(list[3]).split(',')
+	const leftX = Number(lxs)
+	const leftY = Number(lys)
+	const rightX = Number(rxs)
+	const rightY = Number(rys)
+	const vertexBase = Number(vbs)
+	const travel = Number(tvs)
+	if (![leftX, leftY, rightX, rightY, deepY, vertexBase, travel].every(Number.isFinite)) return null
+	return { leftX, leftY, rightX, rightY, deepY, vertexBase, travel }
+}
+
+/** 与后端 buildVRopePath 同公式；两端绝对坐标固定，仅中点随滑块移动 */
+const buildVRopeD = (lx: number, ly: number, vx: number, vy: number, rx: number, ry: number) => {
+	const c1x = lx + (vx - lx) * 0.3
+	const c1y = ly + (vy - ly) * 0.68
+	const c2x = vx - (vx - lx) * 0.36
+	const c2y = vy - (vy - ly) * 0.04
+	const c3x = vx + (rx - vx) * 0.36
+	const c3y = vy - (vy - ry) * 0.04
+	const c4x = rx - (rx - vx) * 0.3
+	const c4y = ry + (vy - ry) * 0.68
+	return `M ${lx} ${ly} C ${c1x} ${c1y} ${c2x} ${c2y} ${vx} ${vy} C ${c3x} ${c3y} ${c4x} ${c4y} ${rx} ${ry}`
+}
+
 const props = withDefaults(
 	defineProps<{
 		modelValue: string
@@ -252,6 +382,9 @@ const powRunning = ref(false)
 const puzzleRef = ref<HTMLElement | null>(null)
 const trackRef = ref<HTMLElement | null>(null)
 const pieceRef = ref<HTMLImageElement | null>(null)
+const curveRopeRef = ref<SVGPathElement | null>(null)
+const curveRopeGlowRef = ref<SVGPathElement | null>(null)
+const curveVertexRef = ref<SVGCircleElement | null>(null)
 const fillRef = ref<HTMLElement | null>(null)
 const thumbRef = ref<HTMLElement | null>(null)
 const turnstileBoxId = `cf-turnstile-${Math.random().toString(36).slice(2, 9)}`
@@ -266,19 +399,72 @@ let pendingClientX: number | null = null
 /** 拖动中的逻辑坐标（不走 Vue 响应式，避免每帧重渲染） */
 let liveX = 0
 
-const sliderMax = computed(() => Math.max(1, puzzleW.value - pieceSize.value))
+const curveMeta = computed(() => (mode.value === 'curve' ? parseCurveMeta(words.value) : null))
+const sliderMax = computed(() => {
+	if (mode.value === 'curve' && curveMeta.value) {
+		return Math.max(1, curveMeta.value.travel)
+	}
+	return Math.max(1, puzzleW.value - pieceSize.value)
+})
+const rotateDeg = computed(() => Math.round((sliderX.value / sliderMax.value) * 360))
+const curveVertex = computed(() => {
+	const meta = curveMeta.value
+	if (!meta) return { x: 0, y: 0 }
+	const ox = Math.min(sliderMax.value, Math.max(0, sliderX.value))
+	return { x: meta.vertexBase + ox, y: meta.deepY }
+})
+const curveRopeD = computed(() => {
+	const meta = curveMeta.value
+	if (!meta) return ''
+	const ox = Math.min(sliderMax.value, Math.max(0, sliderX.value))
+	return buildVRopeD(meta.leftX, meta.leftY, meta.vertexBase + ox, meta.deepY, meta.rightX, meta.rightY)
+})
+
+const paintCurveRope = (offsetX: number) => {
+	const meta = curveMeta.value
+	if (!meta) return
+	const ox = Math.min(sliderMax.value, Math.max(0, offsetX))
+	const vx = meta.vertexBase + ox
+	const d = buildVRopeD(meta.leftX, meta.leftY, vx, meta.deepY, meta.rightX, meta.rightY)
+	const rope = curveRopeRef.value
+	const glow = curveRopeGlowRef.value
+	const vertex = curveVertexRef.value
+	if (rope) rope.setAttribute('d', d)
+	if (glow) glow.setAttribute('d', d)
+	if (vertex) {
+		vertex.setAttribute('cx', String(vx))
+		vertex.setAttribute('cy', String(meta.deepY))
+	}
+}
+
 /** 仅静态布局（宽/高定位），位移用 DOM transform */
-const pieceBaseStyle = computed(() => ({
-	width: `${(jigsawW.value / puzzleW.value) * 100}%`,
-	top: `${((jigsawY.value || 0) / puzzleH.value) * 100}%`,
-	left: '0'
-}))
+const pieceBaseStyle = computed(() => {
+	const w = jigsawW.value
+	const top = jigsawY.value || 0
+	return {
+		width: `${(w / puzzleW.value) * 100}%`,
+		top: `${(top / puzzleH.value) * 100}%`,
+		left: '0'
+	}
+})
 const sliderHintText = computed(() => {
-	if (checking.value && mode.value === 'slider') return '正在校验位置…'
-	if (sliderStatus.value === 'ok') return '拼图已对齐，可继续登录'
+	if (checking.value && (mode.value === 'slider' || mode.value === 'curve')) return '正在校验…'
+	if (sliderStatus.value === 'ok') {
+		return mode.value === 'curve' ? '绳子已对齐，可继续登录' : '拼图已对齐，可继续登录'
+	}
 	if (sliderStatus.value === 'fail') return '未对齐，请重试'
-	if (dragging.value) return '拖动拼图块对齐右侧缺口'
-	return '拖动滑块，使拼图块嵌入缺口'
+	if (dragging.value) {
+		return mode.value === 'curve' ? '继续拖动，使中点对齐绳影' : '拖动拼图块对齐右侧缺口'
+	}
+	return mode.value === 'curve'
+		? '两端已固定在底图端点，拖动滑块摆动中点对齐'
+		: '拖动滑块，使拼图块嵌入缺口'
+})
+const rotateHintText = computed(() => {
+	if (checking.value) return '正在校验角度…'
+	if (sliderStatus.value === 'ok') return '角度正确，可继续登录'
+	if (sliderStatus.value === 'fail') return '角度错误，请重试'
+	return mode.value === 'angle' ? '拖动滑块，将指针旋至正上方' : '拖动滑块，将图片旋转至正向'
 })
 
 const clickHintText = computed(() => {
@@ -347,9 +533,16 @@ const paintSlider = (x: number) => {
 	const ratio = Math.min(1, Math.max(0, max > 0 ? x / max : 0))
 	const piecePx = (x / puzzleW.value) * stageWidth
 
-	const piece = pieceRef.value
-	if (piece) {
-		piece.style.transform = `translate3d(${piecePx}px,0,0)`
+	if (mode.value === 'curve') {
+		paintCurveRope(x)
+	} else if (mode.value === 'slider') {
+		const piece = pieceRef.value
+		if (piece) {
+			piece.style.transform = `translate3d(${piecePx}px,0,0)`
+		}
+	}
+	if (mode.value === 'rotate' || mode.value === 'angle') {
+		sliderX.value = Math.round(x)
 	}
 	const fill = fillRef.value
 	if (fill) {
@@ -391,6 +584,9 @@ const refresh = async () => {
 		pattern: 'click',
 		block_puzzle: 'slider',
 		click_word: 'word',
+		curve: 'curve',
+		rotate: 'rotate',
+		angle: 'angle',
 		pow: 'pow',
 		turnstile: 'turnstile',
 		spec: 'input',
@@ -418,6 +614,9 @@ const refresh = async () => {
 	await nextTick()
 	measureLayout()
 	resetSliderDom()
+	if (mode.value === 'curve') {
+		paintCurveRope(0)
+	}
 	if (mode.value === 'pow' && challenge.value) {
 		runPow(challenge.value, difficulty.value, powToken)
 	}
@@ -505,7 +704,10 @@ const onDragEnd = async () => {
 		return
 	}
 
-	const captcha = String(sliderX.value)
+	const captcha =
+		mode.value === 'rotate' || mode.value === 'angle'
+			? String(Math.round((sliderX.value / sliderMax.value) * 360))
+			: String(sliderX.value)
 	checking.value = true
 	try {
 		const { data } = await useCaptchaCheckApi({ key: captchaKeyLocal || props.captchaKey, captcha })
@@ -861,10 +1063,43 @@ defineExpose({ refresh, ensureVerified, checkInputCaptcha })
 
 .slider-wrap {
 	width: 100%;
-	max-width: 310px;
+	max-width: 360px;
 	margin: 0 auto;
 	gap: 8px;
 	padding: 10px;
+}
+
+.rotate-wrap {
+	width: 100%;
+	max-width: 360px;
+	margin: 0 auto;
+	gap: 8px;
+	padding: 10px;
+}
+
+.rotate-stage {
+	position: relative;
+	width: 100%;
+	min-height: 220px;
+	border-radius: 12px;
+	overflow: hidden;
+	border: 1px solid rgba(180, 210, 230, 0.9);
+	background: linear-gradient(180deg, #e8f4fb, #d7eaf6);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	box-sizing: border-box;
+	user-select: none;
+}
+
+.rotate-img {
+	width: 180px;
+	height: 180px;
+	border-radius: 12px;
+	display: block;
+	transition: transform 0.05s linear;
+	will-change: transform;
 }
 
 .click-wrap,
@@ -897,6 +1132,16 @@ defineExpose({ refresh, ensureVerified, checkInputCaptcha })
 	pointer-events: none;
 }
 
+.curve-rope-overlay {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 2;
+	filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.55));
+}
+
 .puzzle-piece {
 	position: absolute;
 	height: auto !important;
@@ -911,6 +1156,15 @@ defineExpose({ refresh, ensureVerified, checkInputCaptcha })
 
 	&.dragging {
 		box-shadow: none;
+	}
+
+	&.round {
+		height: unset !important;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		overflow: hidden;
+		object-fit: cover;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
 	}
 }
 
@@ -963,7 +1217,7 @@ defineExpose({ refresh, ensureVerified, checkInputCaptcha })
 
 .slide-track {
 	position: relative;
-	height: 34px;
+	height: 42px;
 	border-radius: 999px;
 	background: linear-gradient(180deg, #f7fbfe, #eef4f8);
 	border: 1px solid #d7e6f0;

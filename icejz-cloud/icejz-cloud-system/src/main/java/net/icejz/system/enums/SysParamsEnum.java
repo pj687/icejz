@@ -8,35 +8,35 @@ package net.icejz.system.enums;
  */
 public enum SysParamsEnum {
     /**
-     * 登录验证码开关（账号登录是否启用图形验证码）
+     * @deprecated 已迁至表 sys_captcha_config.enabled，保留枚举仅兼容旧数据
      */
     LOGIN_CAPTCHA,
     /**
-     * 登录验证码类型（兼容旧配置，优先使用分通道参数）
+     * @deprecated 已迁至表 sys_captcha_config，保留枚举仅兼容旧数据
      */
     LOGIN_CAPTCHA_TYPE,
     /**
-     * PC 管理端登录验证码类型
+     * @deprecated 已迁至表 sys_captcha_config.pc_type
      */
     LOGIN_CAPTCHA_TYPE_PC,
     /**
-     * 移动端 / APP 登录验证码类型
+     * @deprecated 已迁至表 sys_captcha_config.app_type
      */
     LOGIN_CAPTCHA_TYPE_APP,
     /**
-     * 短信发送前图形验证码类型
+     * @deprecated 已迁至表 sys_captcha_config.sms_type
      */
     LOGIN_CAPTCHA_TYPE_SMS,
     /**
-     * Cloudflare Turnstile 站点公钥
+     * @deprecated 已迁至表 sys_captcha_config.turnstile_site_key
      */
     TURNSTILE_SITE_KEY,
     /**
-     * Cloudflare Turnstile 密钥
+     * @deprecated 已迁至表 sys_captcha_config.turnstile_secret_key
      */
     TURNSTILE_SECRET_KEY,
     /**
-     * PoW 难度（前导0个数，建议 2~4）
+     * @deprecated 已迁至表 sys_captcha_config.pow_difficulty
      */
     CAPTCHA_POW_DIFFICULTY,
     /**
@@ -48,7 +48,7 @@ public enum SysParamsEnum {
      */
     SMS_CODE_HOUR_LIMIT,
     /**
-     * 是否允许多设备同时登录（true：多设备；false：单设备互踢）
+     * 是否允许多设备同时登录（true：可多设备，个人仍可覆盖关闭；false：全员强制单设备互踢，个人不可开启）
      */
     MULTI_DEVICE_LOGIN,
     /**

@@ -1,86 +1,149 @@
-/* ICEJZ brand theme */
+/* ICEJZ · Studio 视觉系统 */
 page {
-    --icejz-primary: #00a8e8;
-    --icejz-accent: #3ec6ff;
-    --icejz-dark: #141820;
-    --icejz-bg: #f4f7fb;
-    --icejz-text: #1f2937;
-    --icejz-radius: 24rpx;
-    background-color: var(--icejz-bg);
-    color: var(--icejz-text);
+  --ice-ink: #0f1b2d;
+  --ice-ink-soft: #3d4b5c;
+  --ice-mute: #8492a6;
+  --ice-line: rgba(15, 35, 55, 0.06);
+  --ice-panel: rgba(255, 255, 255, 0.94);
+  --ice-canvas: #f3f6fa;
+  --ice-cyan: #00a8e8;
+  --ice-cyan-deep: #0879a8;
+  --ice-cyan-soft: rgba(0, 168, 232, 0.12);
+  --ice-danger: #e11d48;
+  --ice-radius: 22rpx;
+  --ice-radius-lg: 28rpx;
+  --ice-shadow: 0 14rpx 36rpx rgba(15, 35, 55, 0.05);
+  --ice-tab-h: 108rpx;
+  --ice-tab-gap: 12rpx;
+  --ice-safe-bottom: env(safe-area-inset-bottom);
+
+  background-color: var(--ice-canvas);
+  color: var(--ice-ink);
+  font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
 }
 
 .t-input {
-    --td-input-placeholder-text-color: #9ca3af;
-    --td-input-text-color: #1f2937;
+  --td-input-placeholder-text-color: #9aa8b6;
+  --td-input-text-color: #0c1520;
 }
 
 .t-tab-bar {
-    --td-tab-bar-color: #9ca3af;
-    --td-tab-bar-active-color: #00a8e8;
+  --td-tab-bar-color: #7d8b9a;
+  --td-tab-bar-active-color: #00a8e8;
 }
 
 .t-cascader {
-    --td-cascader-active-color: #00a8e8;
+  --td-cascader-active-color: #00a8e8;
 }
 
 .t-switch {
-    --td-switch-checked-color: #00a8e8;
+  --td-switch-checked-color: #00a8e8;
 }
 
 .t-button {
-    --td-button-font-weight: 500;
-    --td-button-medium-font-size: 32rpx;
-    --td-button-default-color: #fff;
-    --td-button-default-bg-color: #00a8e8;
-    --td-button-default-border-color: #00a8e8;
-    --td-button-default-disabled-color: #fff;
-    --td-button-default-disabled-bg: #cccccc;
-    --td-button-default-disabled-border-color: #cccccc;
-    --td-button-default-active-bg-color: #0090c8;
-    --td-button-default-active-border-color: #0090c8;
+  --td-button-font-weight: 600;
+  --td-button-medium-font-size: 30rpx;
+  --td-button-default-color: #fff;
+  --td-button-default-bg-color: #00a8e8;
+  --td-button-default-border-color: #00a8e8;
+  --td-button-default-disabled-color: #fff;
+  --td-button-default-disabled-bg: #c5ced6;
+  --td-button-default-disabled-border-color: #c5ced6;
+  --td-button-default-active-bg-color: #0879a8;
+  --td-button-default-active-border-color: #0879a8;
 }
 
 .t-textarea {
-    --td-textarea-placeholder-color: #9ca3af;
+  --td-textarea-placeholder-color: #9aa8b6;
 }
 
 .t-checkbox {
-    --td-checkbox-icon-checked-color: #00a8e8;
+  --td-checkbox-icon-checked-color: #00a8e8;
 }
 
 .dialog__button-confirm {
-    color: #00a8e8 !important;
+  color: #00a8e8 !important;
 }
 
 .dialog__button-cancel {
-    color: #aeb3b7 !important;
+  color: #7d8b9a !important;
 }
 
-.icejz-card {
-    background: #fff;
-    border-radius: 24rpx;
-    border: 1rpx solid rgba(232, 238, 245, 0.95);
-    box-shadow: 0 8rpx 24rpx rgba(15, 23, 36, 0.04);
+/* 页面通用骨架 */
+.ice-page {
+  min-height: 100vh;
+  background: var(--ice-canvas);
+  box-sizing: border-box;
 }
 
-.icejz-primary-btn {
-    background: #00a8e8 !important;
-    color: #fff !important;
-    border-radius: 16rpx !important;
+.ice-page.with-tab {
+  padding-bottom: calc(var(--ice-tab-h) + var(--ice-tab-gap) + var(--ice-safe-bottom) + 24rpx);
 }
 
-.icejz-page {
-    min-height: 100vh;
-    background:
-        radial-gradient(circle at top right, rgba(0, 168, 232, 0.1), transparent 36%),
-        #f4f7fb;
+.ice-panel {
+  background: var(--ice-panel);
+  border-radius: var(--ice-radius-lg);
+  border: 1rpx solid rgba(255, 255, 255, 0.98);
+  box-shadow: var(--ice-shadow);
 }
 
-.icejz-hero {
-    background:
-        radial-gradient(circle at 90% 10%, rgba(62, 198, 255, 0.32), transparent 36%),
-        linear-gradient(135deg, #121a28 0%, #143047 55%, #0c6f9c 100%);
-    border-radius: 28rpx;
-    box-shadow: 0 16rpx 40rpx rgba(15, 23, 36, 0.16);
+.ice-section-title {
+  font-size: 30rpx;
+  font-weight: 800;
+  color: var(--ice-ink);
+  letter-spacing: 0.02em;
+}
+
+.ice-section-sub {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--ice-mute);
+}
+
+/* 子页通用高级浅色底 */
+.ice-subpage {
+  min-height: 100vh;
+  background: var(--ice-canvas);
+  box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.ice-subpage::before,
+.ice-subpage::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ice-subpage::before {
+  width: 420rpx;
+  height: 420rpx;
+  top: -140rpx;
+  right: -100rpx;
+  background: radial-gradient(circle, rgba(0, 168, 232, 0.14), transparent 70%);
+}
+
+.ice-subpage::after {
+  width: 320rpx;
+  height: 320rpx;
+  top: 360rpx;
+  left: -120rpx;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.12), transparent 70%);
+}
+
+.ice-subpage > view {
+  position: relative;
+  z-index: 1;
+}
+
+.ice-card {
+  margin-top: 16rpx;
+  padding: 26rpx 22rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1rpx solid rgba(255, 255, 255, 0.98);
+  box-shadow: var(--ice-shadow);
 }

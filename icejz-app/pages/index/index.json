@@ -1,4 +1,8 @@
 {
+  "navigationStyle": "custom",
   "navigationBarTitleText": "首页",
-  "usingComponents": {}
+  "usingComponents": {
+    "home-bar-chart": "/components/home-bar-chart/home-bar-chart",
+    "home-ring-stat": "/components/home-ring-stat/home-ring-stat"
+  }
 }

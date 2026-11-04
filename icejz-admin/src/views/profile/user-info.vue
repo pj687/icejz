@@ -98,18 +98,18 @@ const genderOptions = [
 		art: '/profile/gender-male.jpg'
 	},
 	{
-		value: '1',
-		label: '女士',
-		desc: 'Female',
-		tone: 'female',
-		art: '/profile/gender-female.jpg'
-	},
-	{
 		value: '2',
 		label: '暂不透露',
 		desc: 'Prefer not to say',
 		tone: 'unknown',
 		art: '/profile/gender-unknown.jpg'
+	},
+	{
+		value: '1',
+		label: '女士',
+		desc: 'Female',
+		tone: 'female',
+		art: '/profile/gender-female.jpg'
 	}
 ]
 

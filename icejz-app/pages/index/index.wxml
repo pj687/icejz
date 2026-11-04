@@ -1,64 +1,147 @@
-﻿<view class="home">
-  <view class="hero">
-    <view class="hero-top">
-      <view>
-        <view class="brand">{{brand.name}}</view>
-        <view class="slogan">{{brand.slogan}}</view>
-        <view class="hello">{{greeting}}，{{displayName}}</view>
-      </view>
-      <image class="logo" src="/images/logo.png" mode="aspectFit" />
-    </view>
-    <view class="hero-line">{{brand.homeLine}}</view>
-  </view>
+<view class="home">
+  <view class="ambient a1" />
+  <view class="ambient a2" />
 
-  <view class="action-row">
-    <view class="action primary" data-path="/pages/workbench/workbench" data-tab="true" bindtap="onQuickTap">
-      <view class="action-title">进入工作台</view>
-      <view class="action-desc">用户 / 机构 / 角色</view>
+  <view class="top" style="padding-top: {{statusBarPx + 10}}px;">
+    <view class="nav">
+      <view class="nav-msg" data-path="/pages/message/inbox" bindtap="onNav">
+        <image class="nav-msg-ico" src="/images/icons/msg.svg" mode="aspectFit" />
+        <view wx:if="{{unreadCount > 0}}" class="nav-dot">{{unreadBadge}}</view>
+      </view>
+      <view class="nav-brand">
+        <view class="logo-wrap">
+          <image class="logo" src="/images/logo.png" mode="aspectFit" />
+        </view>
+        <view class="nav-brand-copy">
+          <text class="logo-text">ICEJZ</text>
+          <text class="logo-sub">{{brand.tagline}}</text>
+        </view>
+      </view>
+      <view class="nav-capsule-pad" style="width: {{capsulePadPx}}px;" />
     </view>
-    <view class="action" data-path="/pages/message/inbox" bindtap="onQuickTap">
-      <view class="action-title">我的消息</view>
-      <view class="action-desc">{{unreadCount > 0 ? unreadCount + ' 条未读' : '暂无未读'}}</view>
-    </view>
-  </view>
 
-  <view class="block">
-    <view class="block-head">
-      <view class="block-title">今日协同</view>
-      <view class="block-link" data-path="/pages/usercenter/usercenter" data-tab="true" bindtap="onQuickTap">个人中心</view>
-    </view>
-    <view class="metric-grid">
-      <view class="metric" data-path="/pages/sys/user/index" bindtap="onQuickTap">
-        <view class="metric-label">用户</view>
-        <view class="metric-value">查阅</view>
+    <view class="hero">
+      <text class="hello">{{greeting}}，{{displayName}}</text>
+      <view class="wordmark">
+        <text class="ice">ICE</text><text class="jz">JZ</text>
       </view>
-      <view class="metric" data-path="/pages/sys/org/index" bindtap="onQuickTap">
-        <view class="metric-label">机构</view>
-        <view class="metric-value">架构</view>
-      </view>
-      <view class="metric" data-path="/pages/sys/role/index" bindtap="onQuickTap">
-        <view class="metric-label">角色</view>
-        <view class="metric-value">权限</view>
-      </view>
-      <view class="metric" data-path="/pages/message/inbox" bindtap="onQuickTap">
-        <view class="metric-label">消息</view>
-        <view class="metric-value">{{unreadCount}}</view>
-      </view>
-    </view>
-  </view>
+      <text class="lead">{{brand.homeLine}}</text>
 
-  <view class="block">
-    <view class="block-head">
-      <view class="block-title">平台能力</view>
-    </view>
-    <view class="cap-list">
-      <view class="cap" wx:for="{{features}}" wx:key="title">
-        <view class="cap-index">0{{index + 1}}</view>
-        <view class="cap-body">
-          <view class="cap-title">{{item.title}}</view>
-          <view class="cap-desc">{{item.desc}}</view>
+      <view class="actions">
+        <view class="action main" data-path="/pages/workbench/workbench" data-tab="true" bindtap="onNav">
+          <text class="action-t">{{copy.enterWorkbench}}</text>
+          <text class="action-d">{{copy.sysEntry}}</text>
+        </view>
+        <view class="action" data-path="/pages/message/inbox" bindtap="onNav">
+          <text class="action-t">{{copy.message}}</text>
+          <text class="action-d">{{msgActionHint}}</text>
         </view>
       </view>
     </view>
   </view>
+
+  <view class="body">
+    <view class="kpi-row">
+      <view
+        wx:for="{{metrics}}"
+        wx:key="key"
+        class="kpi-card"
+        data-path="{{item.path}}"
+        bindtap="onNav"
+      >
+        <text class="kpi-lab">{{item.label}}</text>
+        <text class="kpi-num">{{statsLoading ? '—' : item.value}}</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="sec-title">{{copy.quickEntry}}</text>
+      <view class="entry-grid">
+        <view
+          wx:for="{{lanes}}"
+          wx:key="key"
+          class="entry"
+          data-path="{{item.path}}"
+          bindtap="onNav"
+        >
+          <view class="entry-orb">
+            <image class="entry-img" src="{{item.icon}}" mode="aspectFit" />
+          </view>
+          <text class="entry-name">{{item.name}}</text>
+          <text class="entry-hint">{{item.hint}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{hasChartData}}" class="card">
+      <view class="card-head">
+        <text class="sec-title">{{copy.resourceOverview}}</text>
+        <text class="sec-sub">{{copy.sameAsAdmin}}</text>
+      </view>
+      <home-bar-chart canvas-id="home-resource-bar" type="bar" height="280rpx" items="{{resourceBars}}" />
+    </view>
+
+    <view wx:if="{{hasChartData}}" class="card">
+      <view class="card-head">
+        <text class="sec-title">{{copy.weekMsg}}</text>
+      </view>
+      <home-bar-chart canvas-id="home-week-line" type="line" height="260rpx" items="{{weekBars}}" />
+    </view>
+
+    <view wx:if="{{hasChartData}}" class="card">
+      <view class="card-head">
+        <text class="sec-title">{{copy.readRate}}</text>
+      </view>
+      <home-ring-stat
+        canvas-id="home-msg-ring"
+        height="240rpx"
+        percent="{{messageRing.percent}}"
+        label="{{copy.read}}"
+        legend="{{messageLegend}}"
+      />
+    </view>
+
+    <view wx:if="{{!hasChartData && !statsLoading}}" class="card empty-tip">
+      <view class="empty-orb" />
+      <text class="empty-title">{{copy.boardPending}}</text>
+      <text class="empty-desc">{{copy.boardHint}}</text>
+    </view>
+
+    <view class="card">
+      <text class="sec-title">{{copy.capabilities}}</text>
+      <view class="feat-list">
+        <view wx:for="{{features}}" wx:key="title" class="feat">
+          <view class="feat-i">0{{index + 1}}</view>
+          <view class="feat-body">
+            <text class="feat-t">{{item.title}}</text>
+            <text class="feat-d">{{item.desc}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <text class="foot">{{brand.footer}}</text>
+  </view>
+
+  <view class="xiaobing-fab" data-path="/pages/assistant/chat" bindtap="onNav">
+    <view class="fab-stage">
+      <view class="fab-halo" />
+      <view class="fab-orbit o1" />
+      <view class="fab-orbit o2" />
+      <view class="fab-spark s1" />
+      <view class="fab-spark s2" />
+      <view class="fab-orb">
+        <view class="fab-sheen" />
+        <image class="fab-img" src="/images/mascot/xiaobing-main.png" mode="aspectFit" />
+        <view class="fab-live">
+          <view class="fab-live-dot" />
+        </view>
+      </view>
+    </view>
+    <view class="fab-tag">
+      <view class="fab-tag-dot" />
+      <text class="fab-tag-lab">{{copy.assistant}}</text>
+    </view>
+  </view>
+
 </view>

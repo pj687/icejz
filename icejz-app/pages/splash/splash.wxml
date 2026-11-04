@@ -1,0 +1,92 @@
+<view class="splash {{ready ? 'ready' : ''}} {{leaving ? 'leave' : ''}}">
+  <view class="bg">
+    <view class="bg-base" />
+    <view class="aurora a1" />
+    <view class="aurora a2" />
+    <view class="blob b1" />
+    <view class="blob b2" />
+    <view class="blob b3" />
+    <view class="beam beam-a" />
+    <view class="beam beam-b" />
+    <view class="grid" />
+    <view class="grain" />
+    <view class="vignette" />
+    <view
+      wx:for="{{particles}}"
+      wx:key="id"
+      class="particle {{item.tone}}"
+      style="{{item.style}}"
+    />
+    <view class="corner tl"><view class="ch" /><view class="cv" /></view>
+    <view class="corner tr"><view class="ch" /><view class="cv" /></view>
+    <view class="corner bl"><view class="ch" /><view class="cv" /></view>
+    <view class="corner br"><view class="ch" /><view class="cv" /></view>
+  </view>
+
+  <view class="stage">
+    <view class="mark-row {{phase >= 1 ? 'show' : ''}}">
+      <view class="mark-line" />
+      <text class="mark-text">STUDIO</text>
+      <view class="mark-line" />
+    </view>
+
+    <view class="orb-wrap {{phase >= 1 ? 'show' : ''}}">
+      <view class="halo" />
+      <view class="halo soft" />
+      <view class="ring r1" />
+      <view class="ring r2" />
+      <view class="ring r3" />
+      <view class="orbit">
+        <view class="orbit-dot" />
+      </view>
+      <view class="orbit slow">
+        <view class="orbit-dot mini" />
+      </view>
+      <view class="spark s1" />
+      <view class="spark s2" />
+      <view class="spark s3" />
+      <view class="orb">
+        <view class="orb-sheen" />
+        <view class="orb-rim" />
+        <image class="mascot" src="/images/mascot/xiaobing-main.png" mode="aspectFit" />
+      </view>
+    </view>
+
+    <view class="brand {{phase >= 2 ? 'show' : ''}}">
+      <view class="kicker {{letterStep >= 1 ? 'in' : ''}}">
+        <view class="kicker-dot" />
+        <text class="kicker-text">ICECORE</text>
+        <view class="kicker-chip">ENGINE</view>
+      </view>
+      <view class="wordmark">
+        <text class="letter ice {{letterStep > 1 ? 'in' : ''}}">I</text>
+        <text class="letter ice {{letterStep > 2 ? 'in' : ''}}">C</text>
+        <text class="letter ice {{letterStep > 3 ? 'in' : ''}}">E</text>
+        <text class="letter jz {{letterStep > 4 ? 'in' : ''}}">J</text>
+        <text class="letter jz {{letterStep > 5 ? 'in' : ''}}">Z</text>
+      </view>
+      <view class="brand-rule {{letterStep >= 7 ? 'in' : ''}}">
+        <view class="rule-diamond" />
+        <view class="brand-line" />
+        <view class="rule-diamond" />
+      </view>
+      <text class="slogan {{letterStep >= 7 ? 'in' : ''}}">{{slogan}}</text>
+      <text class="hint {{letterStep >= 8 ? 'in' : ''}}">{{hint}}</text>
+    </view>
+
+    <view class="loader {{phase >= 3 ? 'show' : ''}} {{ready ? 'ready' : ''}}">
+      <view class="track">
+        <view class="fill" style="width: {{progress}}%;">
+          <view class="fill-shine" />
+        </view>
+      </view>
+      <view class="loader-meta">
+        <view class="status">
+          <view class="status-dot" />
+          <text class="loading-text">{{ready ? readyText : loadingText}}</text>
+        </view>
+        <text class="loading-pct">{{progress}}%</text>
+      </view>
+    </view>
+  </view>
+</view>

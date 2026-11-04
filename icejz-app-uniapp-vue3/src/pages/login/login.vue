@@ -2,143 +2,146 @@
     <view class="login-page">
         <view class="bg-layer" aria-hidden="true">
             <view class="bg-base"></view>
-            <view class="bg-stars"></view>
+            <view class="blob b1"></view>
+            <view class="blob b2"></view>
+            <view class="blob b3"></view>
             <view class="bg-mesh"></view>
-            <view class="bg-aurora a1"></view>
-            <view class="bg-aurora a2"></view>
-            <view class="bg-aurora a3"></view>
-            <view class="bg-glow g1"></view>
-            <view class="bg-glow g2"></view>
-            <view class="bg-glow g3"></view>
-            <view class="orbit-ring r1"></view>
-            <view class="orbit-ring r2"></view>
-            <view class="orbit-ring r3"></view>
-            <view class="float-dot d1"></view>
-            <view class="float-dot d2"></view>
-            <view class="float-dot d3"></view>
-            <view class="float-dot d4"></view>
-            <view class="float-dot d5"></view>
-            <view class="bg-scan"></view>
             <view class="bg-vignette"></view>
         </view>
 
-        <view class="brand-block">
-            <view class="brand-eyebrow">
-                <view class="eyebrow-dot"></view>
-                <text class="eyebrow-text">ICECORE · 低代码引擎</text>
+        <view class="lang-bar" :style="{ paddingTop: statusBarPx + 'px' }">
+            <view class="lang-btn" @tap="toggleLocale">
+                <text class="lang-code">{{ localeShort }}</text>
+                <text class="lang-sep">/</text>
+                <text class="lang-next">{{ nextLocaleShort }}</text>
             </view>
+        </view>
+
+        <view class="brand-block">
             <view class="logo-wrap">
-                <image class="brand-logo" src="/static/logo.png" mode="aspectFit" />
+                <image class="brand-logo" src="/static/logo.png" mode="aspectFill" />
                 <view class="logo-pulse"></view>
+                <view class="logo-shine"></view>
             </view>
             <view class="hero-title">
                 <text class="hero-ice">ICE</text><text class="hero-jz">JZ</text>
             </view>
-            <text class="slogan">{{ brand.slogan }}</text>
-            <view class="brand-chips">
-                <text class="chip">安全可靠</text>
-                <text class="chip">快速开发</text>
-                <text class="chip">灵活扩展</text>
+            <text class="slogan">{{ $t('brand.slogan') }}</text>
+            <view class="brand-eyebrow">
+                <view class="eyebrow-dot"></view>
+                <text class="eyebrow-text">{{ $t('brand.tagline') }}</text>
             </view>
         </view>
 
         <view class="card">
-            <view class="card-accent"></view>
-            <view class="card-glow"></view>
-            <view class="card-corner c-tl"></view>
-            <view class="card-corner c-tr"></view>
-            <view class="card-corner c-bl"></view>
-            <view class="card-corner c-br"></view>
+            <view class="card-glow g-a"></view>
+            <view class="card-glow g-b"></view>
+            <view class="card-sheen"></view>
 
             <view class="card-head">
-                <view class="card-logo-wrap">
-                    <image class="card-logo" src="/static/logo.png" mode="aspectFit" />
-                    <view class="card-logo-pulse"></view>
+                <view class="card-kicker">
+                    <view class="kicker-dot"></view>
+                    <text class="kicker-text">{{ $t('login.welcomeKicker') }}</text>
                 </view>
-                <view class="card-head-text">
-                    <view class="card-title-row">
-                        <text class="card-title">欢迎登录</text>
-                        <view class="card-badge">
-                            <view class="badge-dot"></view>
-                            <text>Secure</text>
-                        </view>
-                    </view>
-                    <text class="card-sub">{{ brand.loginHint }}</text>
-                </view>
+                <text class="card-sub">{{ $t('brand.loginHint') }}</text>
             </view>
 
             <view v-if="!showCompleteProfile">
                 <view class="tabs">
-                    <view class="tab" :class="{ active: loginMode === 'account' }" @tap="loginMode = 'account'">账号登录</view>
-                    <view class="tab" :class="{ active: loginMode === 'mobile' }" @tap="loginMode = 'mobile'">手机登录</view>
+                    <view class="tab" :class="{ active: loginMode === 'account' }" @tap="loginMode = 'account'">{{ $t('login.accountLogin') }}</view>
+                    <view class="tab" :class="{ active: loginMode === 'mobile' }" @tap="loginMode = 'mobile'">{{ $t('login.mobileLogin') }}</view>
                     <view class="tab-indicator" :class="{ mobile: loginMode === 'mobile' }"></view>
                 </view>
 
                 <view v-if="loginMode === 'account'" class="form-body">
                     <view class="field">
-                        <text class="field-label">账号</text>
-                        <input v-model="accountForm.username" class="field-input" placeholder="请输入账号" />
+                        <text class="field-label">{{ $t('login.account') }}</text>
+                        <view class="field-shell">
+                            <view class="field-ico">
+                                <image class="field-ico-img" src="/static/icons/user.svg" mode="aspectFit" />
+                            </view>
+                            <input v-model="accountForm.username" class="field-input" :placeholder="$t('login.accountPh')" />
+                        </view>
                     </view>
                     <view class="field">
-                        <text class="field-label">密码</text>
-                        <input v-model="accountForm.password" password class="field-input" placeholder="请输入密码" />
+                        <text class="field-label">{{ $t('login.password') }}</text>
+                        <view class="field-shell">
+                            <view class="field-ico">
+                                <image class="field-ico-img" src="/static/icons/lock.svg" mode="aspectFit" />
+                            </view>
+                            <input v-model="accountForm.password" password class="field-input" :placeholder="$t('login.passwordPh')" />
+                        </view>
                     </view>
                     <view class="field" v-if="captchaEnabled">
-                        <text class="field-label">安全验证</text>
-                        <LoginCaptchaPopup
-                            ref="accountCaptchaRef"
-                            v-model="accountForm.captcha"
-                            :captcha-key="accountForm.key"
-                            :mode="captchaMode"
-                            :tip="captchaTip"
-                            :image="captchaBase64"
-                            :jigsaw-image="jigsawImage"
-                            :jigsaw-y="jigsawY"
-                            :words="captchaWords"
-                            :pow-running="powRunning"
-                            :site-key="captchaSiteKey"
-                            @refresh="loadCaptcha"
-                        />
+                        <text class="field-label">{{ $t('login.security') }}</text>
+                        <view class="security-shell">
+                            <LoginCaptchaPopup
+                                ref="accountCaptchaRef"
+                                v-model="accountForm.captcha"
+                                :captcha-key="accountForm.key"
+                                :mode="captchaMode"
+                                :tip="captchaTip"
+                                :image="captchaBase64"
+                                :jigsaw-image="jigsawImage"
+                                :jigsaw-y="jigsawY"
+                                :words="captchaWords"
+                                :pow-running="powRunning"
+                                :site-key="captchaSiteKey"
+                                @refresh="loadCaptcha"
+                            />
+                        </view>
                     </view>
                     <view class="submit-btn" :class="{ disabled: isLogging }" @tap="onAccountLogin">
                         <view v-if="isLogging" class="spinner"></view>
-                        {{ isLogging ? '登录中...' : '登录' }}
+                        {{ isLogging ? $t('login.logging') : $t('login.login') }}
                     </view>
                 </view>
 
                 <view v-else class="form-body">
                     <view class="field">
-                        <text class="field-label">手机号</text>
-                        <input v-model="mobileForm.mobile" class="field-input" :class="{ error: inputErrors.mobile }" maxlength="11" placeholder="请输入11位手机号" @input="onPhoneInput" />
+                        <text class="field-label">{{ $t('login.mobile') }}</text>
+                        <view class="field-shell" :class="{ error: !!inputErrors.mobile }">
+                            <view class="field-ico">
+                                <image class="field-ico-img" src="/static/icons/phone.svg" mode="aspectFit" />
+                            </view>
+                            <input v-model="mobileForm.mobile" class="field-input" maxlength="11" :placeholder="$t('login.mobilePh')" @input="onPhoneInput" />
+                        </view>
                         <text class="field-tip" :class="{ err: !!inputErrors.mobile }">{{ inputErrors.mobile || phoneHint }}</text>
                     </view>
 
                     <view class="field">
-                        <text class="field-label">安全验证</text>
-                        <LoginCaptchaPopup
-                            ref="mobileCaptchaRef"
-                            v-model="mobileForm.captcha"
-                            :captcha-key="mobileForm.key"
-                            :mode="captchaMode"
-                            :tip="captchaTip"
-                            :image="captchaBase64"
-                            :jigsaw-image="jigsawImage"
-                            :jigsaw-y="jigsawY"
-                            :words="captchaWords"
-                            :pow-running="powRunning"
-                            :site-key="captchaSiteKey"
-                            @refresh="loadCaptcha"
-                        />
+                        <text class="field-label">{{ $t('login.security') }}</text>
+                        <view class="security-shell">
+                            <LoginCaptchaPopup
+                                ref="mobileCaptchaRef"
+                                v-model="mobileForm.captcha"
+                                :captcha-key="mobileForm.key"
+                                :mode="captchaMode"
+                                :tip="captchaTip"
+                                :image="captchaBase64"
+                                :jigsaw-image="jigsawImage"
+                                :jigsaw-y="jigsawY"
+                                :words="captchaWords"
+                                :pow-running="powRunning"
+                                :site-key="captchaSiteKey"
+                                @refresh="loadCaptcha"
+                            />
+                        </view>
                         <text v-if="inputErrors.captcha" class="field-tip err">{{ inputErrors.captcha }}</text>
-                        <text v-else class="field-tip">通过弹窗完成验证后才能发送短信</text>
+                        <text v-else class="field-tip">{{ $t('login.captchaBeforeSms') }}</text>
                     </view>
 
                     <view class="field">
-                        <text class="field-label">短信验证码</text>
+                        <text class="field-label">{{ $t('login.sms') }}</text>
                         <view class="captcha-row">
-                            <input v-model="mobileForm.code" class="field-input flex" :class="{ error: inputErrors.code }" maxlength="6" placeholder="请输入短信验证码" />
+                            <view class="field-shell flex" :class="{ error: !!inputErrors.code }">
+                                <view class="field-ico">
+                                    <image class="field-ico-img" src="/static/icons/msg.svg" mode="aspectFit" />
+                                </view>
+                                <input v-model="mobileForm.code" class="field-input" maxlength="6" :placeholder="$t('login.smsPh')" />
+                            </view>
                             <view class="code-btn" :class="{ disabled: sms.disabled || isLogging }" @tap.stop="sendCode">
-                                <text class="code-btn-text">{{ sms.disabled ? sms.count + 's' : '发送验证码' }}</text>
+                                <text class="code-btn-text">{{ sms.disabled ? sms.count + 's' : $t('login.sendCode') }}</text>
                             </view>
                         </view>
                         <text v-if="inputErrors.code" class="field-tip err">{{ inputErrors.code }}</text>
@@ -146,12 +149,16 @@
 
                     <view class="submit-btn" :class="{ disabled: !canSubmit }" @tap="onMobileLogin">
                         <view v-if="isLogging" class="spinner"></view>
-                        {{ isLogging ? '登录中...' : '登录' }}
+                        {{ isLogging ? $t('login.logging') : $t('login.login') }}
                     </view>
                 </view>
             </view>
 
             <view v-else class="complete-body">
+                <view class="card-kicker">
+                    <view class="kicker-dot"></view>
+                    <text class="kicker-text">{{ $t('login.welcomeKicker') }}</text>
+                </view>
                 <text class="complete-title">完善信息</text>
                 <text class="complete-desc">选择身份并补充资料后进入系统。首次默认密码为当前手机号。</text>
 
@@ -168,13 +175,23 @@
 
                 <view class="field">
                     <text class="field-label">姓名</text>
-                    <input v-model="completeForm.realName" class="field-input" :class="{ error: completeErrors.realName }" placeholder="请输入真实姓名" />
+                    <view class="field-shell" :class="{ error: !!completeErrors.realName }">
+                        <view class="field-ico">
+                            <image class="field-ico-img" src="/static/icons/name.svg" mode="aspectFit" />
+                        </view>
+                        <input v-model="completeForm.realName" class="field-input" placeholder="请输入真实姓名" />
+                    </view>
                     <text v-if="completeErrors.realName" class="field-tip err">{{ completeErrors.realName }}</text>
                 </view>
 
                 <view class="field">
                     <text class="field-label">手机号</text>
-                    <input :value="completeForm.mobile" disabled class="field-input readonly" />
+                    <view class="field-shell readonly">
+                        <view class="field-ico">
+                            <image class="field-ico-img" src="/static/icons/phone.svg" mode="aspectFit" />
+                        </view>
+                        <input :value="completeForm.mobile" disabled class="field-input" />
+                    </view>
                 </view>
 
                 <view class="field">
@@ -198,15 +215,14 @@
             <LoginAgreement v-if="!showCompleteProfile" ref="agreementRef" v-model="agreed" />
 
             <view class="card-secure">
-                <text>加密传输</text>
-                <text class="sep">·</text>
-                <text>权限隔离</text>
-                <text class="sep">·</text>
-                <text>操作可审计</text>
+                <view class="secure-chip">{{ $t('login.secureEncrypt') }}</view>
+                <view class="secure-chip">{{ $t('login.secureAuth') }}</view>
+                <view class="secure-chip">{{ $t('login.secureAudit') }}</view>
             </view>
         </view>
 
-        <text class="footnote">{{ brand.footer }} · 请先阅读并同意相关协议后再登录</text>
+        <text class="footnote">{{ brand.footer }} · {{ $t('login.footnote') }}</text>
+        <ice-toast-host />
     </view>
 </template>
 
@@ -214,15 +230,21 @@
 import { sm2Encrypt } from '../../utils/sm2.js';
 import cache from '../../utils/cache.js';
 import brand from '../../config/brand.js';
+import { setAppLocale } from '@/locale/index.js';
 import { useSendCodeApi, useMobileLoginApi, useLoginApi, useCompleteProfileApi, useCaptchaApi, useCaptchaEnabledApi } from '../../api/auth.js';
 import { useUserInfoApi } from '../../api/user.js';
+import { goAfterAuth } from '@/utils/guide.js';
 import LoginAgreement from './LoginAgreement.vue';
 import LoginCaptchaPopup from './LoginCaptchaPopup.vue';
+import IceToastHost from '@/components/feedback/IceToastHost.vue';
 
 const CAPTCHA_TYPE_MODE = {
     pattern: 'click',
     block_puzzle: 'slider',
     click_word: 'word',
+    curve: 'curve',
+    rotate: 'rotate',
+    angle: 'angle',
     pow: 'pow',
     turnstile: 'turnstile',
     spec: 'input',
@@ -233,7 +255,7 @@ const CAPTCHA_TYPE_MODE = {
 
 export default {
     name: 'Login',
-    components: { LoginAgreement, LoginCaptchaPopup },
+    components: { LoginAgreement, LoginCaptchaPopup, IceToastHost },
     async onShow() {
         try {
             const enabledRes = await useCaptchaEnabledApi();
@@ -250,6 +272,15 @@ export default {
             if (this.isLogging || this.showCompleteProfile || this.loginMode !== 'mobile') return false;
             return !!this.mobileForm.mobile && !!this.mobileForm.code;
         },
+        localeCode() {
+            return this.$i18n.locale === 'en-US' ? 'en-US' : 'zh-CN';
+        },
+        localeShort() {
+            return this.localeCode === 'en-US' ? 'EN' : '中';
+        },
+        nextLocaleShort() {
+            return this.localeCode === 'en-US' ? '中' : 'EN';
+        }
     },
     watch: {
         loginMode() {
@@ -258,9 +289,17 @@ export default {
             }
         }
     },
+    created() {
+        try {
+            this.statusBarPx = uni.getSystemInfoSync().statusBarHeight || 20;
+        } catch (e) {
+            this.statusBarPx = 20;
+        }
+    },
     data() {
         return {
             brand,
+            statusBarPx: 20,
             agreed: false,
             isLogging: false,
             isCompleting: false,
@@ -312,13 +351,14 @@ export default {
                 orgId: null
             },
             roleOptions: [
-                { key: 'elder', label: '老人', value: 303, emoji: '👴', tip: '本人使用，查看服务与档案' },
-                { key: 'family', label: '家属', value: 302, emoji: '👨‍👩‍👧', tip: '协助家人，关注照护情况' }
+                { key: 'dev', label: '研发', value: 2, emoji: '⚙', tip: '开发工具与物联网能力' },
+                { key: 'ops', label: '运维', value: 3, emoji: '🛰', tip: '日志、监控与定时任务' },
+                { key: 'pm', label: '产品', value: 4, emoji: '◎', tip: '日常协作与业务查阅' }
             ],
             genderOptions: [
-                { key: 'male', label: '男', value: 0, emoji: '👦', tip: '阳光稳重' },
-                { key: 'female', label: '女', value: 1, emoji: '👩', tip: '温柔细致' },
-                { key: 'unknown', label: '未知', value: 2, emoji: '🟰', tip: '保持默认' }
+                { key: 'male', label: '男', value: 0, emoji: '♂', tip: '男性' },
+                { key: 'female', label: '女', value: 1, emoji: '♀', tip: '女性' },
+                { key: 'unknown', label: '未知', value: 2, emoji: '·', tip: '保持默认' }
             ],
             phoneHint: '请输入11位手机号',
             sms: {
@@ -330,6 +370,11 @@ export default {
         };
     },
     methods: {
+        toggleLocale() {
+            const next = this.localeCode === 'zh-CN' ? 'en-US' : 'zh-CN';
+            setAppLocale(next);
+            uni.showToast({ title: this.$t('lang.switched'), icon: 'none' });
+        },
         onPhoneInput(e) {
             const rawValue = (e?.detail?.value ?? this.mobileForm.mobile ?? '').replace(/\D/g, '').slice(0, 11);
             this.mobileForm.mobile = rawValue;
@@ -624,7 +669,7 @@ export default {
                 if (userResponse && userResponse.code === 0) cache.setUserInfo(userResponse.data);
                 this.showCompleteProfile = false;
                 uni.showToast({ title: '登录成功', icon: 'success' });
-                setTimeout(() => uni.switchTab({ url: '/pages/index/index' }), 1200);
+                setTimeout(() => goAfterAuth({ replace: true }), 1200);
                 return;
             }
             throw response || new Error('登录失败');
@@ -642,17 +687,57 @@ export default {
 <style scoped>
 .login-page {
     --cyan: #00a8e8;
-    --cyan-2: #3ec6ff;
+    --cyan-2: #2bb8ef;
+    --ink: #0f1b2d;
+    --mute: #8492a6;
     min-height: 100vh;
     position: relative;
-    padding: 0 28rpx calc(40rpx + env(safe-area-inset-bottom));
+    padding: 0 28rpx calc(36rpx + env(safe-area-inset-bottom));
     box-sizing: border-box;
-    background: #030912;
+    background: #f3f6fa;
     overflow-x: hidden;
-    color: #fff;
+    color: var(--ink);
 }
 
-/* ===== Background (PC-like, mobile-light) ===== */
+.lang-bar {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 0;
+    padding-bottom: 4rpx;
+}
+
+.lang-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6rpx;
+    height: 64rpx;
+    padding: 0 22rpx;
+    border-radius: 999rpx;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1rpx solid rgba(255, 255, 255, 0.98);
+    box-shadow: 0 10rpx 22rpx rgba(15, 35, 55, 0.06);
+}
+
+.lang-code {
+    font-size: 24rpx;
+    font-weight: 750;
+    color: #00a8e8;
+}
+
+.lang-sep {
+    font-size: 20rpx;
+    color: #c5ced6;
+}
+
+.lang-next {
+    font-size: 22rpx;
+    font-weight: 650;
+    color: #8492a6;
+}
+
+/* ===== Background ===== */
 .bg-layer {
     position: absolute;
     inset: 0;
@@ -664,171 +749,58 @@ export default {
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(ellipse 80% 55% at 12% 12%, rgba(0, 168, 232, 0.42), transparent 55%),
-        radial-gradient(ellipse 70% 50% at 92% 78%, rgba(62, 198, 255, 0.26), transparent 52%),
-        radial-gradient(ellipse 50% 40% at 50% 42%, rgba(14, 60, 92, 0.45), transparent 60%),
-        linear-gradient(160deg, #030912 0%, #0a1524 36%, #0e2438 66%, #081c2c 100%);
+        radial-gradient(ellipse 80% 55% at 50% -5%, rgba(0, 168, 232, 0.16), transparent 60%),
+        radial-gradient(ellipse 55% 40% at 100% 20%, rgba(56, 189, 248, 0.12), transparent 55%),
+        radial-gradient(ellipse 50% 35% at 0% 70%, rgba(0, 168, 232, 0.1), transparent 55%),
+        linear-gradient(180deg, #eef6fb 0%, #f3f6fa 42%, #f7f9fc 100%);
 }
 
-.bg-stars {
+.blob {
     position: absolute;
-    inset: 0;
-    opacity: 0.55;
-    background-image:
-        radial-gradient(2rpx 2rpx at 12% 18%, rgba(255, 255, 255, 0.75), transparent),
-        radial-gradient(2rpx 2rpx at 28% 62%, rgba(183, 233, 255, 0.7), transparent),
-        radial-gradient(3rpx 3rpx at 46% 22%, rgba(255, 255, 255, 0.55), transparent),
-        radial-gradient(2rpx 2rpx at 64% 48%, rgba(154, 230, 255, 0.65), transparent),
-        radial-gradient(2rpx 2rpx at 78% 16%, rgba(255, 255, 255, 0.5), transparent),
-        radial-gradient(2rpx 2rpx at 88% 72%, rgba(122, 217, 255, 0.6), transparent),
-        radial-gradient(3rpx 3rpx at 18% 84%, rgba(255, 255, 255, 0.4), transparent),
-        radial-gradient(2rpx 2rpx at 52% 78%, rgba(183, 233, 255, 0.55), transparent),
-        radial-gradient(2rpx 2rpx at 35% 40%, rgba(255, 255, 255, 0.45), transparent),
-        radial-gradient(2rpx 2rpx at 70% 30%, rgba(154, 230, 255, 0.5), transparent);
-    animation: stars-twinkle 6s ease-in-out infinite;
+    border-radius: 50%;
+    filter: blur(2px);
+    pointer-events: none;
+}
+.blob.b1 {
+    width: 480rpx;
+    height: 480rpx;
+    top: -160rpx;
+    right: -120rpx;
+    background: radial-gradient(circle, rgba(0, 168, 232, 0.22), transparent 68%);
+    animation: float-a 7s ease-in-out infinite;
+}
+.blob.b2 {
+    width: 380rpx;
+    height: 380rpx;
+    bottom: 6%;
+    left: -140rpx;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
+    animation: float-b 8s ease-in-out infinite;
+}
+.blob.b3 {
+    width: 240rpx;
+    height: 240rpx;
+    top: 38%;
+    right: 8%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.7), transparent 70%);
+    animation: float-a 9s ease-in-out infinite reverse;
 }
 
 .bg-mesh {
     position: absolute;
     inset: 0;
-    opacity: 0.16;
+    opacity: 0.28;
     background-image:
-        linear-gradient(rgba(0, 168, 232, 0.14) 1rpx, transparent 1rpx),
-        linear-gradient(90deg, rgba(0, 168, 232, 0.14) 1rpx, transparent 1rpx);
+        linear-gradient(rgba(0, 168, 232, 0.08) 1rpx, transparent 1rpx),
+        linear-gradient(90deg, rgba(0, 168, 232, 0.08) 1rpx, transparent 1rpx);
     background-size: 56rpx 56rpx;
-    mask-image: radial-gradient(ellipse at 50% 28%, #000 8%, transparent 72%);
-}
-
-.bg-aurora {
-    position: absolute;
-    border-radius: 42%;
-    filter: blur(70rpx);
-    opacity: 0.36;
-    mix-blend-mode: screen;
-}
-.a1 {
-    width: 520rpx;
-    height: 520rpx;
-    left: -140rpx;
-    top: -160rpx;
-    background: conic-gradient(from 90deg, rgba(0, 168, 232, 0.65), transparent, rgba(62, 198, 255, 0.45), transparent);
-    animation: aurora 14s ease-in-out infinite;
-}
-.a2 {
-    width: 480rpx;
-    height: 480rpx;
-    right: -160rpx;
-    bottom: -120rpx;
-    background: conic-gradient(from 220deg, rgba(62, 198, 255, 0.5), transparent, rgba(0, 168, 232, 0.38), transparent);
-    animation: aurora 18s ease-in-out infinite reverse;
-}
-.a3 {
-    width: 360rpx;
-    height: 360rpx;
-    left: 28%;
-    top: 34%;
-    opacity: 0.2;
-    background: conic-gradient(from 40deg, rgba(120, 220, 255, 0.35), transparent 40%, rgba(0, 168, 232, 0.28), transparent 75%);
-    animation: aurora 20s ease-in-out infinite;
-}
-
-.bg-glow {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80rpx);
-}
-.g1 {
-    width: 420rpx;
-    height: 420rpx;
-    left: -120rpx;
-    top: -80rpx;
-    background: rgba(0, 168, 232, 0.42);
-    animation: float-a 11s ease-in-out infinite;
-}
-.g2 {
-    width: 360rpx;
-    height: 360rpx;
-    right: -100rpx;
-    top: 260rpx;
-    background: rgba(62, 198, 255, 0.26);
-    animation: float-b 13s ease-in-out infinite;
-}
-.g3 {
-    width: 240rpx;
-    height: 240rpx;
-    left: 40%;
-    top: 16%;
-    background: rgba(0, 168, 232, 0.14);
-    animation: float-a 15s ease-in-out infinite reverse;
-}
-
-.orbit-ring {
-    position: absolute;
-    left: 50%;
-    top: 18%;
-    border-radius: 50%;
-    border: 1rpx solid rgba(0, 168, 232, 0.18);
-    transform: translate(-50%, -50%);
-}
-.r1 {
-    width: 280rpx;
-    height: 280rpx;
-    animation: orbit-spin 22s linear infinite;
-    box-shadow: 0 0 24rpx rgba(0, 168, 232, 0.08) inset;
-}
-.r2 {
-    width: 420rpx;
-    height: 420rpx;
-    border-color: rgba(62, 198, 255, 0.12);
-    animation: orbit-spin 34s linear infinite reverse;
-}
-.r3 {
-    width: 560rpx;
-    height: 560rpx;
-    border-style: dashed;
-    border-color: rgba(0, 168, 232, 0.1);
-    animation: orbit-spin 48s linear infinite;
-}
-
-.float-dot {
-    position: absolute;
-    width: 8rpx;
-    height: 8rpx;
-    border-radius: 50%;
-    background: rgba(183, 233, 255, 0.85);
-    box-shadow: 0 0 12rpx rgba(0, 168, 232, 0.8);
-    animation: float-dot 7s ease-in-out infinite;
-}
-.d1 { left: 14%; top: 22%; animation-delay: 0s; }
-.d2 { left: 78%; top: 18%; width: 6rpx; height: 6rpx; animation-delay: 1.2s; }
-.d3 { left: 22%; top: 48%; animation-delay: 2s; }
-.d4 { left: 86%; top: 42%; width: 10rpx; height: 10rpx; animation-delay: 0.6s; }
-.d5 { left: 48%; top: 12%; animation-delay: 1.8s; }
-
-.bg-scan {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        180deg,
-        transparent 0%,
-        rgba(0, 168, 232, 0.04) 46%,
-        rgba(62, 198, 255, 0.12) 50%,
-        rgba(0, 168, 232, 0.04) 54%,
-        transparent 100%
-    );
-    background-size: 100% 240%;
-    animation: scan 8s linear infinite;
-    opacity: 0.35;
-    z-index: 1;
+    mask-image: radial-gradient(ellipse at 50% 18%, #000 0%, transparent 70%);
 }
 
 .bg-vignette {
     position: absolute;
     inset: 0;
-    z-index: 1;
-    background:
-        radial-gradient(ellipse at center, transparent 36%, rgba(4, 10, 18, 0.58) 100%),
-        linear-gradient(180deg, rgba(4, 10, 18, 0.08), transparent 20%, transparent 70%, rgba(4, 10, 18, 0.35));
+    background: radial-gradient(ellipse at 50% 30%, transparent 40%, rgba(243, 246, 250, 0.55) 100%);
 }
 
 .brand-block,
@@ -848,58 +820,96 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 72rpx 0 32rpx;
+    padding: 28rpx 0 20rpx;
     text-align: center;
+}
+
+@media (max-height: 760px) {
+    .brand-block { padding: 12rpx 0 8rpx; }
+    .logo-wrap {
+        width: 88rpx;
+        height: 88rpx;
+        margin-bottom: 12rpx;
+        border-radius: 28rpx;
+    }
+    .brand-logo {
+        border-radius: 28rpx;
+    }
+    .logo-pulse { border-radius: 34rpx; }
+    .hero-ice, .hero-jz { font-size: 52rpx; }
+    .slogan { margin-top: 8rpx; font-size: 22rpx; }
+    .brand-eyebrow { margin-top: 10rpx; }
 }
 
 .brand-eyebrow {
     display: inline-flex;
     align-items: center;
     gap: 10rpx;
-    margin-bottom: 22rpx;
-    padding: 8rpx 18rpx;
+    margin-top: 18rpx;
+    padding: 10rpx 20rpx;
     border-radius: 999rpx;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1rpx solid rgba(0, 168, 232, 0.22);
-    animation: fade-up 0.6s ease both;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1rpx solid rgba(255, 255, 255, 0.98);
+    box-shadow: 0 10rpx 24rpx rgba(15, 35, 55, 0.05);
+    animation: fade-up 0.65s ease 0.16s both;
 }
 .eyebrow-dot {
     width: 10rpx;
     height: 10rpx;
     border-radius: 50%;
     background: var(--cyan);
-    box-shadow: 0 0 0 6rpx rgba(0, 168, 232, 0.18);
+    box-shadow: 0 0 0 6rpx rgba(0, 168, 232, 0.14);
     animation: pulse-dot 2.2s ease-in-out infinite;
 }
 .eyebrow-text {
     font-size: 20rpx;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: rgba(183, 233, 255, 0.92);
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    color: var(--mute);
 }
 
 .logo-wrap {
     position: relative;
-    width: 108rpx;
-    height: 108rpx;
-    margin-bottom: 22rpx;
+    width: 112rpx;
+    height: 112rpx;
+    margin-bottom: 20rpx;
+    border-radius: 36rpx;
+    overflow: hidden;
+    background: #041018;
+    box-shadow: 0 14rpx 28rpx rgba(15, 35, 55, 0.14);
     animation: logo-float 4.5s ease-in-out infinite;
 }
 .brand-logo {
-    width: 108rpx;
-    height: 108rpx;
-    border-radius: 28rpx;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1rpx solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.28);
+    width: 100%;
+    height: 100%;
+    border-radius: 36rpx;
+    display: block;
 }
 .logo-pulse {
     position: absolute;
-    inset: -10rpx;
-    border-radius: 34rpx;
-    border: 2rpx solid rgba(0, 168, 232, 0.35);
+    inset: -8rpx;
+    border-radius: 42rpx;
+    border: 2rpx solid rgba(0, 168, 232, 0.24);
     animation: ring-glow 3.2s ease-in-out infinite;
     pointer-events: none;
+}
+.logo-shine {
+    position: absolute;
+    inset: 0;
+    border-radius: 36rpx;
+    overflow: hidden;
+    pointer-events: none;
+}
+.logo-shine::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -60%;
+    width: 48%;
+    height: 180%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    transform: rotate(18deg);
+    animation: logo-shine 4.8s ease-in-out infinite;
 }
 
 .hero-title {
@@ -907,210 +917,222 @@ export default {
     animation: fade-up 0.7s ease 0.05s both;
 }
 .hero-ice {
-    color: #fff;
-    font-size: 72rpx;
-    font-weight: 780;
+    color: var(--ink);
+    font-size: 64rpx;
+    font-weight: 800;
     letter-spacing: 2rpx;
-    text-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.35);
 }
 .hero-jz {
     color: var(--cyan);
-    font-size: 72rpx;
-    font-weight: 780;
+    font-size: 64rpx;
+    font-weight: 800;
     letter-spacing: 2rpx;
-    text-shadow: 0 0 28rpx rgba(0, 168, 232, 0.45);
 }
 .slogan {
     display: block;
-    margin-top: 16rpx;
-    color: rgba(255, 255, 255, 0.72);
+    margin-top: 14rpx;
+    color: var(--mute);
     font-size: 24rpx;
-    letter-spacing: 1rpx;
-    animation: fade-up 0.7s ease 0.12s both;
-}
-.brand-chips {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10rpx;
-    margin-top: 22rpx;
-    animation: fade-up 0.7s ease 0.18s both;
-}
-.chip {
-    padding: 8rpx 16rpx;
-    border-radius: 999rpx;
-    font-size: 20rpx;
-    font-weight: 650;
-    color: rgba(183, 233, 255, 0.92);
-    background: rgba(0, 168, 232, 0.12);
-    border: 1rpx solid rgba(0, 168, 232, 0.22);
+    letter-spacing: 0.5rpx;
+    animation: fade-up 0.7s ease 0.1s both;
 }
 
 /* ===== Card ===== */
 .card {
     position: relative;
-    margin-top: 8rpx;
-    padding: 36rpx 28rpx 24rpx;
-    border-radius: 28rpx;
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 251, 253, 0.96));
-    border: 1rpx solid rgba(255, 255, 255, 0.55);
+    margin-top: 12rpx;
+    padding: 40rpx 30rpx 28rpx;
+    border-radius: 36rpx;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1rpx solid rgba(255, 255, 255, 0.98);
     box-shadow:
-        0 28rpx 64rpx rgba(0, 0, 0, 0.32),
-        0 0 0 1rpx rgba(0, 168, 232, 0.08) inset;
+        0 24rpx 56rpx rgba(15, 35, 55, 0.08),
+        0 2rpx 0 rgba(255, 255, 255, 0.95) inset;
     overflow: hidden;
-    animation: fade-up 0.75s ease 0.14s both;
-}
-.card-accent {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 6rpx;
-    background: linear-gradient(90deg, #0096d6, #00a8e8, #3ec6ff, #00a8e8);
-    background-size: 200% 100%;
-    animation: accent-flow 4s linear infinite;
+    animation: fade-up 0.75s ease 0.12s both;
+    backdrop-filter: blur(18px);
 }
 .card-glow {
     position: absolute;
-    width: 280rpx;
-    height: 280rpx;
-    right: -80rpx;
-    top: -120rpx;
     border-radius: 50%;
-    background: rgba(0, 168, 232, 0.14);
-    filter: blur(40rpx);
     pointer-events: none;
+    filter: blur(36rpx);
 }
-.card-corner {
+.card-glow.g-a {
+    width: 300rpx;
+    height: 300rpx;
+    right: -100rpx;
+    top: -140rpx;
+    background: rgba(0, 168, 232, 0.16);
+}
+.card-glow.g-b {
+    width: 220rpx;
+    height: 220rpx;
+    left: -80rpx;
+    bottom: -90rpx;
+    background: rgba(56, 189, 248, 0.12);
+}
+.card-sheen {
     position: absolute;
-    width: 22rpx;
-    height: 22rpx;
-    border-color: rgba(0, 168, 232, 0.35);
-    border-style: solid;
+    inset: 0;
     pointer-events: none;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.55) 0%, transparent 38%, transparent 100%);
 }
-.c-tl { left: 14rpx; top: 14rpx; border-width: 2rpx 0 0 2rpx; }
-.c-tr { right: 14rpx; top: 14rpx; border-width: 2rpx 2rpx 0 0; }
-.c-bl { left: 14rpx; bottom: 14rpx; border-width: 0 0 2rpx 2rpx; }
-.c-br { right: 14rpx; bottom: 14rpx; border-width: 0 2rpx 2rpx 0; }
 
 .card-head {
-    display: flex;
-    align-items: center;
-    gap: 18rpx;
-    margin-bottom: 28rpx;
-}
-.card-logo-wrap {
     position: relative;
-    width: 72rpx;
-    height: 72rpx;
-    flex-shrink: 0;
+    z-index: 1;
+    margin-bottom: 24rpx;
 }
-.card-logo {
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 18rpx;
-    background: linear-gradient(180deg, #f0f9ff, #e0f2fe);
-    border: 1rpx solid rgba(0, 168, 232, 0.18);
-}
-.card-logo-pulse {
-    position: absolute;
-    inset: -6rpx;
-    border-radius: 22rpx;
-    border: 2rpx solid rgba(0, 168, 232, 0.28);
-    animation: ring-glow 3.2s ease-in-out infinite;
-}
-.card-head-text {
-    min-width: 0;
-    flex: 1;
-}
-.card-title-row {
-    display: flex;
-    align-items: center;
-    gap: 12rpx;
-}
-.card-title {
-    color: #0f1724;
-    font-size: 34rpx;
-    font-weight: 760;
-}
-.card-badge {
+.card-kicker {
     display: inline-flex;
     align-items: center;
-    gap: 8rpx;
-    height: 36rpx;
-    padding: 0 14rpx;
+    gap: 10rpx;
+    margin-bottom: 12rpx;
+    padding: 8rpx 16rpx;
     border-radius: 999rpx;
-    background: rgba(0, 168, 232, 0.1);
-    border: 1rpx solid rgba(0, 168, 232, 0.18);
-    color: #0284c7;
-    font-size: 18rpx;
-    font-weight: 740;
-    letter-spacing: 0.04em;
+    background: rgba(0, 168, 232, 0.08);
 }
-.badge-dot {
+.kicker-dot {
     width: 10rpx;
     height: 10rpx;
     border-radius: 50%;
     background: #10b981;
-    box-shadow: 0 0 0 4rpx rgba(16, 185, 129, 0.18);
+    box-shadow: 0 0 0 5rpx rgba(16, 185, 129, 0.14);
     animation: pulse-dot 2s ease-in-out infinite;
+}
+.kicker-text {
+    font-size: 20rpx;
+    font-weight: 700;
+    color: #0284c7;
+    letter-spacing: 0.04em;
 }
 .card-sub {
     display: block;
-    margin-top: 8rpx;
-    color: #64748b;
-    font-size: 22rpx;
+    color: var(--mute);
+    font-size: 24rpx;
+    line-height: 1.45;
 }
 
 .tabs {
     position: relative;
+    z-index: 1;
     display: flex;
-    gap: 0;
-    margin-bottom: 28rpx;
-    border-bottom: 1rpx solid #eef2f7;
+    margin-bottom: 30rpx;
+    padding: 8rpx;
+    border-radius: 999rpx;
+    background: rgba(243, 246, 250, 0.92);
+    border: 1rpx solid rgba(255, 255, 255, 0.9);
 }
 .tab {
     flex: 1;
     text-align: center;
-    padding: 0 0 20rpx;
-    color: #94a3b8;
-    font-size: 28rpx;
-    font-weight: 600;
+    padding: 18rpx 0;
+    color: var(--mute);
+    font-size: 26rpx;
+    font-weight: 650;
+    border-radius: 999rpx;
+    position: relative;
+    z-index: 1;
+    transition: color 0.2s ease;
 }
-.tab.active { color: #0f1724; }
+.tab.active { color: #fff; }
 .tab-indicator {
     position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 50%;
-    height: 4rpx;
+    left: 8rpx;
+    top: 8rpx;
+    bottom: 8rpx;
+    width: calc(50% - 8rpx);
     border-radius: 999rpx;
-    background: linear-gradient(90deg, #00a8e8, #3ec6ff);
-    box-shadow: 0 0 12rpx rgba(0, 168, 232, 0.45);
-    transition: transform 0.22s ease-out;
+    background: linear-gradient(145deg, #00a8e8, #2bb8ef);
+    box-shadow: 0 12rpx 24rpx rgba(0, 168, 232, 0.28);
+    transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 0;
+    pointer-events: none;
 }
 .tab-indicator.mobile { transform: translateX(100%); }
 
-.field { margin-bottom: 24rpx; }
-.field-label { display: block; margin-bottom: 10rpx; color: #475569; font-size: 24rpx; font-weight: 600; }
+.form-body,
+.complete-body {
+    position: relative;
+    z-index: 1;
+}
+
+.field { margin-bottom: 22rpx; }
+.field-label {
+    display: block;
+    margin-bottom: 12rpx;
+    margin-left: 8rpx;
+    color: #5b6b7c;
+    font-size: 23rpx;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+}
+.field-shell {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    min-height: 96rpx;
+    padding: 0 12rpx 0 16rpx;
+    border-radius: 28rpx;
+    border: 1rpx solid rgba(232, 238, 245, 0.95);
+    background: rgba(247, 250, 252, 0.96);
+    box-sizing: border-box;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.field-shell.flex { flex: 1; min-width: 0; }
+.field-shell.error {
+    border-color: rgba(225, 29, 72, 0.4);
+    background: #fff5f7;
+}
+.field-shell.readonly {
+    background: #eef2f6;
+}
+.field-shell:focus-within {
+    border-color: rgba(0, 168, 232, 0.42);
+    background: #fff;
+    box-shadow: 0 0 0 8rpx rgba(0, 168, 232, 0.08);
+}
+.field-ico {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 18rpx;
+    background: rgba(0, 168, 232, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.field-ico-img {
+    width: 30rpx;
+    height: 30rpx;
+}
 .field-input {
-    width: 100%;
-    height: 88rpx;
-    padding: 0 22rpx;
-    border-radius: 16rpx;
-    border: 1rpx solid #e5e7eb;
-    background: linear-gradient(180deg, #ffffff, #f4f9fc);
-    color: #111827;
+    flex: 1;
+    min-width: 0;
+    height: 96rpx;
+    padding: 0 12rpx 0 4rpx;
+    border: none;
+    background: transparent;
+    color: var(--ink);
     font-size: 28rpx;
     box-sizing: border-box;
 }
-.field-input.error { border-color: #f56c6c; background: #fff5f5; }
-.field-input.readonly { color: #94a3b8; background: #f1f5f9; }
-.field-input.flex { flex: 1; }
-.field-tip { display: block; margin-top: 8rpx; color: #94a3b8; font-size: 20rpx; }
-.field-tip.err { color: #f56c6c; }
+.field-tip {
+    display: block;
+    margin-top: 10rpx;
+    padding-left: 12rpx;
+    color: var(--mute);
+    font-size: 20rpx;
+}
+.field-tip.err { color: #e11d48; }
+
+.security-shell {
+    padding: 18rpx 18rpx 14rpx;
+    border-radius: 28rpx;
+    background: rgba(247, 250, 252, 0.96);
+    border: 1rpx solid rgba(232, 238, 245, 0.95);
+}
 
 .captcha-row {
     display: flex;
@@ -1121,162 +1143,192 @@ export default {
 .captcha-row :deep(uni-input),
 .captcha-row :deep(.uni-input-wrapper),
 .captcha-row :deep(.uni-input-input) {
-    height: 88rpx !important;
-    min-height: 88rpx !important;
+    height: 96rpx !important;
+    min-height: 96rpx !important;
     box-sizing: border-box;
 }
 
 .code-btn {
-    min-width: 200rpx;
-    height: 88rpx;
-    padding: 0 20rpx;
-    border-radius: 16rpx;
-    border: 1rpx solid #00a8e8;
-    background: rgba(0,168,232,0.1);
+    min-width: 196rpx;
+    height: 96rpx;
+    padding: 0 22rpx;
+    border-radius: 28rpx;
+    border: none;
+    background: rgba(0, 168, 232, 0.1);
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 .code-btn-text {
-    color: #00a8e8;
+    color: #0284c7;
     font-size: 24rpx;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.2;
 }
-.code-btn.disabled { opacity: 0.55; pointer-events: none; }
+.code-btn.disabled { opacity: 0.5; pointer-events: none; }
 
 .submit-btn {
     position: relative;
     overflow: hidden;
-    margin-top: 8rpx;
-    min-height: 96rpx;
-    padding: 26rpx 24rpx;
-    border-radius: 16rpx;
-    background: linear-gradient(135deg, #0096d6 0%, #00a8e8 40%, #3ec6ff 100%);
+    margin: 8rpx auto 0;
+    width: 78%;
+    min-height: 84rpx;
+    padding: 20rpx 24rpx;
+    border-radius: 999rpx;
+    background: linear-gradient(145deg, #00a8e8 0%, #1ab3ec 55%, #2bb8ef 100%);
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow:
-        0 14rpx 30rpx rgba(0,168,232,0.34),
-        inset 0 1rpx 0 rgba(255,255,255,0.35);
+        0 12rpx 26rpx rgba(0, 168, 232, 0.22),
+        inset 0 1rpx 0 rgba(255, 255, 255, 0.35);
     color: #fff;
-    font-size: 30rpx;
-    font-weight: 740;
-    letter-spacing: 4rpx;
-    line-height: 1.4;
+    font-size: 28rpx;
+    font-weight: 720;
+    letter-spacing: 1rpx;
+    line-height: 1.3;
 }
-.submit-btn.disabled { opacity: 0.55; pointer-events: none; }
+.submit-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+    transform: translateX(-120%);
+    animation: btn-glint 3.6s ease-in-out infinite;
+}
+.submit-btn.disabled { opacity: 0.5; pointer-events: none; }
+@keyframes btn-glint {
+    0%, 55% { transform: translateX(-120%); }
+    75%, 100% { transform: translateX(120%); }
+}
 
 .ghost-btn {
     min-height: 88rpx;
     padding: 20rpx 24rpx;
-    border-radius: 16rpx;
-    border: 1rpx solid #e5e7eb;
-    background: #f8fafc;
+    border-radius: 999rpx;
+    border: 1rpx solid rgba(232, 238, 245, 0.95);
+    background: #f7fafc;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #111827;
+    color: var(--ink);
     font-size: 26rpx;
+    font-weight: 600;
     line-height: 1.2;
 }
 .ghost-btn.block { width: 100%; margin-bottom: 16rpx; }
-.ghost-btn.disabled { opacity: 0.55; pointer-events: none; }
+.ghost-btn.disabled { opacity: 0.5; pointer-events: none; }
 
 .spinner {
     width: 28rpx;
     height: 28rpx;
     margin-right: 12rpx;
     border-radius: 50%;
-    border: 4rpx solid rgba(255,255,255,0.35);
+    border: 4rpx solid rgba(255, 255, 255, 0.35);
     border-top-color: #fff;
     animation: spin 1s linear infinite;
 }
 
-.complete-title { display: block; color: #111827; font-size: 34rpx; font-weight: 700; }
-.complete-desc { display: block; margin: 10rpx 0 24rpx; color: #64748b; font-size: 24rpx; line-height: 1.6; }
+.complete-title {
+    display: block;
+    color: var(--ink);
+    font-size: 36rpx;
+    font-weight: 800;
+}
+.complete-desc {
+    display: block;
+    margin: 10rpx 0 24rpx;
+    color: var(--mute);
+    font-size: 24rpx;
+    line-height: 1.6;
+}
 .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; }
 .gender-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12rpx; }
 .role-card {
-    padding: 22rpx 16rpx;
-    border-radius: 16rpx;
-    background: #f4f8fb;
+    padding: 24rpx 16rpx;
+    border-radius: 24rpx;
+    background: #f7fafc;
     border: 2rpx solid transparent;
     text-align: center;
 }
-.role-card.active { background: #e8f7fd; border-color: #00a8e8; }
+.role-card.active {
+    background: rgba(0, 168, 232, 0.08);
+    border-color: rgba(0, 168, 232, 0.42);
+    box-shadow: 0 10rpx 22rpx rgba(0, 168, 232, 0.1);
+}
 .role-card.compact { padding: 20rpx 8rpx; }
-.role-name { display: block; color: #111827; font-size: 28rpx; font-weight: 700; }
-.role-tip { display: block; margin-top: 8rpx; color: #64748b; font-size: 20rpx; line-height: 1.4; }
+.role-name {
+    display: block;
+    color: var(--ink);
+    font-size: 28rpx;
+    font-weight: 700;
+}
+.role-tip {
+    display: block;
+    margin-top: 8rpx;
+    color: var(--mute);
+    font-size: 20rpx;
+    line-height: 1.4;
+}
 
 .card-secure {
+    position: relative;
+    z-index: 1;
     margin-top: 28rpx;
     padding-top: 22rpx;
-    border-top: 1rpx solid #eef2f7;
+    border-top: 1rpx solid rgba(238, 242, 247, 0.95);
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 12rpx;
-    color: #94a3b8;
-    font-size: 20rpx;
+    flex-wrap: wrap;
+    gap: 10rpx;
 }
-.sep { color: #cbd5e1; }
+.secure-chip {
+    padding: 8rpx 16rpx;
+    border-radius: 999rpx;
+    background: #f3f6fa;
+    color: #8492a6;
+    font-size: 20rpx;
+    font-weight: 600;
+}
 
 .footnote {
     display: block;
     margin-top: 28rpx;
     text-align: center;
-    color: rgba(255,255,255,0.45);
+    color: var(--mute);
     font-size: 22rpx;
+    line-height: 1.5;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes stars-twinkle {
-    0%, 100% { opacity: 0.42; }
-    50% { opacity: 0.7; }
-}
-@keyframes aurora {
-    0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-    33% { transform: translate(4%, 3%) rotate(8deg) scale(1.05); }
-    66% { transform: translate(-3%, 5%) rotate(-6deg) scale(0.96); }
-}
 @keyframes float-a {
     0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(24rpx, 18rpx); }
+    50% { transform: translate(18rpx, 14rpx); }
 }
 @keyframes float-b {
     0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-20rpx, 16rpx); }
-}
-@keyframes float-dot {
-    0%, 100% { transform: translateY(0); opacity: 0.55; }
-    50% { transform: translateY(-16rpx); opacity: 1; }
-}
-@keyframes orbit-spin {
-    to { transform: translate(-50%, -50%) rotate(360deg); }
-}
-@keyframes scan {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 0% 100%; }
+    50% { transform: translate(-16rpx, 12rpx); }
 }
 @keyframes logo-float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10rpx); }
+    50% { transform: translateY(-8rpx); }
+}
+@keyframes logo-shine {
+    0%, 55% { transform: translateX(-120%) rotate(18deg); opacity: 0; }
+    65% { opacity: 0.9; }
+    80%, 100% { transform: translateX(280%) rotate(18deg); opacity: 0; }
 }
 @keyframes ring-glow {
     0%, 100% { opacity: 0.35; transform: scale(1); }
-    50% { opacity: 0.85; transform: scale(1.06); }
+    50% { opacity: 0.85; transform: scale(1.05); }
 }
 @keyframes pulse-dot {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.15); opacity: 0.7; }
-}
-@keyframes accent-flow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
 }
 @keyframes fade-up {
     from { opacity: 0; transform: translateY(18rpx); }

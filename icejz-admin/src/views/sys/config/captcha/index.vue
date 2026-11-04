@@ -14,82 +14,95 @@
 			</div>
 		</section>
 
-		<el-card class="org-auth-card page-card" shadow="never" v-loading="loading">
-			<el-form label-position="top" class="captcha-form">
-				<section class="block">
-					<div class="block-head">
+		<div class="captcha-stack" v-loading="loading">
+			<!-- 1. 总开关：独立配置卡片 -->
+			<el-card class="org-auth-card page-card section-card" shadow="never">
+				<div class="card-head">
+					<div class="card-head-copy">
+						<span class="card-kicker">配置</span>
 						<strong>总开关</strong>
 						<em>只影响「账号密码登录」是否必须过图形/交互验证码；短信发码前的图形码始终会校验，不受此开关影响。</em>
 					</div>
-					<div class="switch-panel" :class="{ on: form.enabled }">
-						<div class="switch-copy">
-							<span class="switch-title">账号密码登录验证码</span>
-							<span class="switch-desc">
-								{{
-									form.enabled
-										? '已开启：PC / App 账号登录提交时会校验对应端所选验证码。'
-										: '已关闭：账号密码可直接登录；短信发码入口仍会要求图形验证码。'
-								}}
-							</span>
-						</div>
-						<el-switch v-model="form.enabled" active-text="开启" inactive-text="关闭" />
+				</div>
+				<div class="switch-panel" :class="{ on: form.enabled }">
+					<div class="switch-copy">
+						<span class="switch-title">账号密码登录验证码</span>
+						<span class="switch-desc">
+							{{
+								form.enabled
+									? '已开启：PC / App 账号登录提交时会校验对应端所选验证码。'
+									: '已关闭：账号密码可直接登录；短信发码入口仍会要求图形验证码。'
+							}}
+						</span>
 					</div>
-				</section>
+					<el-switch v-model="form.enabled" active-text="开启" inactive-text="关闭" />
+				</div>
+			</el-card>
 
-				<section class="block">
-					<div class="block-head">
+			<!-- 2. 说明：独立介绍卡片，与配置区分离 -->
+			<el-card class="org-auth-card page-card section-card guide-section" shadow="never">
+				<div class="card-head">
+					<div class="card-head-copy">
+						<span class="card-kicker">介绍</span>
 						<strong>验证方式说明</strong>
-						<em>选择前可先对照下表。点选 / 拼图防刷更强；PoW 几乎无感；Turnstile 依赖 Cloudflare（免费档可用）。</em>
+						<em>选择前可先浏览各类交互差异。点选 / 拼图防刷更强；PoW 几乎无感；Turnstile 依赖 Cloudflare（免费档可用）。</em>
 					</div>
-					<div class="guide-grid">
-						<article
-							v-for="guide in modeGuides"
-							:key="guide.mode"
-							class="guide-card"
-							:class="['mode-' + guide.mode, { active: usedModes.has(guide.mode) }]"
-						>
-							<header class="guide-head">
-								<span class="guide-badge">{{ guide.badge }}</span>
-								<strong>{{ guide.title }}</strong>
-								<em v-if="usedModes.has(guide.mode)" class="guide-used">使用中</em>
-							</header>
-							<p class="guide-desc">{{ guide.desc }}</p>
-							<ul class="guide-points">
-								<li v-for="(point, idx) in guide.points" :key="idx">{{ point }}</li>
-							</ul>
-							<span class="guide-when">适合：{{ guide.when }}</span>
-						</article>
-					</div>
-				</section>
+					<span class="card-hint">只读参考 · 不直接改配置</span>
+				</div>
+				<div class="guide-grid">
+					<article
+						v-for="guide in modeGuides"
+						:key="guide.mode"
+						class="guide-card"
+						:class="['mode-' + guide.mode, { active: usedModes.has(guide.mode) }]"
+					>
+						<header class="guide-head">
+							<span class="guide-badge">{{ guide.badge }}</span>
+							<strong>{{ guide.title }}</strong>
+							<em v-if="usedModes.has(guide.mode)" class="guide-used">使用中</em>
+						</header>
+						<p class="guide-desc">{{ guide.desc }}</p>
+						<ul class="guide-points">
+							<li v-for="(point, idx) in guide.points" :key="idx">{{ point }}</li>
+						</ul>
+						<span class="guide-when">适合：{{ guide.when }}</span>
+					</article>
+				</div>
+			</el-card>
 
-				<section class="block">
-					<div class="block-head">
+			<!-- 3. 分端类型：场景说明与选择器分层 -->
+			<el-card class="org-auth-card page-card section-card" shadow="never">
+				<div class="card-head">
+					<div class="card-head-copy">
+						<span class="card-kicker">配置</span>
 						<strong>分端验证码类型</strong>
 						<em>三个入口各自独立；改某一端不会影响另外两端。保存后对新发起的验证码请求立即生效。</em>
 					</div>
-					<div class="channel-grid">
-						<div
-							v-for="item in channels"
-							:key="item.key"
-							class="channel-card"
-							:data-mode="resolveOption(form[item.key])?.mode || 'input'"
-						>
-							<div class="channel-head">
-								<span class="channel-index">{{ item.index }}</span>
-								<div class="channel-title">
-									<span class="channel-name">{{ item.title }}</span>
-									<span class="channel-tip">{{ item.desc }}</span>
-								</div>
+				</div>
+				<div class="channel-grid">
+					<div
+						v-for="item in channels"
+						:key="item.key"
+						class="channel-card"
+						:data-mode="resolveOption(form[item.key])?.mode || 'input'"
+					>
+						<div class="channel-head">
+							<span class="channel-index">{{ item.index }}</span>
+							<div class="channel-title">
+								<span class="channel-name">{{ item.title }}</span>
+								<span class="channel-tip">{{ item.desc }}</span>
 							</div>
+						</div>
 
-							<div class="channel-scene">
-								<span class="scene-label">适用场景</span>
-								<p>{{ item.scene }}</p>
-								<ul>
-									<li v-for="(line, idx) in item.notes" :key="idx">{{ line }}</li>
-								</ul>
-							</div>
+						<div class="channel-scene">
+							<span class="scene-label">适用场景</span>
+							<p>{{ item.scene }}</p>
+							<ul>
+								<li v-for="(line, idx) in item.notes" :key="idx">{{ line }}</li>
+							</ul>
+						</div>
 
+						<div class="channel-config">
 							<label class="field-label">验证码类型</label>
 							<el-select
 								v-model="form[item.key]"
@@ -133,10 +146,18 @@
 							</div>
 						</div>
 					</div>
-				</section>
+				</div>
+			</el-card>
 
-				<section class="block" :class="{ dimmed: !needsAdvanced }">
-					<div class="block-head">
+			<!-- 4. 高级参数：独立卡片 -->
+			<el-card
+				class="org-auth-card page-card section-card"
+				:class="{ dimmed: !needsAdvanced }"
+				shadow="never"
+			>
+				<div class="card-head">
+					<div class="card-head-copy">
+						<span class="card-kicker">可选</span>
 						<strong>高级参数</strong>
 						<em>
 							仅当某端选用「算力校验 PoW」或「Cloudflare Turnstile」时需要配置。
@@ -144,6 +165,8 @@
 							<template v-else>当前三端均未选用，可先忽略本区。</template>
 						</em>
 					</div>
+				</div>
+				<el-form label-position="top" class="adv-form">
 					<div class="adv-grid">
 						<div class="adv-item" :class="{ highlight: usedModes.has('pow') }">
 							<div class="adv-item-head">
@@ -192,14 +215,23 @@
 							</p>
 						</div>
 					</div>
-				</section>
+				</el-form>
+			</el-card>
 
+			<!-- 5. 操作条 -->
+			<el-card class="org-auth-card page-card section-card actions-card" shadow="never">
 				<div class="actions">
-					<el-button type="primary" :loading="saving" @click="onSave">保存配置</el-button>
-					<el-button :disabled="loading || saving" @click="loadConfig">重新加载</el-button>
+					<div class="actions-copy">
+						<strong>保存后立即生效</strong>
+						<em>仅影响之后新发起的验证码请求，不影响已下发未使用的旧 key。</em>
+					</div>
+					<div class="actions-btns">
+						<el-button type="primary" :loading="saving" @click="onSave">保存配置</el-button>
+						<el-button :disabled="loading || saving" @click="loadConfig">重新加载</el-button>
+					</div>
 				</div>
-			</el-form>
-		</el-card>
+			</el-card>
+		</div>
 	</div>
 </template>
 
@@ -215,11 +247,14 @@ const MODE_META: Record<string, string> = {
 	click: '点选',
 	slider: '拼图',
 	word: '点字',
+	curve: '滑动曲线',
+	rotate: '旋转',
+	angle: '角度',
 	pow: '算力',
 	turnstile: '人机'
 }
 
-const MODE_ORDER = ['input', 'click', 'slider', 'word', 'pow', 'turnstile']
+const MODE_ORDER = ['input', 'click', 'slider', 'word', 'curve', 'rotate', 'angle', 'pow', 'turnstile']
 
 /** 各验证方式说明（配置页引导用） */
 const modeGuides = [
@@ -254,6 +289,30 @@ const modeGuides = [
 		desc: '按提示顺序依次点击图中汉字，顺序与位置都要正确。',
 		points: ['多点确认，防刷更强', '手机端需注意点击精度', '点满后会预校验对错'],
 		when: '安全要求更高的登录入口'
+	},
+	{
+		mode: 'curve',
+		badge: '曲线',
+		title: '滑动曲线',
+		desc: '底图两端固定端点与淡色绳影；亮绳两端钉死，拖动滑块摆动中点对齐后通过。',
+		points: ['两端固定、中点摆动更直观', '仍为滑块交互，学习成本低', '适合中等风控场景'],
+		when: '希望比普通拼图稍难、又保持滑块体验'
+	},
+	{
+		mode: 'rotate',
+		badge: '旋转',
+		title: '旋转验证码',
+		desc: '图片被随机旋转，拖动滑块转回正立（顶部标记朝上）。',
+		points: ['行为验证，防脚本成本较高', '容差约 ±12°', 'PC / 触屏均可操作'],
+		when: '需要更强行为验证、避免纯坐标拼图'
+	},
+	{
+		mode: 'angle',
+		badge: '角度',
+		title: '角度验证码',
+		desc: '表盘指针偏离正上方，拖动滑块旋转至绿色 12 点标记。',
+		points: ['与旋转同类校验逻辑', '视觉为角度表盘更直观', '容差约 ±12°'],
+		when: '希望用表盘交互替代风景旋转图'
 	},
 	{
 		mode: 'pow',
@@ -310,6 +369,21 @@ const TYPE_GUIDE: Record<string, { short: string; detail: string; extra: string 
 		detail: '按提示依次点击图中文字，顺序与坐标均需正确。',
 		extra: '点满后预校验；失败会自动换一张。'
 	},
+	curve: {
+		short: '拖动滑块摆动绳子中点对齐',
+		detail: '底图两端固定端点与淡色绳影；亮绳两端始终钉在端点上，拖动滑块只摆动中点，对齐绳影后通过。',
+		extra: '两端固定、中点摆动，适合中等风控。'
+	},
+	rotate: {
+		short: '旋转图片至正向',
+		detail: '图片被随机旋转，拖动滑块转回正立方向。',
+		extra: '容差约 ±12°；适合触屏与 PC。'
+	},
+	angle: {
+		short: '旋转指针至正上方',
+		detail: '表盘指针偏离 12 点方向，拖动滑块对齐绿色标记。',
+		extra: '与旋转验证码同类校验，视觉为角度表盘。'
+	},
 	pow: {
 		short: '浏览器静默算哈希',
 		detail: '前端循环 SHA256，找到满足前导 0 的 nonce 后提交。',
@@ -345,7 +419,7 @@ const channels = [
 		scene: '浏览器访问管理控制台，使用用户名 + 密码登录时弹出的验证交互。',
 		notes: [
 			'受上方「总开关」控制：关闭后账号登录可不做图形校验',
-			'推荐：滑动拼图 / 文字点选 / 点选图案',
+			'推荐：滑动拼图 / 滑动曲线 / 旋转 / 点选',
 			'若选 Turnstile，请确保办公网络可访问 Cloudflare'
 		]
 	},
@@ -369,7 +443,7 @@ const channels = [
 		scene: '移动端使用账号密码直接登录时的验证码（与短信发码前的图形码是两套配置）。',
 		notes: [
 			'受账号登录总开关控制',
-			'推荐：滑动拼图、点选图案；触屏点字需留足点击区域',
+			'推荐：滑动拼图、滑动曲线、旋转；触屏点字需留足点击区域',
 			'Turnstile / PoW 在小程序内可能受限，请先真机验证'
 		]
 	}
@@ -454,30 +528,92 @@ onMounted(loadConfig)
 </script>
 
 <style scoped lang="scss">
-.captcha-form {
+.captcha-stack {
 	display: flex;
 	flex-direction: column;
-	gap: 28px;
+	gap: 16px;
 }
 
-.block-head {
+.section-card {
+	:deep(.el-card__body) {
+		padding: 20px 22px 22px;
+	}
+}
+
+.card-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
 	margin-bottom: 16px;
+	padding-bottom: 14px;
+	border-bottom: 1px solid #eef2f6;
+}
 
-	strong {
-		display: block;
-		font-size: 16px;
-		color: #0f1724;
-	}
+.card-head-copy {
+	min-width: 0;
+	flex: 1;
+}
 
-	em {
-		display: block;
-		margin-top: 6px;
-		font-style: normal;
-		font-size: 13px;
-		color: #8b93a7;
-		line-height: 1.55;
-		max-width: 920px;
+.card-kicker {
+	display: inline-flex;
+	align-items: center;
+	height: 22px;
+	padding: 0 8px;
+	margin-bottom: 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 720;
+	letter-spacing: 0.06em;
+	color: #0879a8;
+	background: rgba(0, 168, 232, 0.1);
+	border: 1px solid rgba(0, 168, 232, 0.16);
+}
+
+.guide-section {
+	background:
+		linear-gradient(180deg, #f8fafc 0%, #fff 48%),
+		#fff;
+
+	:deep(.el-card__body) {
+		background: transparent;
 	}
+}
+
+.guide-section .card-kicker {
+	color: #64748b;
+	background: #f1f5f9;
+	border-color: #e2e8f0;
+}
+
+.card-head-copy strong {
+	display: block;
+	font-size: 16px;
+	font-weight: 740;
+	color: #0f1724;
+}
+
+.card-head-copy em {
+	display: block;
+	margin-top: 6px;
+	font-style: normal;
+	font-size: 13px;
+	color: #8b93a7;
+	line-height: 1.55;
+	max-width: 920px;
+}
+
+.card-hint {
+	flex-shrink: 0;
+	margin-top: 28px;
+	padding: 6px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 650;
+	color: #8492a6;
+	background: #f8fafc;
+	border: 1px dashed #e2e8f0;
+	white-space: nowrap;
 }
 
 .switch-panel {
@@ -550,11 +686,20 @@ onMounted(loadConfig)
 	&.mode-word {
 		--accent: #7c3aed;
 	}
-	&.mode-pow {
+	&.mode-curve {
+		--accent: #0891b2;
+	}
+	&.mode-rotate {
 		--accent: #db2777;
 	}
+	&.mode-angle {
+		--accent: #4f46e5;
+	}
+	&.mode-pow {
+		--accent: #64748b;
+	}
 	&.mode-turnstile {
-		--accent: #475569;
+		--accent: #f97316;
 	}
 }
 
@@ -632,6 +777,14 @@ onMounted(loadConfig)
 	gap: 16px;
 }
 
+.channel-config {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding-top: 12px;
+	border-top: 1px dashed #e2e8f0;
+}
+
 .channel-card {
 	--accent: #3b82f6;
 	display: flex;
@@ -662,11 +815,20 @@ onMounted(loadConfig)
 	&[data-mode='word'] {
 		--accent: #7c3aed;
 	}
-	&[data-mode='pow'] {
+	&[data-mode='curve'] {
+		--accent: #0891b2;
+	}
+	&[data-mode='rotate'] {
 		--accent: #db2777;
 	}
+	&[data-mode='angle'] {
+		--accent: #4f46e5;
+	}
+	&[data-mode='pow'] {
+		--accent: #64748b;
+	}
 	&[data-mode='turnstile'] {
-		--accent: #475569;
+		--accent: #f97316;
 	}
 }
 
@@ -840,7 +1002,7 @@ onMounted(loadConfig)
 	}
 }
 
-.block.dimmed {
+.section-card.dimmed {
 	opacity: 0.72;
 }
 
@@ -942,9 +1104,44 @@ onMounted(loadConfig)
 	}
 }
 
+.actions-card {
+	:deep(.el-card__body) {
+		padding: 16px 22px;
+	}
+}
+
 .actions {
 	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.actions-copy {
+	min-width: 0;
+
+	strong {
+		display: block;
+		font-size: 14px;
+		font-weight: 720;
+		color: #0f172a;
+	}
+
+	em {
+		display: block;
+		margin-top: 4px;
+		font-style: normal;
+		font-size: 12px;
+		color: #8492a6;
+		line-height: 1.45;
+	}
+}
+
+.actions-btns {
+	display: flex;
 	gap: 12px;
+	flex-shrink: 0;
 }
 
 .hero-chip.on {
@@ -968,6 +1165,22 @@ onMounted(loadConfig)
 
 	.adv-item:first-child {
 		max-width: none;
+	}
+
+	.card-hint {
+		display: none;
+	}
+
+	.actions {
+		align-items: stretch;
+	}
+
+	.actions-btns {
+		width: 100%;
+	}
+
+	.actions-btns .el-button {
+		flex: 1;
 	}
 }
 </style>
@@ -1058,6 +1271,18 @@ onMounted(loadConfig)
 	.opt-mode.mode-slider {
 		color: #b45309;
 		background: #ffedd5;
+	}
+	.opt-mode.mode-curve {
+		color: #0e7490;
+		background: #cffafe;
+	}
+	.opt-mode.mode-rotate {
+		color: #be185d;
+		background: #fce7f3;
+	}
+	.opt-mode.mode-angle {
+		color: #4338ca;
+		background: #e0e7ff;
 	}
 	.opt-mode.mode-word {
 		color: #6d28d9;

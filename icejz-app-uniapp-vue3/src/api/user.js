@@ -1,166 +1,48 @@
-import * as request from '../utils/request.js';
+import * as request from '../utils/request.js'
 
-/**
- * 获取用户信息
- */
+/** 获取用户信息 */
 export const useUserInfoApi = () => {
-    return request.get('/sys/user/info');
-};
+  return request.get('/sys/user/info')
+}
 
-/**
- * 更新用户信息
- */
+/** 更新用户信息 */
 export const useUserInfoSubmitApi = (dataForm) => {
-    return request.put('/sys/user/info', dataForm);
-};
+  return request.put('/sys/user/info', dataForm)
+}
 
-/**
- * 更新用户头像
- */
+/** 更新用户头像 */
 export const useUserAvatarApi = (dataForm) => {
-    return request.put('/sys/user/avatar', dataForm);
-};
+  return request.put('/sys/user/avatar', dataForm)
+}
 
-/**
- * 修改密码
- */
+/** 修改密码 */
 export const updatePasswordApi = (data) => {
-    return request.put('/sys/user/password', data);
-};
+  return request.put('/sys/user/password', data)
+}
 
-/**
- * 获取个人中心老人档案/紧急联系人概览
- */
-export const useUserMemberSummaryApi = () => {
-    return request.get('/sys/user/member-summary');
-};
+/** 当前用户登录设备列表 */
+export const useUserDeviceListApi = () => {
+  return request.get('/sys/user/device')
+}
 
-/**
- * 更新联系人备注
- */
-export const useFamilyBindingRemarkApi = (data) => {
-    return request.put('/member/family-binding/remark', data);
-};
+/** 下线指定登录设备 */
+export const useUserDeviceKickApi = (accessToken) => {
+  return request.del('/sys/user/device/' + encodeURIComponent(accessToken))
+}
 
-/**
- * 解除联系人绑定
- */
-export const useFamilyBindingUnbindApi = (data) => {
-    return request.del('/member/family-binding/unbind', data);
-};
+/** 当前用户多设备登录设置 */
+export const useMyLoginSecurityApi = () => {
+  return request.get('/sys/user/login-security')
+}
 
-/**
- * 邀请家属绑定（老人发起，通过手机号）
- */
-export const useFamilyBindingInviteApi = (data) => {
-    return request.post('/member/family-binding/invite', data);
-};
+/** 保存当前用户多设备登录设置 */
+export const useMyLoginSecuritySaveApi = (data) => {
+  return request.put('/sys/user/login-security', data)
+}
 
-export const useFamilyInviteSendCodeApi = (data) => {
-    return request.post('/sys/user/family-invite/send-code', data);
-};
-
-export const useFamilyBindingConfirmApi = (data) => {
-    return request.post('/member/family-binding/confirm', data);
-};
-
-
-export const useSendElderBindCodeApi = (data) => {
-    return request.post('/sys/user/elder-bind/send-code', data);
-};
-
-/**
- * 确认绑定老人档案
- */
-export const useConfirmElderBindApi = (data) => {
-    return request.post('/sys/user/elder-bind/confirm', data);
-};
-
-/**
- * 我的消息通知（与管理端站内消息互通）
- */
-export const useNoticePageApi = (params) => {
-    return request.get('/sys/message/my/page', params);
-};
-
-export const useNoticeUnreadCountApi = () => {
-    return request.get('/sys/message/my/unread-count');
-};
-
-export const useNoticeReadApi = (id) => {
-    return request.put(`/sys/message/my/${id}/read`);
-};
-
-export const useNoticeReadAllApi = () => {
-    return request.put('/sys/message/my/read-all');
-};
-
-export const useNoticeDetailApi = (id) => {
-    return request.get(`/sys/message/my/${id}`);
-};
-
-/**
- * 更新老人档案
- */
-export const useElderArchiveSubmitApi = (data) => {
-    return data?.id ? request.put('/member/elder-archive', data) : request.post('/member/elder-archive', data);
-};
-
-// ===== 服务项目 =====
-export const useServiceItemListApi = (category) => {
-    return request.get('/member/service-item/list', { category });
-};
-
-export const useServiceItemDetailApi = (id) => {
-    return request.get(`/member/service-item/${id}`);
-};
-
-// ===== 服务预约 =====
-export const useBookingCreateApi = (data) => {
-    return request.post('/member/booking', data);
-};
-
-export const useBookingListApi = (params) => {
-    return request.get('/member/booking/page', params);
-};
-
-export const useBookingDetailApi = (id) => {
-    return request.get(`/member/booking/${id}`);
-};
-
-export const useBookingCancelApi = (id, cancelReason) => {
-    return request.put(`/member/booking/${id}/status/4`, { cancelReason });
-};
-
-// ===== 服务订单 =====
-export const useOrderListApi = (params) => {
-    return request.get('/member/order/page', params);
-};
-
-export const useOrderDetailApi = (id) => {
-    return request.get(`/member/order/${id}`);
-};
-
-export const useOrderReviewApi = (id, rating, review) => {
-    return request.put(`/member/order/${id}/review`, { rating, review });
-};
-
-// ===== 健康数据 =====
-export const useHealthSummaryApi = (elderUserId) => {
-    const params = elderUserId ? { elderUserId } : {};
-    return request.get('/member/health-record/summary', params);
-};
-
-export const useHealthTrendApi = (recordType, limit = 30, elderUserId) => {
-    const params = { recordType, limit };
-    if (elderUserId) params.elderUserId = elderUserId;
-    return request.get('/member/health-record/trend', params);
-};
-
-export const useHealthRecordAddApi = (data) => {
-    return request.post('/member/health-record', data);
-};
-
-export const useHealthAlertListApi = (params) => {
-    return request.get('/member/health-alert/my', params);
-};
+/** @deprecated 兼容旧引用，请改用 @/api/message.js */
+export const useNoticePageApi = (params) => request.get('/sys/message/my/page', params)
+export const useNoticeUnreadCountApi = () => request.get('/sys/message/my/unread-count')
+export const useNoticeReadApi = (id) => request.put(`/sys/message/my/${id}/read`)
+export const useNoticeReadAllApi = () => request.put('/sys/message/my/read-all')
+export const useNoticeDetailApi = (id) => request.get(`/sys/message/my/${id}`)

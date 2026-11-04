@@ -3,7 +3,7 @@
   background:
     radial-gradient(circle at top right, rgba(0, 168, 232, 0.1), transparent 36%),
     #f4f7fb;
-  padding: 24rpx 24rpx calc(40rpx + env(safe-area-inset-bottom));
+  padding: 0 24rpx calc(40rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 

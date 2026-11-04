@@ -5,12 +5,14 @@
 				<div class="pref-head-copy">
 					<span class="pref-kicker">个人偏好</span>
 					<strong>多设备登录</strong>
-					<em>可覆盖系统默认；保存后对新登录立即生效</em>
+					<em>{{ systemOn ? '系统已开启多设备；你可覆盖为关/开，保存后对新登录立即生效' : '系统已关闭多设备：全员强制单设备，个人无法开启' }}</em>
 				</div>
 				<span class="pref-chip" :data-on="effectiveOn ? '1' : '0'">
 					当前生效：{{ effectiveOn ? `多设备 · 上限 ${effectiveMax}` : '单设备互踢' }}
 				</span>
 			</header>
+
+			<div v-if="!systemOn" class="lock-tip">系统总开关已关闭，无法选择「允许多设备」。</div>
 
 			<div class="mode-grid" role="radiogroup" aria-label="多设备策略">
 				<button
@@ -18,17 +20,18 @@
 					:key="opt.value"
 					type="button"
 					class="mode-card"
-					:class="[opt.value, { active: prefMode === opt.value }]"
+					:class="[opt.value, { active: prefMode === opt.value, locked: opt.value === 'on' && !systemOn }]"
 					role="radio"
 					:aria-checked="prefMode === opt.value"
-					@click="prefMode = opt.value"
+					:disabled="opt.value === 'on' && !systemOn"
+					@click="selectMode(opt.value)"
 				>
 					<span class="mode-badge">{{ opt.badge }}</span>
 					<strong>{{ opt.title }}</strong>
 					<p>{{ opt.desc }}</p>
-					<em v-if="opt.value === 'sys'">系统：{{ systemOn ? `多设备 ≤ ${systemMax}` : '单设备互踢' }}</em>
-					<em v-else-if="opt.value === 'on'">上限可在 1～{{ systemMax }} 内调整</em>
-					<em v-else>无视系统总开关</em>
+					<em v-if="opt.value === 'sys'">系统：{{ systemOn ? `多设备 ≤ ${systemMax}` : '单设备互踢（强制）' }}</em>
+					<em v-else-if="opt.value === 'on'">{{ systemOn ? `上限可在 1～${systemMax} 内调整` : '系统关闭时不可选' }}</em>
+					<em v-else>{{ systemOn ? '个人强制单设备' : '与系统关闭效果一致' }}</em>
 					<i class="mode-check" aria-hidden="true"></i>
 				</button>
 			</div>
@@ -157,6 +160,14 @@ const modeOptions: Array<{ value: PrefMode; badge: string; title: string; desc: 
 	}
 ]
 
+const selectMode = (value: PrefMode) => {
+	if (value === 'on' && !systemOn.value) {
+		ElMessage.warning('系统已关闭多设备登录，个人不可开启')
+		return
+	}
+	prefMode.value = value
+}
+
 const clientLabel = (type?: string) => {
 	const map: Record<string, string> = { pc: 'PC 浏览器', app: '移动 App', mp: '小程序' }
 	return map[type || ''] || type || '未知设备'
@@ -206,7 +217,7 @@ const loadPref = async () => {
 		effectiveMax.value = Math.min(data?.effectiveMultiDeviceMax ?? systemMax.value, systemMax.value)
 		const clampMax = (n?: number | null) => Math.max(1, Math.min(n ?? systemMax.value, systemMax.value))
 		if (data?.multiDeviceLogin === 1) {
-			prefMode.value = 'on'
+			prefMode.value = systemOn.value ? 'on' : 'sys'
 			prefMax.value = clampMax(data?.multiDeviceMax)
 		} else if (data?.multiDeviceLogin === 0) {
 			prefMode.value = 'off'
@@ -223,6 +234,10 @@ const loadPref = async () => {
 }
 
 const savePref = async () => {
+	if (prefMode.value === 'on' && !systemOn.value) {
+		ElMessage.warning('系统已关闭多设备登录，个人不可开启')
+		return
+	}
 	prefSaving.value = true
 	try {
 		const multiDeviceLogin = prefMode.value === 'sys' ? null : prefMode.value === 'on' ? 1 : 0
@@ -353,6 +368,17 @@ onMounted(() => {
 	margin-bottom: 14px;
 }
 
+.lock-tip {
+	margin: -4px 0 12px;
+	padding: 10px 12px;
+	border-radius: 10px;
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: #9a3412;
+	background: rgba(251, 146, 60, 0.12);
+	border: 1px solid rgba(251, 146, 60, 0.28);
+}
+
 .mode-card {
 	--accent: #64748b;
 	position: relative;
@@ -366,6 +392,13 @@ onMounted(() => {
 	border: 1px solid var(--line, #e8eef5);
 	background: var(--panel, #fff);
 	text-align: left;
+
+	&.locked,
+	&:disabled {
+		opacity: 0.48;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
 	cursor: pointer;
 	transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
 

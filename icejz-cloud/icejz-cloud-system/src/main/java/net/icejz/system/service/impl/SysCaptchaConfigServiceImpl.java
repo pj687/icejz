@@ -2,115 +2,132 @@ package net.icejz.system.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
-import net.icejz.system.cache.SysParamsCache;
-import net.icejz.system.dao.SysParamsDao;
-import net.icejz.system.entity.SysParamsEntity;
+import net.icejz.system.cache.SysCaptchaConfigCache;
+import net.icejz.system.dao.SysCaptchaConfigDao;
+import net.icejz.system.entity.SysCaptchaConfigEntity;
+import net.icejz.system.enums.CaptchaChannelEnum;
 import net.icejz.system.enums.CaptchaTypeEnum;
-import net.icejz.system.enums.SysParamsEnum;
 import net.icejz.system.service.SysCaptchaConfigService;
 import net.icejz.system.vo.SysCaptchaConfigVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 验证码类型配置
+ * 验证码配置（sys_captcha_config）
  */
 @Service
 @AllArgsConstructor
 public class SysCaptchaConfigServiceImpl implements SysCaptchaConfigService {
-    private final SysParamsDao sysParamsDao;
-    private final SysParamsCache sysParamsCache;
+    private static final long DEFAULT_TENANT_ID = 10000L;
+
+    private final SysCaptchaConfigDao sysCaptchaConfigDao;
+    private final SysCaptchaConfigCache sysCaptchaConfigCache;
 
     @Override
     public SysCaptchaConfigVO getConfig() {
-        String legacy = safeGet(SysParamsEnum.LOGIN_CAPTCHA_TYPE.name(), "spec");
-        SysCaptchaConfigVO vo = new SysCaptchaConfigVO();
-        vo.setEnabled(Boolean.parseBoolean(safeGet(SysParamsEnum.LOGIN_CAPTCHA.name(), "false")));
-        vo.setPcType(CaptchaTypeEnum.of(safeGet(SysParamsEnum.LOGIN_CAPTCHA_TYPE_PC.name(), legacy)).getCode());
-        vo.setAppType(CaptchaTypeEnum.of(safeGet(SysParamsEnum.LOGIN_CAPTCHA_TYPE_APP.name(), legacy)).getCode());
-        String sms = CaptchaTypeEnum.of(safeGet(SysParamsEnum.LOGIN_CAPTCHA_TYPE_SMS.name(), legacy)).getCode();
-        vo.setSmsType(sms);
-        vo.setMobileType(sms);
-        vo.setTurnstileSiteKey(safeGet(SysParamsEnum.TURNSTILE_SITE_KEY.name(), ""));
-        vo.setTurnstileSecretKey(safeGet(SysParamsEnum.TURNSTILE_SECRET_KEY.name(), ""));
-        vo.setPowDifficulty(safeInt(SysParamsEnum.CAPTCHA_POW_DIFFICULTY.name(), 3));
-        return vo;
+        SysCaptchaConfigEntity entity = loadOrCreate(DEFAULT_TENANT_ID);
+        return toVo(entity);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveConfig(SysCaptchaConfigVO vo) {
-        boolean enabled = Boolean.TRUE.equals(vo.getEnabled());
-        upsert(SysParamsEnum.LOGIN_CAPTCHA.name(), "用户登录-验证码开关",
-                String.valueOf(enabled), "是否开启账号登录图形验证码（true：开启，false：关闭）");
+        SysCaptchaConfigEntity entity = loadOrCreate(DEFAULT_TENANT_ID);
 
         String pc = CaptchaTypeEnum.of(vo.getPcType()).getCode();
         String app = CaptchaTypeEnum.of(vo.getAppType()).getCode();
         String smsRaw = StrUtil.blankToDefault(vo.getSmsType(), vo.getMobileType());
         String sms = CaptchaTypeEnum.of(StrUtil.blankToDefault(smsRaw, pc)).getCode();
-
-        upsert(SysParamsEnum.LOGIN_CAPTCHA_TYPE_PC.name(), "PC管理端-账号登录验证码类型", pc,
-                "PC 管理端账号登录使用的验证码类型");
-        upsert(SysParamsEnum.LOGIN_CAPTCHA_TYPE_APP.name(), "移动端登录验证码类型", app,
-                "App / 小程序 / H5 登录使用的验证码类型");
-        upsert(SysParamsEnum.LOGIN_CAPTCHA_TYPE_SMS.name(), "短信发送-图形验证码类型", sms,
-                "PC/App 发短信前图形验证码类型");
-        upsert(SysParamsEnum.LOGIN_CAPTCHA_TYPE.name(), "用户登录-验证码类型(默认)", pc,
-                "兼容旧配置；分端未配置时回退");
-
-        upsert(SysParamsEnum.TURNSTILE_SITE_KEY.name(), "Turnstile站点公钥",
-                StrUtil.nullToDefault(vo.getTurnstileSiteKey(), ""), "Cloudflare Turnstile Site Key");
-        upsert(SysParamsEnum.TURNSTILE_SECRET_KEY.name(), "Turnstile密钥",
-                StrUtil.nullToDefault(vo.getTurnstileSecretKey(), ""), "Cloudflare Turnstile Secret Key");
-
         int difficulty = vo.getPowDifficulty() == null ? 3 : vo.getPowDifficulty();
         difficulty = Math.max(2, Math.min(difficulty, 5));
-        upsert(SysParamsEnum.CAPTCHA_POW_DIFFICULTY.name(), "PoW验证码难度",
-                String.valueOf(difficulty), "PoW 前导0个数，建议2~4，越大越慢");
+
+        entity.setEnabled(Boolean.TRUE.equals(vo.getEnabled()) ? 1 : 0);
+        entity.setPcType(pc);
+        entity.setAppType(app);
+        entity.setSmsType(sms);
+        entity.setTurnstileSiteKey(StrUtil.nullToDefault(vo.getTurnstileSiteKey(), ""));
+        entity.setTurnstileSecretKey(StrUtil.nullToDefault(vo.getTurnstileSecretKey(), ""));
+        entity.setPowDifficulty(difficulty);
+
+        sysCaptchaConfigDao.updateById(entity);
+        sysCaptchaConfigCache.delete(entity.getTenantId());
+        sysCaptchaConfigCache.save(entity);
     }
 
-    private void upsert(String key, String name, String value, String remark) {
-        SysParamsEntity entity = sysParamsDao.get(key);
+    @Override
+    public boolean isEnabled() {
+        return Integer.valueOf(1).equals(loadOrCreate(DEFAULT_TENANT_ID).getEnabled());
+    }
+
+    @Override
+    public CaptchaTypeEnum resolveType(CaptchaChannelEnum channel) {
+        SysCaptchaConfigEntity entity = loadOrCreate(DEFAULT_TENANT_ID);
+        String code = switch (channel == null ? CaptchaChannelEnum.PC : channel) {
+            case APP -> entity.getAppType();
+            case SMS -> entity.getSmsType();
+            default -> entity.getPcType();
+        };
+        return CaptchaTypeEnum.of(code);
+    }
+
+    @Override
+    public String getTurnstileSiteKey() {
+        return StrUtil.nullToDefault(loadOrCreate(DEFAULT_TENANT_ID).getTurnstileSiteKey(), "");
+    }
+
+    @Override
+    public String getTurnstileSecretKey() {
+        return StrUtil.nullToDefault(loadOrCreate(DEFAULT_TENANT_ID).getTurnstileSecretKey(), "");
+    }
+
+    @Override
+    public int getPowDifficulty() {
+        Integer d = loadOrCreate(DEFAULT_TENANT_ID).getPowDifficulty();
+        if (d == null) {
+            return 3;
+        }
+        return Math.max(2, Math.min(d, 5));
+    }
+
+    private SysCaptchaConfigEntity loadOrCreate(Long tenantId) {
+        SysCaptchaConfigEntity cached = sysCaptchaConfigCache.get(tenantId);
+        if (cached != null) {
+            return cached;
+        }
+        SysCaptchaConfigEntity entity = sysCaptchaConfigDao.getByTenantId(tenantId);
         if (entity == null) {
-            entity = new SysParamsEntity();
-            entity.setParamKey(key);
-            entity.setParamName(name);
-            entity.setParamValue(value);
-            entity.setParamType(1);
-            entity.setRemark(remark);
-            entity.setTenantId(10000L);
-            sysParamsDao.insert(entity);
-        } else {
-            entity.setParamName(name);
-            entity.setParamValue(value);
-            entity.setRemark(remark);
-            sysParamsDao.updateById(entity);
+            entity = defaultEntity(tenantId);
+            sysCaptchaConfigDao.insert(entity);
         }
-        sysParamsCache.save(key, value);
+        sysCaptchaConfigCache.save(entity);
+        return entity;
     }
 
-    private String safeGet(String key, String defaultValue) {
-        try {
-            String cached = sysParamsCache.get(key);
-            if (StrUtil.isNotBlank(cached)) {
-                return cached;
-            }
-            SysParamsEntity entity = sysParamsDao.get(key);
-            if (entity == null || StrUtil.isBlank(entity.getParamValue())) {
-                return defaultValue;
-            }
-            sysParamsCache.save(entity.getParamKey(), entity.getParamValue());
-            return entity.getParamValue();
-        } catch (Exception e) {
-            return defaultValue;
-        }
+    private SysCaptchaConfigEntity defaultEntity(Long tenantId) {
+        SysCaptchaConfigEntity entity = new SysCaptchaConfigEntity();
+        entity.setTenantId(tenantId);
+        entity.setEnabled(0);
+        entity.setPcType(CaptchaTypeEnum.SPEC.getCode());
+        entity.setAppType(CaptchaTypeEnum.SPEC.getCode());
+        entity.setSmsType(CaptchaTypeEnum.SPEC.getCode());
+        entity.setTurnstileSiteKey("");
+        entity.setTurnstileSecretKey("");
+        entity.setPowDifficulty(3);
+        entity.setRemark("系统默认验证码配置");
+        return entity;
     }
 
-    private int safeInt(String key, int defaultValue) {
-        try {
-            return Integer.parseInt(safeGet(key, String.valueOf(defaultValue)));
-        } catch (Exception e) {
-            return defaultValue;
-        }
+    private SysCaptchaConfigVO toVo(SysCaptchaConfigEntity entity) {
+        SysCaptchaConfigVO vo = new SysCaptchaConfigVO();
+        vo.setEnabled(Integer.valueOf(1).equals(entity.getEnabled()));
+        vo.setPcType(CaptchaTypeEnum.of(entity.getPcType()).getCode());
+        vo.setAppType(CaptchaTypeEnum.of(entity.getAppType()).getCode());
+        String sms = CaptchaTypeEnum.of(entity.getSmsType()).getCode();
+        vo.setSmsType(sms);
+        vo.setMobileType(sms);
+        vo.setTurnstileSiteKey(StrUtil.nullToDefault(entity.getTurnstileSiteKey(), ""));
+        vo.setTurnstileSecretKey(StrUtil.nullToDefault(entity.getTurnstileSecretKey(), ""));
+        vo.setPowDifficulty(entity.getPowDifficulty() == null ? 3 : entity.getPowDifficulty());
+        return vo;
     }
 }

@@ -1,0 +1,97 @@
+<view class="page">
+  <ice-nav-bar title="{{copy.title}}" sub="{{copy.sub}}" />
+  <view class="body">
+    <view class="panel pref">
+      <view class="panel-head">
+        <view>
+          <text class="kicker">{{copy.prefKicker}}</text>
+          <text class="panel-title">{{copy.prefTitle}}</text>
+          <text class="panel-desc">{{prefDescText}}</text>
+        </view>
+        <view class="eff-chip {{effectiveOn ? 'on' : ''}}">{{effectiveLabel}}</view>
+      </view>
+
+      <view wx:if="{{!systemOn}}" class="lock-tip">{{copy.systemLockedTip}}</view>
+
+      <view class="mode-list">
+        <view
+          wx:for="{{modeOptions}}"
+          wx:key="value"
+          class="mode-card {{item.value}} {{prefMode === item.value ? 'active' : ''}} {{item.locked ? 'locked' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="selectMode"
+        >
+          <view class="mode-top">
+            <text class="mode-badge">{{item.badge}}</text>
+            <view wx:if="{{prefMode === item.value}}" class="mode-check" />
+          </view>
+          <text class="mode-title">{{item.title}}</text>
+          <text class="mode-desc">{{item.desc}}</text>
+          <text class="mode-note">{{item.note}}</text>
+        </view>
+      </view>
+
+      <view class="limit-panel {{prefMode !== 'on' ? 'dimmed' : ''}}">
+        <view class="limit-copy">
+          <text class="limit-title">{{copy.limitTitle}}</text>
+          <text class="limit-desc">{{limitDescText}}</text>
+        </view>
+        <view class="stepper">
+          <view class="step-btn {{prefMode !== 'on' || prefMax <= 1 ? 'disabled' : ''}}" bindtap="decMax">−</view>
+          <text class="step-val">{{prefMax}}</text>
+          <view class="step-btn {{prefMode !== 'on' || prefMax >= systemMax ? 'disabled' : ''}}" bindtap="incMax">+</view>
+        </view>
+      </view>
+
+      <view class="pref-actions">
+        <button class="save-btn" loading="{{prefSaving}}" bindtap="savePref">{{copy.save}}</button>
+        <view class="reload-btn" bindtap="loadAll">{{copy.reload}}</view>
+      </view>
+    </view>
+
+    <view class="panel session">
+      <view class="panel-head row">
+        <view>
+          <text class="panel-title">{{copy.sessionTitle}}</text>
+          <text class="panel-desc">{{copy.sessionDesc}}</text>
+        </view>
+        <view class="refresh" bindtap="loadList">{{copy.refresh}}</view>
+      </view>
+
+      <view wx:if="{{loading}}" class="empty soft">{{copy.loading}}</view>
+      <view wx:elif="{{!list.length}}" class="empty">{{copy.empty}}</view>
+
+      <view wx:else class="device-list">
+        <view
+          wx:for="{{list}}"
+          wx:key="accessToken"
+          class="device-item {{item.current ? 'current' : ''}}"
+        >
+          <view class="device-icon">{{item.clientShort}}</view>
+          <view class="device-main">
+            <view class="device-title">
+              <text class="device-name">{{item.clientLabel}}</text>
+              <text wx:if="{{item.current}}" class="badge">{{copy.current}}</text>
+            </view>
+            <view class="device-meta">
+              <text>IP {{item.loginIp || '—'}}</text>
+              <text>{{item.loginTimeText}}</text>
+            </view>
+            <text class="device-ua">{{item.uaShort}}</text>
+          </view>
+          <view class="device-actions">
+            <view
+              wx:if="{{!item.current}}"
+              class="kick-btn {{kicking === item.accessToken ? 'busy' : ''}}"
+              data-index="{{index}}"
+              bindtap="kick"
+            >
+              {{kicking === item.accessToken ? copy.kicking : copy.kick}}
+            </view>
+            <text wx:else class="current-tip">{{copy.thisDevice}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

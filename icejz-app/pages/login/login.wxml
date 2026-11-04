@@ -1,43 +1,284 @@
 <view class="login-page">
-  <view class="brand">
-    <image class="brand-logo" src="/images/logo.png" mode="aspectFit" />
-    <view class="login-title">{{brand.name}}</view>
-    <view class="login-sub">{{brand.slogan}}</view>
-    <view class="login-tag">{{brand.tagline}}</view>
+  <view class="bg-layer" aria-hidden="true">
+    <view class="bg-base" />
+    <view class="blob b1" />
+    <view class="blob b2" />
+    <view class="blob b3" />
+    <view class="bg-mesh" />
+    <view class="bg-vignette" />
   </view>
 
-  <form bindsubmit="onLogin">
-    <view class="login">
-      <t-input name="username" value="admin" placeholder="账号">
-        <view slot="label" class="require">账号</view>
-      </t-input>
+  <view class="lang-bar" style="padding-top: {{statusBarPx}}px;">
+    <view class="lang-btn" bindtap="toggleLocale">
+      <text class="lang-code">{{localeShort}}</text>
+      <text class="lang-sep">/</text>
+      <text class="lang-next">{{nextLocaleShort}}</text>
+    </view>
+  </view>
 
-      <t-input type="password" name="password" value="123456" placeholder="密码">
-        <view slot="label" class="require">密码</view>
-      </t-input>
+  <view class="brand-block">
+    <view class="logo-wrap">
+      <image class="brand-logo" src="/images/logo.png" mode="aspectFill" />
+      <view class="logo-pulse" />
+      <view class="logo-shine" />
+    </view>
+    <view class="hero-title">
+      <text class="hero-ice">ICE</text><text class="hero-jz">JZ</text>
+    </view>
+    <text class="slogan">{{copy.slogan}}</text>
+    <view class="brand-eyebrow">
+      <view class="eyebrow-dot" />
+      <text class="eyebrow-text">{{copy.tagline}}</text>
+    </view>
+  </view>
 
-      <view wx:if="{{captchaVisible}}" class="captcha-block">
-        <login-captcha-popup
-          id="captchaPopup"
-          mode="{{captchaMode}}"
-          tip="{{captchaTip}}"
-          image="{{captchaBase64}}"
-          jigsawImage="{{jigsawImage}}"
-          jigsawY="{{jigsawY}}"
-          words="{{captchaWords}}"
-          value="{{captchaValue}}"
-          bind:refresh="onCaptcha"
-          bind:change="onCaptchaChange"
-          bind:confirm="onCaptchaConfirm"
-        />
-        <input name="captcha" value="{{captchaValue}}" hidden />
+  <view class="card">
+    <view class="card-glow g-a" />
+    <view class="card-glow g-b" />
+    <view class="card-sheen" />
+
+    <view wx:if="{{!showCompleteProfile}}">
+      <view class="card-head">
+        <view class="card-kicker">
+          <view class="kicker-dot" />
+          <text class="kicker-text">{{copy.welcomeKicker}}</text>
+        </view>
+        <text class="card-sub">{{copy.loginHint}}</text>
+      </view>
+
+      <view class="tabs">
+        <view
+          class="tab {{loginMode === 'account' ? 'active' : ''}}"
+          data-mode="account"
+          bindtap="switchMode"
+        >{{copy.accountLogin}}</view>
+        <view
+          class="tab {{loginMode === 'mobile' ? 'active' : ''}}"
+          data-mode="mobile"
+          bindtap="switchMode"
+        >{{copy.mobileLogin}}</view>
+        <view class="tab-indicator {{loginMode === 'mobile' ? 'mobile' : ''}}" />
+      </view>
+
+      <view wx:if="{{loginMode === 'account'}}" class="form-body">
+        <view class="field">
+          <text class="field-label">{{copy.account}}</text>
+          <view class="field-shell">
+            <view class="field-ico">
+              <image class="field-ico-img" src="/images/icons/user.svg" mode="aspectFit" />
+            </view>
+            <input
+              class="field-input"
+              value="{{accountForm.username}}"
+              placeholder="{{copy.accountPh}}"
+              data-form="accountForm"
+              data-key="username"
+              bindinput="onFieldInput"
+            />
+          </view>
+        </view>
+
+        <view class="field">
+          <text class="field-label">{{copy.password}}</text>
+          <view class="field-shell">
+            <view class="field-ico">
+              <image class="field-ico-img" src="/images/icons/lock.svg" mode="aspectFit" />
+            </view>
+            <input
+              class="field-input"
+              password
+              value="{{accountForm.password}}"
+              placeholder="{{copy.passwordPh}}"
+              data-form="accountForm"
+              data-key="password"
+              bindinput="onFieldInput"
+            />
+          </view>
+        </view>
+
+        <view wx:if="{{captchaEnabled}}" class="field">
+          <text class="field-label">{{copy.security}}</text>
+          <view class="security-shell">
+            <login-captcha-popup
+              id="captchaPopup"
+              captchaKey="{{captchaKey}}"
+              mode="{{captchaMode}}"
+              tip="{{captchaTip}}"
+              image="{{captchaBase64}}"
+              jigsawImage="{{jigsawImage}}"
+              jigsawY="{{jigsawY}}"
+              words="{{captchaWords}}"
+              value="{{captchaValue}}"
+              bind:refresh="onCaptcha"
+              bind:change="onCaptchaChange"
+              bind:confirm="onCaptchaConfirm"
+            />
+          </view>
+        </view>
+
+        <view class="submit-btn {{isLogging ? 'disabled' : ''}}" bindtap="onAccountLogin">
+          <view wx:if="{{isLogging}}" class="spinner" />
+          {{isLogging ? copy.logging : copy.login}}
+        </view>
+      </view>
+
+      <view wx:else class="form-body">
+        <view class="field">
+          <text class="field-label">{{copy.mobile}}</text>
+          <view class="field-shell {{inputErrors.mobile ? 'error' : ''}}">
+            <view class="field-ico">
+              <image class="field-ico-img" src="/images/icons/phone.svg" mode="aspectFit" />
+            </view>
+            <input
+              class="field-input"
+              maxlength="11"
+              value="{{mobileForm.mobile}}"
+              placeholder="{{copy.mobilePh}}"
+              bindinput="onPhoneInput"
+            />
+          </view>
+          <text class="field-tip {{inputErrors.mobile ? 'err' : ''}}">{{inputErrors.mobile || phoneHint}}</text>
+        </view>
+
+        <view wx:if="{{captchaEnabled}}" class="field">
+          <text class="field-label">{{copy.security}}</text>
+          <view class="security-shell">
+            <login-captcha-popup
+              id="captchaPopupMobile"
+              captchaKey="{{captchaKey}}"
+              mode="{{captchaMode}}"
+              tip="{{captchaTip}}"
+              image="{{captchaBase64}}"
+              jigsawImage="{{jigsawImage}}"
+              jigsawY="{{jigsawY}}"
+              words="{{captchaWords}}"
+              value="{{captchaValue}}"
+              bind:refresh="onCaptcha"
+              bind:change="onCaptchaChange"
+              bind:confirm="onCaptchaConfirm"
+            />
+          </view>
+          <text class="field-tip {{inputErrors.captcha ? 'err' : ''}}">{{inputErrors.captcha || copy.captchaBeforeSms}}</text>
+        </view>
+
+        <view class="field">
+          <text class="field-label">{{copy.sms}}</text>
+          <view class="captcha-row">
+            <view class="field-shell flex {{inputErrors.code ? 'error' : ''}}">
+              <view class="field-ico">
+                <image class="field-ico-img" src="/images/icons/msg.svg" mode="aspectFit" />
+              </view>
+              <input
+                class="field-input"
+                maxlength="6"
+                value="{{mobileForm.code}}"
+                placeholder="{{copy.smsPh}}"
+                data-form="mobileForm"
+                data-key="code"
+                bindinput="onFieldInput"
+              />
+            </view>
+            <view class="code-btn {{sms.disabled || isLogging ? 'disabled' : ''}}" bindtap="sendCode">
+              <text class="code-btn-text">{{sms.disabled ? sms.count + 's' : copy.sendCode}}</text>
+            </view>
+          </view>
+          <text wx:if="{{inputErrors.code}}" class="field-tip err">{{inputErrors.code}}</text>
+        </view>
+
+        <view class="submit-btn {{!canSubmit ? 'disabled' : ''}}" bindtap="onMobileLogin">
+          <view wx:if="{{isLogging}}" class="spinner" />
+          {{isLogging ? copy.logging : copy.login}}
+        </view>
       </view>
 
       <login-agreement id="agreement" value="{{agreed}}" bind:change="onAgreementChange" />
+    </view>
 
-      <view class="login-btn">
-        <t-button block type="submit">登录</t-button>
+    <view wx:else class="complete-body">
+      <view class="card-kicker">
+        <view class="kicker-dot" />
+        <text class="kicker-text">{{copy.welcomeKicker}}</text>
+      </view>
+      <text class="complete-title">完善信息</text>
+      <text class="complete-desc">选择身份并补充资料后进入系统。首次默认密码为当前手机号。</text>
+
+      <view class="field">
+        <text class="field-label">选择身份</text>
+        <view class="role-grid">
+          <view
+            wx:for="{{roleOptions}}"
+            wx:key="value"
+            class="role-card {{completeForm.roleId === item.value ? 'active' : ''}}"
+            data-value="{{item.value}}"
+            bindtap="selectRole"
+          >
+            <text class="role-name">{{item.label}}</text>
+            <text class="role-tip">{{item.tip}}</text>
+          </view>
+        </view>
+        <text wx:if="{{completeErrors.roleId}}" class="field-tip err">{{completeErrors.roleId}}</text>
+      </view>
+
+      <view class="field">
+        <text class="field-label">姓名</text>
+        <view class="field-shell {{completeErrors.realName ? 'error' : ''}}">
+          <view class="field-ico">
+            <image class="field-ico-img" src="/images/icons/name.svg" mode="aspectFit" />
+          </view>
+          <input
+            class="field-input"
+            value="{{completeForm.realName}}"
+            placeholder="请输入真实姓名"
+            data-form="completeForm"
+            data-key="realName"
+            bindinput="onFieldInput"
+          />
+        </view>
+        <text wx:if="{{completeErrors.realName}}" class="field-tip err">{{completeErrors.realName}}</text>
+      </view>
+
+      <view class="field">
+        <text class="field-label">手机号</text>
+        <view class="field-shell readonly">
+          <view class="field-ico">
+            <image class="field-ico-img" src="/images/icons/phone.svg" mode="aspectFit" />
+          </view>
+          <input class="field-input" value="{{completeForm.mobile}}" disabled />
+        </view>
+      </view>
+
+      <view class="field">
+        <text class="field-label">性别</text>
+        <view class="gender-grid">
+          <view
+            wx:for="{{genderOptions}}"
+            wx:key="value"
+            class="role-card compact {{completeForm.gender === item.value ? 'active' : ''}}"
+            data-value="{{item.value}}"
+            bindtap="selectGender"
+          >
+            <text class="role-name">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="ghost-btn block {{isCompleting ? 'disabled' : ''}}" bindtap="backToLogin">
+        <text>返回登录</text>
+      </view>
+      <view class="submit-btn {{isCompleting ? 'disabled' : ''}}" bindtap="submitCompleteProfile">
+        <view wx:if="{{isCompleting}}" class="spinner" />
+        {{isCompleting ? '提交中...' : '完成并进入系统'}}
       </view>
     </view>
-  </form>
+
+    <view class="card-secure">
+      <view class="secure-chip">{{copy.secureEncrypt}}</view>
+      <view class="secure-chip">{{copy.secureAuth}}</view>
+      <view class="secure-chip">{{copy.secureAudit}}</view>
+    </view>
+  </view>
+
+  <text class="footnote">{{copy.footer}} · {{copy.footnote}}</text>
+  <ice-toast-host />
+  <ice-confirm-host />
 </view>

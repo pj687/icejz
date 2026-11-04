@@ -10,20 +10,17 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.icejz.framework.common.cache.RedisCache;
 import net.icejz.framework.common.cache.RedisKeys;
-import net.icejz.system.cache.SysParamsCache;
 import net.icejz.system.captcha.CaptchaGenerator;
-import net.icejz.system.dao.SysParamsDao;
-import net.icejz.system.entity.SysParamsEntity;
 import net.icejz.system.enums.CaptchaChannelEnum;
 import net.icejz.system.enums.CaptchaTypeEnum;
-import net.icejz.system.enums.SysParamsEnum;
+import net.icejz.system.service.SysCaptchaConfigService;
 import net.icejz.system.service.SysCaptchaService;
 import net.icejz.system.vo.SysCaptchaVO;
 import org.springframework.stereotype.Service;
 
 
 /**
- * 验证码（字符 / 行为 / PoW / Turnstile），支持分端类型
+ * 验证码（字符 / 行为 / PoW / Turnstile），配置来自 sys_captcha_config
  *
  * @author ice_jz
  * <a href="https://icejz.net">ICEJZ</a>
@@ -33,20 +30,23 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class SysCaptchaServiceImpl implements SysCaptchaService {
     private static final int CAPTCHA_TTL = 300;
+    /** 滑动拼图水平容差（逻辑像素） */
     private static final int SLIDER_OFFSET = 8;
+    /** 绳子中点对齐容差，略宽于拼图，降低触屏操作难度 */
+    private static final int CURVE_OFFSET = 16;
     private static final int WORD_OFFSET = 28;
     /** 图案点选半径更严，避免点到邻近错误图案仍判定通过 */
     private static final int PATTERN_OFFSET = 22;
+    private static final int ANGLE_OFFSET = CaptchaGenerator.ANGLE_TOLERANCE;
     private static final String TYPE_SEP = "::";
 
     private final RedisCache redisCache;
-    private final SysParamsDao sysParamsDao;
-    private final SysParamsCache sysParamsCache;
+    private final SysCaptchaConfigService sysCaptchaConfigService;
 
     @Override
     public SysCaptchaVO generate(String channel) {
         CaptchaChannelEnum ch = CaptchaChannelEnum.of(channel);
-        CaptchaTypeEnum type = resolveType(ch);
+        CaptchaTypeEnum type = sysCaptchaConfigService.resolveType(ch);
         SysCaptchaVO vo = new SysCaptchaVO();
         vo.setType(type.getCode());
         vo.setMode(type.getMode());
@@ -54,7 +54,7 @@ public class SysCaptchaServiceImpl implements SysCaptchaService {
         vo.setEnabled(isCaptchaEnabled());
 
         if (type == CaptchaTypeEnum.TURNSTILE) {
-            String siteKey = safeParam(SysParamsEnum.TURNSTILE_SITE_KEY.name(), "");
+            String siteKey = sysCaptchaConfigService.getTurnstileSiteKey();
             vo.setKey("turnstile");
             vo.setSiteKey(siteKey);
             vo.setTip(StrUtil.isBlank(siteKey) ? "未配置 Turnstile 站点密钥，请改用其他验证码类型" : type.getTip());
@@ -62,8 +62,7 @@ public class SysCaptchaServiceImpl implements SysCaptchaService {
         }
 
         if (type == CaptchaTypeEnum.POW) {
-            int difficulty = safeInt(SysParamsEnum.CAPTCHA_POW_DIFFICULTY.name(), 3);
-            difficulty = Math.max(2, Math.min(difficulty, 5));
+            int difficulty = sysCaptchaConfigService.getPowDifficulty();
             String challenge = UUID.randomUUID().toString().replace("-", "");
             String key = UUID.randomUUID().toString();
             redisCache.set(RedisKeys.getCaptchaKey(key), wrap(type, challenge + "|" + difficulty), CAPTCHA_TTL);
@@ -84,11 +83,16 @@ public class SysCaptchaServiceImpl implements SysCaptchaService {
         vo.setJigsawImage(generated.jigsawImage());
         vo.setJigsawY(generated.jigsawY());
         vo.setWords(generated.words());
-        if (type == CaptchaTypeEnum.BLOCK_PUZZLE) {
+        if (type == CaptchaTypeEnum.BLOCK_PUZZLE || type == CaptchaTypeEnum.CURVE) {
             vo.setPuzzleWidth(CaptchaGenerator.PUZZLE_W);
             vo.setPuzzleHeight(CaptchaGenerator.PUZZLE_H);
-            vo.setJigsawWidth(CaptchaGenerator.jigsawCanvasSize());
-            vo.setPieceSize(CaptchaGenerator.PIECE);
+            if (type == CaptchaTypeEnum.CURVE) {
+                vo.setJigsawWidth(CaptchaGenerator.CURVE_ROPE_W);
+                vo.setPieceSize(CaptchaGenerator.CURVE_ROPE_W);
+            } else {
+                vo.setJigsawWidth(CaptchaGenerator.jigsawCanvasSize());
+                vo.setPieceSize(CaptchaGenerator.PIECE);
+            }
         }
         return vo;
     }
@@ -142,7 +146,10 @@ public class SysCaptchaServiceImpl implements SysCaptchaService {
             return verifyPow(payload, code);
         }
         if (type == CaptchaTypeEnum.BLOCK_PUZZLE) {
-            return verifySlider(payload, code);
+            return verifySlider(payload, code, SLIDER_OFFSET);
+        }
+        if (type == CaptchaTypeEnum.CURVE) {
+            return verifySlider(payload, code, CURVE_OFFSET);
         }
         if (type == CaptchaTypeEnum.CLICK_WORD) {
             return verifyClickPoints(payload, code, WORD_OFFSET);
@@ -150,16 +157,28 @@ public class SysCaptchaServiceImpl implements SysCaptchaService {
         if (type == CaptchaTypeEnum.PATTERN) {
             return verifyClickPoints(payload, code, PATTERN_OFFSET);
         }
+        if (type == CaptchaTypeEnum.ROTATE || type == CaptchaTypeEnum.ANGLE) {
+            return verifyAngle(payload, code);
+        }
         return code.equalsIgnoreCase(payload);
+    }
+
+    /** 用户旋转角 + 服务端偏转角 ≈ 360°（或 0°） */
+    private boolean verifyAngle(String expectAngle, String actualAngle) {
+        try {
+            int expect = Integer.parseInt(expectAngle.trim());
+            int actual = Integer.parseInt(actualAngle.trim());
+            int sum = Math.floorMod(expect + actual, 360);
+            return sum <= ANGLE_OFFSET || sum >= 360 - ANGLE_OFFSET;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public boolean isCaptchaEnabled() {
-        return Boolean.parseBoolean(safeParam(SysParamsEnum.LOGIN_CAPTCHA.name(), "false"));
+        return sysCaptchaConfigService.isEnabled();
     }
-
-
-
 
     private String wrap(CaptchaTypeEnum type, String payload) {
         return type.getCode() + TYPE_SEP + StrUtil.nullToDefault(payload, "");
@@ -170,7 +189,7 @@ public class SysCaptchaServiceImpl implements SysCaptchaService {
         if (idx > 0) {
             return CaptchaTypeEnum.of(cached.substring(0, idx));
         }
-        return CaptchaTypeEnum.of(safeParam(SysParamsEnum.LOGIN_CAPTCHA_TYPE.name(), "spec"));
+        return CaptchaTypeEnum.SPEC;
     }
 
     private String unwrapPayload(String cached) {
@@ -181,19 +200,11 @@ public class SysCaptchaServiceImpl implements SysCaptchaService {
         return cached;
     }
 
-    private CaptchaTypeEnum resolveType(CaptchaChannelEnum channel) {
-        String typed = safeParam(channel.getTypeParam().name(), "");
-        if (StrUtil.isNotBlank(typed)) {
-            return CaptchaTypeEnum.of(typed);
-        }
-        return CaptchaTypeEnum.of(safeParam(SysParamsEnum.LOGIN_CAPTCHA_TYPE.name(), "spec"));
-    }
-
-    private boolean verifySlider(String expectX, String actualX) {
+    private boolean verifySlider(String expectX, String actualX, int offset) {
         try {
             int expect = Integer.parseInt(expectX.trim());
             int actual = Integer.parseInt(actualX.trim());
-            return Math.abs(expect - actual) <= SLIDER_OFFSET;
+            return Math.abs(expect - actual) <= offset;
         } catch (Exception e) {
             return false;
         }
@@ -240,7 +251,7 @@ public class SysCaptchaServiceImpl implements SysCaptchaService {
     }
 
     private boolean verifyTurnstile(String token) {
-        String secret = safeParam(SysParamsEnum.TURNSTILE_SECRET_KEY.name(), "");
+        String secret = sysCaptchaConfigService.getTurnstileSecretKey();
         if (StrUtil.isBlank(secret)) {
             log.warn("Turnstile secret 未配置");
             return false;
@@ -255,32 +266,6 @@ public class SysCaptchaServiceImpl implements SysCaptchaService {
         } catch (Exception e) {
             log.error("Turnstile 校验失败", e);
             return false;
-        }
-    }
-
-
-    private String safeParam(String key, String defaultValue) {
-        try {
-            String value = sysParamsCache.get(key);
-            if (StrUtil.isNotBlank(value)) {
-                return value;
-            }
-            SysParamsEntity entity = sysParamsDao.get(key);
-            if (entity == null || StrUtil.isBlank(entity.getParamValue())) {
-                return defaultValue;
-            }
-            sysParamsCache.save(entity.getParamKey(), entity.getParamValue());
-            return entity.getParamValue();
-        } catch (Exception e) {
-            return defaultValue;
-        }
-    }
-
-    private int safeInt(String key, int defaultValue) {
-        try {
-            return Integer.parseInt(safeParam(key, String.valueOf(defaultValue)));
-        } catch (Exception e) {
-            return defaultValue;
         }
     }
 

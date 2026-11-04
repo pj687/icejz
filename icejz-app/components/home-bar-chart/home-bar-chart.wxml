@@ -1,0 +1,7 @@
+<view class="chart">
+  <ice-echart
+    canvas-id="{{canvasId}}"
+    height="{{height}}"
+    option="{{chartOption}}"
+  />
+</view>

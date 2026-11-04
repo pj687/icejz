@@ -1,13 +1,18 @@
 {
   "pages": [
+    "pages/splash/splash",
     "pages/login/login",
+    "pages/guide/guide",
     "pages/index/index",
     "pages/workbench/workbench",
     "pages/usercenter/usercenter",
     "pages/usercenter/password/password",
     "pages/usercenter/userinfo/userinfo",
     "pages/usercenter/about/about",
+    "pages/usercenter/devices/devices",
+    "pages/usercenter/settings/settings",
     "pages/usercenter/userinfo/input/input",
+    "pages/assistant/chat",
     "pages/message/inbox",
     "pages/sys/user/index",
     "pages/sys/org/index",
@@ -30,15 +35,21 @@
       },
       {
         "pagePath": "pages/usercenter/usercenter",
-        "text": "个人中心"
+        "text": "我的"
       }
     ]
   },
   "window": {
+    "navigationStyle": "custom",
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "ICEJZ",
-    "navigationBarBackgroundColor": "#ffffff",
-    "backgroundColor": "#f4f7fb"
+    "navigationBarBackgroundColor": "#f3f6fa",
+    "backgroundColor": "#f3f6fa"
+  },
+  "usingComponents": {
+    "ice-nav-bar": "/components/ice-nav-bar/ice-nav-bar",
+    "ice-toast-host": "/components/ice-toast-host/ice-toast-host",
+    "ice-confirm-host": "/components/ice-confirm-host/ice-confirm-host"
   },
   "resolveAlias": {
     "@/*": "/*"

@@ -1,0 +1,33 @@
+<view
+  wx:if="{{show}}"
+  class="mask {{leaving ? 'out' : ''}}"
+  catchtouchmove="noop"
+>
+  <view class="card {{tone}} {{leaving ? 'out' : ''}}" catchtap="noop">
+    <view class="aura" />
+    <view class="sheen" />
+
+    <view class="icon">
+      <view class="ring" />
+      <view class="core">
+        <view wx:if="{{tone === 'danger'}}" class="x">
+          <view class="x-a" />
+          <view class="x-b" />
+        </view>
+        <view wx:else class="i">
+          <view class="i-dot" />
+          <view class="i-bar" />
+        </view>
+      </view>
+    </view>
+
+    <text class="title">{{title}}</text>
+    <text wx:if="{{content}}" class="desc">{{content}}</text>
+
+    <view class="foot {{showCancel ? '' : 'single'}}">
+      <view wx:if="{{showCancel}}" class="act cancel" catchtap="onCancel">{{cancelText}}</view>
+      <view wx:if="{{showCancel}}" class="split" />
+      <view class="act ok {{tone}}" catchtap="onConfirm">{{confirmText}}</view>
+    </view>
+  </view>
+</view>

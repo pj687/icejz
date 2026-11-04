@@ -88,13 +88,13 @@
 			<section class="form-block">
 				<header class="block-head">
 					<strong>登录设备</strong>
-					<span>可覆盖系统「登录安全」默认策略；留空则跟随系统</span>
+					<span>{{ systemOn ? '系统已开启多设备；可覆盖为关/开，留空跟随系统' : '系统已关闭多设备：全员强制单设备，此处不可开启' }}</span>
 				</header>
 				<el-row :gutter="16">
 					<el-col :span="12">
 						<el-form-item label="多设备登录">
 							<el-select v-model="dataForm.multiDeviceLogin" clearable placeholder="跟随系统" style="width: 100%">
-								<el-option :value="1" label="允许多设备" />
+								<el-option :value="1" label="允许多设备" :disabled="!systemOn" />
 								<el-option :value="0" label="仅单设备（互踢）" />
 							</el-select>
 						</el-form-item>
@@ -105,7 +105,7 @@
 								v-model="dataForm.multiDeviceMax"
 								:min="1"
 								:max="systemMax"
-								:disabled="dataForm.multiDeviceLogin !== 1"
+								:disabled="!systemOn || dataForm.multiDeviceLogin !== 1"
 								controls-position="right"
 								placeholder="跟随系统"
 								style="width: 100%"
@@ -114,7 +114,11 @@
 					</el-col>
 				</el-row>
 				<p class="field-tip">
-					选「允许多设备」时可单独设上限（不得超过系统上限 {{ systemMax }}）；选「仅单设备」则无视系统总开关。清空选项后重新跟随系统配置。
+					{{
+						systemOn
+							? `选「允许多设备」时可单独设上限（不得超过系统上限 ${systemMax}）；选「仅单设备」则个人强制互踢。清空后跟随系统。`
+							: '系统总开关关闭时，即使用户曾设为多设备也不会生效，也无法重新开启。'
+					}}
 				</p>
 			</section>
 		</el-form>
@@ -141,6 +145,7 @@ const postList = ref<any[]>([])
 const roleList = ref<any[]>([])
 const dataFormRef = ref()
 const systemMax = ref(5)
+const systemOn = ref(false)
 
 const dataForm = reactive({
 	id: '',
@@ -162,8 +167,14 @@ const dataForm = reactive({
 const loadSystemMax = async () => {
 	try {
 		const { data } = await useLoginSecurityConfigApi()
+		systemOn.value = !!data?.multiDeviceLogin
 		systemMax.value = Math.max(1, data?.multiDeviceMax ?? 5)
+		if (!systemOn.value && dataForm.multiDeviceLogin === 1) {
+			dataForm.multiDeviceLogin = null
+			dataForm.multiDeviceMax = null
+		}
 	} catch {
+		systemOn.value = false
 		systemMax.value = 5
 	}
 }
@@ -213,6 +224,10 @@ const getUser = (id: number) => {
 
 const submitPayload = () => {
 	const payload: any = { ...dataForm }
+	if (!systemOn.value && payload.multiDeviceLogin === 1) {
+		ElMessage.warning('系统已关闭多设备登录，不可为用户开启')
+		return null
+	}
 	if (payload.multiDeviceLogin !== 1) {
 		payload.multiDeviceMax = null
 	} else if (payload.multiDeviceMax != null) {
@@ -234,7 +249,12 @@ const submitHandle = () => {
 			return false
 		}
 
-		useUserSubmitApi(submitPayload()).then(() => {
+		const payload = submitPayload()
+		if (!payload) {
+			return false
+		}
+
+		useUserSubmitApi(payload).then(() => {
 			ElMessage.success({
 				message: '操作成功',
 				duration: 500,

@@ -79,16 +79,20 @@ public class SysUserTokenServiceImpl extends BaseServiceImpl<SysUserTokenDao, Sy
         int systemMax = safeIntParam(SysParamsEnum.MULTI_DEVICE_MAX.name(), 5);
         systemMax = Math.max(1, Math.min(systemMax, 50));
 
-        boolean multiDevice = systemMulti;
+        // 系统关闭 = 全员强制单设备；仅系统开启时，个人可覆盖为关/开（null 跟随系统）
+        boolean multiDevice = false;
         int multiMax = systemMax;
-        SysUserEntity userCfg = sysUserDao.selectById(userId);
-        if (userCfg != null) {
-            if (userCfg.getMultiDeviceLogin() != null) {
-                multiDevice = userCfg.getMultiDeviceLogin() == 1;
-            }
-            if (multiDevice && userCfg.getMultiDeviceMax() != null && userCfg.getMultiDeviceMax() > 0) {
-                // 个人上限不可超过系统上限
-                multiMax = Math.max(1, Math.min(userCfg.getMultiDeviceMax(), systemMax));
+        if (systemMulti) {
+            multiDevice = true;
+            SysUserEntity userCfg = sysUserDao.selectById(userId);
+            if (userCfg != null) {
+                if (userCfg.getMultiDeviceLogin() != null) {
+                    multiDevice = userCfg.getMultiDeviceLogin() == 1;
+                }
+                if (multiDevice && userCfg.getMultiDeviceMax() != null && userCfg.getMultiDeviceMax() > 0) {
+                    // 个人上限不可超过系统上限
+                    multiMax = Math.max(1, Math.min(userCfg.getMultiDeviceMax(), systemMax));
+                }
             }
         }
 

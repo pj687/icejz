@@ -8,6 +8,10 @@ export const useMessageUnreadCountApi = () => {
   return request.get('/sys/message/my/unread-count')
 }
 
+export const useMessageLatestApi = (limit = 5) => {
+  return request.get('/sys/message/my/latest', { limit })
+}
+
 export const useMessageMyApi = (id) => {
   return request.get('/sys/message/my/' + id)
 }

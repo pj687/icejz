@@ -1,10 +1,127 @@
-<view class="about-page">
-  <view class="about-card">
-    <view class="about-logo">
-      <t-image src="/images/logo.png" mode="heightFix" height="80" />
+<view class="page">
+  <view class="bg" aria-hidden="true">
+    <view class="bg-base" />
+    <view class="blob b1" />
+    <view class="blob b2" />
+    <view class="blob b3" />
+    <view class="mesh" />
+  </view>
+
+  <ice-nav-bar title="关于我们" sub="{{brand.tagline}}" />
+
+  <view class="body">
+    <view class="stage">
+      <view class="stage-glow g1" />
+      <view class="stage-glow g2" />
+      <view class="stage-lines" />
+
+      <view class="kicker">
+        <view class="kicker-dot" />
+        <text class="kicker-text">ICECORE</text>
+        <view class="kicker-chip">ENGINE</view>
+      </view>
+
+      <view class="orb-wrap">
+        <view class="halo" />
+        <view class="ring r1" />
+        <view class="ring r2" />
+        <view class="orbit">
+          <view class="orbit-dot" />
+        </view>
+        <view class="logo-wrap">
+          <image class="brand-logo" src="/images/logo.png" mode="aspectFill" />
+          <view class="logo-pulse" />
+          <view class="logo-shine" />
+        </view>
+      </view>
+
+      <view class="wordmark">
+        <text class="wm-ice">ICE</text><text class="wm-jz">JZ</text>
+      </view>
+      <text class="slogan">{{brand.slogan}}</text>
+      <text class="tagline">{{brand.tagline}}</text>
+
+      <view class="pill-row">
+        <text wx:for="{{pills}}" wx:key="*this" class="pill">{{item}}</text>
+      </view>
     </view>
-    <view class="about-title">{{brand.name}}</view>
-    <view class="about-sub">{{brand.slogan}}</view>
-    <view class="about-intro">{{brand.description}}</view>
+
+    <view class="section">
+      <view class="section-head">
+        <view class="section-mark" />
+        <view class="section-copy">
+          <text class="section-title">系统简介</text>
+          <text class="section-sub">面向企业交付的低代码底座</text>
+        </view>
+      </view>
+      <view class="intro-panel">
+        <view class="intro-glow" />
+        <view class="intro-accent" />
+        <text class="intro-text">{{brand.aboutIntro}}</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head">
+        <view class="section-mark" />
+        <view class="section-copy">
+          <text class="section-title">核心能力</text>
+          <text class="section-sub">安全 · 交付 · 扩展 · 信创</text>
+        </view>
+      </view>
+      <view class="feature-grid">
+        <view
+          wx:for="{{features}}"
+          wx:key="title"
+          class="feature"
+        >
+          <view class="feature-ico tone-{{index}}">
+            <image class="feature-img" src="{{item.icon}}" mode="aspectFit" />
+          </view>
+          <view class="feature-top">
+            <text class="feature-index">0{{index + 1}}</text>
+            <view class="feature-mark tone-{{index}}" />
+          </view>
+          <text class="feature-title">{{item.title}}</text>
+          <text class="feature-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="meta">
+      <view class="meta-glow" />
+      <view class="meta-head">
+        <view class="meta-badge">
+          <view class="meta-live" />
+          <text class="meta-ver">{{brand.version}}</text>
+        </view>
+        <text class="meta-head-sub">当前版本</text>
+      </view>
+      <view class="meta-rows">
+        <view class="meta-row">
+          <view class="meta-ico tone-cyan">
+            <image class="meta-img" src="/images/icons/about.svg" mode="aspectFit" />
+          </view>
+          <text class="meta-label">当前版本</text>
+          <text class="meta-value">{{brand.version}}</text>
+        </view>
+        <view class="meta-row">
+          <view class="meta-ico tone-deep">
+            <image class="meta-img" src="/images/icons/settings.svg" mode="aspectFit" />
+          </view>
+          <text class="meta-label">技术底座</text>
+          <text class="meta-value">{{brand.poweredBy}}</text>
+        </view>
+        <view class="meta-row last">
+          <view class="meta-ico tone-slate">
+            <image class="meta-img" src="/images/icons/profile.svg" mode="aspectFit" />
+          </view>
+          <text class="meta-label">版权信息</text>
+          <text class="meta-value">{{brand.footer}}</text>
+        </view>
+      </view>
+    </view>
+
+    <text class="foot-note">感谢选择 ICEJZ</text>
   </view>
 </view>

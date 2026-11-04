@@ -1,16 +1,20 @@
 const cache = require('@/utils/cache.js')
+const { t } = require('@/locale/index.js')
 const {
   useMessageMyPageApi,
   useMessageUnreadCountApi,
   useMessageMyApi,
   useMessageReadAllApi
 } = require('@/api/message.js')
+const { showIceToast } = require('@/utils/iceToast.js')
+const { showIceConfirm } = require('@/utils/iceConfirm.js')
 
 Page({
   data: {
     loading: false,
     list: [],
-    unreadCount: 0
+    unreadCount: 0,
+    copy: {}
   },
 
   onShow() {
@@ -18,7 +22,26 @@ Page({
       wx.reLaunch({ url: '/pages/login/login' })
       return
     }
+    this.refreshCopy()
     this.loadData()
+  },
+
+  refreshCopy() {
+    this.setData({
+      copy: {
+        title: t('message.title'),
+        sub: t('message.sub'),
+        list: t('message.list'),
+        readAll: t('message.readAll'),
+        syncing: t('message.syncing'),
+        empty: t('message.empty'),
+        emptyHint: t('message.emptyHint'),
+        system: t('message.system'),
+        detail: t('message.detail'),
+        noContent: t('message.noContent'),
+        allReadOk: t('message.allReadOk')
+      }
+    })
   },
 
   async loadData() {
@@ -43,10 +66,11 @@ Page({
     const id = e.currentTarget.dataset.id
     try {
       const { data } = await useMessageMyApi(id)
-      wx.showModal({
-        title: data?.title || '消息详情',
-        content: data?.content || '无内容',
-        showCancel: false
+      await showIceConfirm({
+        title: data?.title || this.data.copy.detail,
+        content: data?.content || this.data.copy.noContent,
+        showCancel: false,
+        confirmText: t('common.confirm')
       })
       this.loadData()
     } catch (err) {
@@ -57,7 +81,7 @@ Page({
   async onReadAll() {
     try {
       await useMessageReadAllApi()
-      wx.showToast({ title: '已全部已读', icon: 'none' })
+      showIceToast({ title: this.data.copy.allReadOk, icon: 'success' })
       this.loadData()
     } catch (e) {
       // ignore

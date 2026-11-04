@@ -1,54 +1,238 @@
-<view class="user-center-card">
-  <view class="user-center-card__header">
-    <t-avatar image="{{user.avatar || 'https://oss.mlh.jucheng.icu/logo.png'}}" class="user-center-card__header__avatar" />
-    <view class="user-center-card__header__meta">
-      <view class="user-center-card__header__name">{{user.realName}}</view>
-      <view class="user-center-card__header__sub">{{brand.slogan}}</view>
-    </view>
+<view class="page">
+  <view class="bg">
+    <view class="bg-base" />
+    <view class="blob b1" />
+    <view class="blob b2" />
   </view>
-</view>
-<view class="content-wrapper">
-  <view class="nav-group-wrapper">
-    <view class="nav-group">
-      <t-cell-group>
-        <t-cell t-class="nav-group__top" title="常用功能" note="查看全部" arrow />
-      </t-cell-group>
-      <view class="nav-group__content">
-        <view class="nav-group__item" wx:for="{{menuData}}" wx:for-item="item" wx:key="index" data-index="{{index}}" bindtap="onClickMenu">
-          <view class="nav-group__item__icon">
-            <t-badge count="{{item.count}}" color="#FF4646">
-              <t-icon name="{{item.icon}}" size="56rpx" color="#00a8e8" />
-            </t-badge>
+
+  <view class="shell" style="padding-top: {{statusBarPx + 8}}px;">
+    <view class="stage">
+      <view class="stage-glow g1" />
+      <view class="stage-glow g2" />
+
+      <view class="stage-nav" style="padding-right: {{stagePadRightPx}}px;">
+        <view class="brand">
+          <view class="brand-mark">
+            <text class="brand-ice">ICE</text><text class="brand-jz">JZ</text>
           </view>
-          <view class="nav-group__item__title">{{item.title}}</view>
+          <text class="brand-sub">{{copy.accountCenter}}</text>
+        </view>
+        <view class="stage-actions">
+          <view class="act-btn" data-path="/pages/message/inbox" bindtap="onNavigate">
+            <image class="act-ico" src="/images/icons/msg.svg" mode="aspectFit" />
+            <view wx:if="{{unreadCount > 0}}" class="act-dot">{{unreadBadge}}</view>
+          </view>
+          <view class="act-btn" data-path="/pages/usercenter/settings/settings" bindtap="onNavigate">
+            <image class="act-ico" src="/images/icons/settings.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+
+      <view class="identity" data-path="/pages/usercenter/userinfo/userinfo" bindtap="onNavigate">
+        <view class="avatar-stage" catchtap="previewAvatar">
+          <view class="avatar-halo" />
+          <view class="avatar-orbit" />
+          <view class="avatar-box">
+            <view class="avatar-sheen" />
+            <image class="avatar" src="{{displayAvatar}}" mode="aspectFill" />
+            <view class="live" />
+          </view>
+        </view>
+        <view class="identity-copy">
+          <text class="greet">{{helloText}}</text>
+          <view class="name-line">
+            <text class="name">{{displayName}}</text>
+            <text class="chip">{{copy.member}}</text>
+          </view>
+          <view class="meta">
+            <text wx:if="{{user.username}}" class="meta-pill">@{{user.username}}</text>
+            <text class="meta-pill soft">{{orgName || copy.orgEmpty}}</text>
+          </view>
+        </view>
+        <view class="edit-btn" data-path="/pages/usercenter/userinfo/userinfo" catchtap="onNavigate">
+          <text class="edit-t">{{copy.editShort}}</text>
+        </view>
+      </view>
+
+      <view class="metrics">
+        <view class="metric" data-path="/pages/message/inbox" bindtap="onNavigate">
+          <text class="metric-val">{{unreadCount}}</text>
+          <text class="metric-lab">{{copy.statUnread}}</text>
+        </view>
+        <view class="metric-split" />
+        <view class="metric" data-path="/pages/sys/user/index" bindtap="onNavigate">
+          <text class="metric-val">{{accountShort}}</text>
+          <text class="metric-lab">{{copy.statAccount}}</text>
+        </view>
+        <view class="metric-split" />
+        <view class="metric" data-path="/pages/sys/org/index" bindtap="onNavigate">
+          <text class="metric-val">{{orgShort}}</text>
+          <text class="metric-lab">{{copy.statOrg}}</text>
         </view>
       </view>
     </view>
+
+    <view class="section">
+      <view class="section-head">
+        <text class="section-title">{{copy.frequent}}</text>
+        <text class="section-sub">{{copy.frequentSub}}</text>
+      </view>
+      <view class="service-grid">
+        <view
+          wx:for="{{menuData}}"
+          wx:key="path"
+          class="service"
+          data-index="{{index}}"
+          bindtap="onClickMenu"
+        >
+          <view class="service-ico">
+            <image
+              wx:if="{{item.useMascot}}"
+              class="service-img"
+              src="/images/mascot/xiaobing-head.png"
+              mode="aspectFit"
+            />
+            <image wx:else class="service-img" src="{{item.icon}}" mode="aspectFit" />
+            <view wx:if="{{item.count}}" class="service-badge">{{item.count > 99 ? '99+' : item.count}}</view>
+          </view>
+          <view class="service-copy">
+            <text class="service-name">{{item.title}}</text>
+            <text class="service-hint">{{item.hint}}</text>
+          </view>
+          <text class="service-go">›</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section account-section">
+      <view class="section-head account-head">
+        <view class="account-head-mark" />
+        <view class="account-head-copy">
+          <text class="section-title">{{copy.accountGroup}}</text>
+          <text class="section-sub">{{copy.accountGroupSub}}</text>
+        </view>
+      </view>
+      <view class="panel account-panel">
+        <view class="panel-glow" />
+        <view class="panel-lines" />
+        <view
+          wx:for="{{accountMenus}}"
+          wx:key="title"
+          class="row {{index === accountMenus.length - 1 ? 'last' : ''}}"
+          data-path="{{item.path}}"
+          data-action="{{item.action}}"
+          bindtap="onAccountTap"
+          hover-class="row-hover"
+          hover-stay-time="80"
+        >
+          <view class="row-ico {{item.tone}}">
+            <view class="row-ico-ring" />
+            <image class="row-img" src="{{item.icon}}" mode="aspectFit" />
+          </view>
+          <view class="row-copy">
+            <text class="row-title">{{item.title}}</text>
+            <text wx:if="{{item.note}}" class="row-note">{{item.note}}</text>
+          </view>
+          <view class="row-trail">
+            <text class="row-go">›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="logout" bindtap="onLogout">{{copy.logout}}</view>
+    <text class="foot">{{brand.footer}}</text>
   </view>
-  <view class="cell-box">
-    <t-cell-group>
-      <t-cell title="个人信息" arrow url="userinfo/userinfo"></t-cell>
-      <t-cell title="修改密码" arrow url="password/password"></t-cell>
-      <t-cell title="关于我们" arrow url="about/about"></t-cell>
-      <t-cell title="联系作者" note="QQ 960681673" arrow bind:click="openMakePhone"></t-cell>
-    </t-cell-group>
+
+  <view
+    wx:if="{{avatarPreview}}"
+    class="avatar-preview"
+    catchtouchmove="noop"
+  >
+    <view class="avatar-preview-close" catchtap="closeAvatarPreview">
+      <view class="avatar-preview-x">
+        <view class="x-a" />
+        <view class="x-b" />
+      </view>
+    </view>
+    <text class="avatar-preview-tip">{{copy.avatarZoomTip}}</text>
+    <view
+      class="avatar-preview-stage"
+      catchtap="onPreviewBgClick"
+      bindtouchstart="onPreviewTouchStart"
+      catchtouchmove="onPreviewTouchMove"
+      bindtouchend="onPreviewTouchEnd"
+      bindtouchcancel="onPreviewTouchEnd"
+    >
+      <image
+        class="avatar-preview-img"
+        src="{{displayAvatar}}"
+        mode="aspectFit"
+        style="transform: translate3d({{avatarX}}px, {{avatarY}}px, 0) scale({{avatarScale}});"
+        catchtap="onPreviewImgClick"
+      />
+    </view>
   </view>
-  <view class="cell-box">
-    <t-cell-group>
-      <t-cell title="退出登录" bind:click="onLogout">
-        <t-icon name="poweroff" size="48rpx" slot="note" />
-      </t-cell>
-    </t-cell-group>
+
+  <view wx:if="{{contactOpen}}" class="contact-mask" catchtouchmove="noop" bindtap="closeContact">
+    <view class="contact-sheet" catchtap="noop">
+      <view class="contact-glow g1" />
+      <view class="contact-glow g2" />
+      <view class="contact-handle" />
+
+      <view class="contact-hero">
+        <view class="contact-orb">
+          <view class="contact-halo" />
+          <view class="contact-ring" />
+          <view class="contact-logo-box">
+            <image class="contact-logo" src="/images/logo.png" mode="aspectFill" />
+            <view class="contact-logo-shine" />
+          </view>
+        </view>
+        <view class="contact-wordmark">
+          <text class="wm-ice">ICE</text><text class="wm-jz">JZ</text>
+        </view>
+        <text class="contact-title">{{copy.contactSheetTitle}}</text>
+        <text class="contact-sub">{{copy.contactSheetSub}}</text>
+        <view class="contact-chip">
+          <view class="contact-chip-dot" />
+          <text class="contact-chip-t">{{copy.contactAuthorName}}</text>
+        </view>
+      </view>
+
+      <view class="contact-card">
+        <view class="contact-row">
+          <view class="contact-ico tone-cyan">
+            <image class="contact-ico-img" src="/images/icons/contact.svg" mode="aspectFit" />
+          </view>
+          <view class="contact-row-main">
+            <text class="contact-lab">{{copy.contactQq}}</text>
+            <text class="contact-val">{{copy.contactQqValue}}</text>
+          </view>
+          <view class="contact-copy-btn" data-type="qq" bindtap="onCopyContact">{{copy.contactCopy}}</view>
+        </view>
+        <view class="contact-row">
+          <view class="contact-ico tone-deep">
+            <image class="contact-ico-img" src="/images/icons/email.svg" mode="aspectFit" />
+          </view>
+          <view class="contact-row-main">
+            <text class="contact-lab">{{copy.contactEmail}}</text>
+            <text class="contact-val">{{copy.contactEmailValue}}</text>
+          </view>
+          <view class="contact-copy-btn" data-type="email" bindtap="onCopyContact">{{copy.contactCopy}}</view>
+        </view>
+        <view class="contact-row last">
+          <view class="contact-ico tone-slate">
+            <image class="contact-ico-img" src="/images/icons/device.svg" mode="aspectFit" />
+          </view>
+          <view class="contact-row-main">
+            <text class="contact-lab">{{copy.contactHours}}</text>
+            <text class="contact-val soft">{{copy.contactHoursValue}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="contact-close" bindtap="closeContact">{{copy.contactClose}}</view>
+    </view>
   </view>
 </view>
-
-<t-popup visible="{{showMakePhone}}" placement="bottom" bind:visible-change="closeMakePhone">
-  <view class="popup-content">
-    <view class="popup-title border-bottom-1px">
-      服务时间: 每周一至周五 9:00-12:00 14:00-18:00
-    </view>
-    <view class="popup-phone border-bottom-1px" bind:tap="onPhoneCall">QQ：960681673（点击复制）</view>
-    <view class="popup-phone border-bottom-1px" bind:tap="onPhoneCall">邮箱：960681673@qq.com</view>
-    <view class="popup-close" bind:tap="closeMakePhone">取消</view>
-  </view>
-</t-popup>

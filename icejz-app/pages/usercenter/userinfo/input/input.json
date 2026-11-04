@@ -1,7 +1,7 @@
 {
-  "navigationBarTitleText": "个人信息",
-  "usingComponents": {
-    "t-input": "tdesign-miniprogram/input/input",
-    "t-button": "tdesign-miniprogram/button/button"
-  }
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "编辑资料",
+  "navigationBarBackgroundColor": "#f3f6fa",
+  "backgroundColor": "#f3f6fa",
+  "usingComponents": {}
 }

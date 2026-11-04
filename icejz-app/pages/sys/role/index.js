@@ -1,10 +1,12 @@
 const cache = require('@/utils/cache.js')
+const { t } = require('@/locale/index.js')
 const { useRolePageApi, useRoleListApi } = require('@/api/sys.js')
 
 Page({
   data: {
     loading: false,
-    list: []
+    list: [],
+    copy: {}
   },
 
   onShow() {
@@ -12,7 +14,22 @@ Page({
       wx.reLaunch({ url: '/pages/login/login' })
       return
     }
+    this.refreshCopy()
     this.loadData()
+  },
+
+  refreshCopy() {
+    this.setData({
+      copy: {
+        roleTitle: t('sys.roleTitle'),
+        roleSub: t('sys.roleSub'),
+        loadingRole: t('sys.loadingRole'),
+        emptyRole: t('sys.emptyRole'),
+        emptyRoleHint: t('sys.emptyRoleHint'),
+        noCode: t('sys.noCode'),
+        noRemark: t('sys.noRemark')
+      }
+    })
   },
 
   async loadData() {

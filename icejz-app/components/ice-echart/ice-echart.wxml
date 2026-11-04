@@ -1,0 +1,8 @@
+<view class="ice-echart" style="height: {{height}};">
+  <ec-canvas
+    wx:if="{{ec}}"
+    id="{{canvasId}}"
+    canvas-id="{{canvasId}}"
+    ec="{{ec}}"
+  />
+</view>

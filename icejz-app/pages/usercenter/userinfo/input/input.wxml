@@ -1,10 +1,46 @@
-<view class="input-edit">
-  <form bindsubmit="onSubmit">
-    <t-input wx:if="{{user.realName}}" name="realName" value="{{user.realName}}" label="姓名" placeholder="请输入姓名" borderless clearable />
-    <t-input wx:if="{{user.mobile}}" name="mobile" value="{{user.mobile}}" label="手机号" placeholder="请输入手机号" borderless clearable />
-    <t-input wx:if="{{user.email}}" name="email" value="{{user.email}}" label="邮箱" placeholder="请输入邮箱" borderless clearable />
-    <view class="input-btn">
-      <t-button block type="submit">保存</t-button>
+<view class="page">
+  <ice-nav-bar title="{{activeField.title}}" sub="{{activeField.desc}}" />
+
+  <view class="body">
+    <view class="panel">
+      <view class="field-head">
+        <view class="mark {{activeField.theme}}">
+          <image class="mark-img" src="{{activeField.icon}}" mode="aspectFit" />
+        </view>
+        <view class="field-meta">
+          <text class="label">{{activeField.label}}</text>
+          <text class="tip">{{activeField.tip}}</text>
+        </view>
+      </view>
+
+      <view class="input-shell">
+        <input
+          value="{{formValue}}"
+          type="{{activeField.inputType}}"
+          maxlength="{{activeField.maxlength}}"
+          placeholder="{{activeField.placeholder}}"
+          cursor-spacing="20"
+          class="field-input"
+          focus="{{true}}"
+          confirm-type="done"
+          bindinput="onInput"
+          bindconfirm="onSubmit"
+        />
+      </view>
+
+      <view class="compare">
+        <view class="compare-item">
+          <text class="compare-label">{{copy.original}}</text>
+          <text class="compare-value">{{originalValue || activeField.emptyText}}</text>
+        </view>
+        <text class="compare-arrow">→</text>
+        <view class="compare-item">
+          <text class="compare-label">{{copy.next}}</text>
+          <text class="compare-value accent">{{formValue || activeField.emptyText}}</text>
+        </view>
+      </view>
     </view>
-  </form>
+
+    <button class="save-btn" loading="{{saving}}" bindtap="onSubmit">{{copy.saveEdit}}</button>
+  </view>
 </view>

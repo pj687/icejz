@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "ice-toast-host": "/components/ice-toast-host/ice-toast-host",
+    "ice-confirm-host": "/components/ice-confirm-host/ice-confirm-host"
+  }
+}

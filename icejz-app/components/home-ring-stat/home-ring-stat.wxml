@@ -1,0 +1,7 @@
+<view class="ring-wrap">
+  <ice-echart
+    canvas-id="{{canvasId}}"
+    height="{{height}}"
+    option="{{chartOption}}"
+  />
+</view>

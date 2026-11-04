@@ -1,5 +1,23 @@
-<t-tab-bar value="{{value}}" bindchange="onChange" split="{{false}}">
-  <t-tab-bar-item wx:for="{{list}}" wx:key="index" value="{{item.index}}" icon="{{item.icon}}">
-    {{ item.text }}
-  </t-tab-bar-item>
-</t-tab-bar>
+<!-- cover-view 盖住 canvas；外围透明，仅椭圆形 dock 本体实色 -->
+<cover-view wx:if="{{!hidden}}" class="tab-root">
+  <cover-view class="dock-wrap">
+    <cover-view class="dock">
+      <cover-view class="dock-indicator" style="left: {{indicatorLeft}}%; width: {{indicatorWidth}}%;" />
+      <cover-view
+        wx:for="{{list}}"
+        wx:key="url"
+        class="dock-item {{value === index ? 'active' : ''}}"
+        data-index="{{index}}"
+        bindtap="onChange"
+      >
+        <cover-image
+          class="ico"
+          src="{{value === index ? item.activeIcon : item.icon}}"
+        />
+        <cover-view class="label">{{item.text}}</cover-view>
+      </cover-view>
+    </cover-view>
+  </cover-view>
+</cover-view>
+<ice-toast-host />
+<ice-confirm-host />

@@ -1,0 +1,104 @@
+<view class="page">
+  <ice-nav-bar title="{{robotName}}" sub="{{statusText}}">
+    <view slot="right" class="nav-actions">
+      <text class="nav-btn" bindtap="openHistory">{{tHistory}}</text>
+      <text class="nav-btn primary" bindtap="startNewChat">{{tNew}}</text>
+    </view>
+  </ice-nav-bar>
+
+  <scroll-view
+    class="msg-scroll"
+    scroll-y
+    scroll-into-view="{{scrollInto}}"
+    scroll-with-animation
+  >
+    <view class="msg-list">
+      <view class="msg assistant">
+        <image class="avatar" src="/images/mascot/xiaobing-main.png" mode="aspectFit" />
+        <view class="bubble">
+          <text class="greet">{{hello}}</text>
+          <text class="welcome">{{welcome}}</text>
+        </view>
+      </view>
+
+      <view
+        wx:for="{{messages}}"
+        wx:key="index"
+        id="m{{index}}"
+        class="msg {{item.role}}"
+      >
+        <image
+          wx:if="{{item.role === 'assistant'}}"
+          class="avatar"
+          src="/images/mascot/xiaobing-main.png"
+          mode="aspectFit"
+        />
+        <view class="bubble">
+          <text class="content">{{item.content}}</text>
+        </view>
+      </view>
+
+      <view wx:if="{{loading}}" id="typing" class="msg assistant">
+        <image class="avatar" src="/images/mascot/xiaobing-main.png" mode="aspectFit" />
+        <view class="bubble typing">
+          <view class="dot" />
+          <view class="dot" />
+          <view class="dot" />
+        </view>
+      </view>
+
+      <view wx:if="{{!messages.length && !loading}}" class="chips">
+        <view
+          wx:for="{{quickasks}}"
+          wx:key="*this"
+          class="chip"
+          data-text="{{item}}"
+          bindtap="askChip"
+        >{{item}}</view>
+      </view>
+
+      <view id="bottom-anchor" class="bottom-space" />
+    </view>
+  </scroll-view>
+
+  <view class="composer">
+    <input
+      class="input"
+      value="{{input}}"
+      placeholder="{{placeholder}}"
+      disabled="{{loading}}"
+      confirm-type="send"
+      bindinput="onInput"
+      bindconfirm="send"
+    />
+    <view class="send {{loading || !input ? 'disabled' : ''}}" bindtap="send">{{sendLabel}}</view>
+  </view>
+
+  <view wx:if="{{historyOpen}}" class="history-mask" bindtap="closeHistory" />
+  <view class="history-panel {{historyOpen ? 'open' : ''}}">
+    <view class="history-head">
+      <text class="history-title">{{tHistoryTitle}}</text>
+      <view class="history-head-actions">
+        <text class="nav-btn primary" bindtap="onHistoryNew">{{tNew}}</text>
+        <text class="history-close" bindtap="closeHistory">×</text>
+      </view>
+    </view>
+    <scroll-view class="history-scroll" scroll-y>
+      <view wx:if="{{sessionsLoading}}" class="history-empty">{{tHistoryLoading}}</view>
+      <view wx:elif="{{!sessions.length}}" class="history-empty">{{tHistoryEmpty}}</view>
+      <view
+        wx:for="{{sessions}}"
+        wx:key="id"
+        class="session-item {{item.id === currentSessionId ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onSelectSession"
+      >
+        <view class="session-main">
+          <text class="session-title">{{item.titleText}}</text>
+          <text class="session-time">{{item.timeText}}</text>
+        </view>
+        <text class="session-del" data-id="{{item.id}}" catchtap="onDeleteSession">{{tDelete}}</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

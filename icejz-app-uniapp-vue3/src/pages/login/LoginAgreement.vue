@@ -4,12 +4,10 @@
 			<view class="check" :class="{ on: agreed }"></view>
 			<view class="bar-text">
 				<text class="bar-label">我已阅读并同意</text>
-				<view class="bar-links">
-					<template v-for="(item, index) in agreements" :key="item.id">
-						<text class="a" @tap.stop="open(item.id)">《{{ item.shortTitle }}》</text>
-						<text v-if="index < agreements.length - 1" class="sep">、</text>
-					</template>
-				</view>
+				<template v-for="(item, index) in agreements" :key="item.id">
+					<text class="a" @tap.stop="open(item.id)">《{{ item.shortTitle }}》</text>
+					<text v-if="index < agreements.length - 1" class="sep">、</text>
+				</template>
 			</view>
 		</view>
 	</view>
@@ -302,59 +300,62 @@ export default {
 
 <style scoped>
 .bar {
-	margin: 4rpx 0 18rpx;
+	margin: 20rpx 0 4rpx;
 }
 .bar-row {
 	display: flex;
 	gap: 14rpx;
 	align-items: flex-start;
+	padding: 18rpx 20rpx;
+	border-radius: 24rpx;
+	background: rgba(247, 250, 252, 0.96);
+	border: 1rpx solid rgba(232, 238, 245, 0.95);
 }
 .check {
-	width: 34rpx;
-	height: 34rpx;
-	margin-top: 4rpx;
+	width: 36rpx;
+	height: 36rpx;
+	margin-top: 2rpx;
 	flex-shrink: 0;
-	border-radius: 9rpx;
-	border: 2rpx solid #c5d5e2;
+	border-radius: 50%;
+	border: 2rpx solid #c9d5e0;
 	box-sizing: border-box;
 	position: relative;
 	background: #fff;
+	transition: all 0.18s ease;
 }
 .check.on {
-	border-color: #00a8e8;
-	background: linear-gradient(135deg, #00a8e8, #3ec6ff);
+	border-color: transparent;
+	background: linear-gradient(145deg, #00a8e8, #2bb8ef);
+	box-shadow: 0 6rpx 14rpx rgba(0, 168, 232, 0.22);
 }
 .check.on::after {
 	content: '';
 	position: absolute;
-	left: 10rpx;
-	top: 4rpx;
+	left: 12rpx;
+	top: 6rpx;
 	width: 8rpx;
-	height: 16rpx;
+	height: 14rpx;
 	border: solid #fff;
-	border-width: 0 4rpx 4rpx 0;
+	border-width: 0 3rpx 3rpx 0;
 	transform: rotate(45deg);
 }
 .bar-text {
 	flex: 1;
 	min-width: 0;
+	font-size: 22rpx;
+	line-height: 1.7;
+	color: #8492a6;
 }
 .bar-label {
-	display: block;
-	font-size: 24rpx;
 	color: #5b6b7c;
-}
-.bar-links {
-	margin-top: 4rpx;
-	font-size: 24rpx;
-	line-height: 1.7;
-	color: #6b7c8d;
+	font-weight: 500;
 }
 .sep {
-	color: #a8b4c0;
+	color: #b6c2cf;
 }
 .a {
-	color: #0090c8;
+	color: #00a8e8;
+	font-weight: 650;
 }
 
 .root {

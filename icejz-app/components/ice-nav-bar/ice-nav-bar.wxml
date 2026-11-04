@@ -1,0 +1,19 @@
+<view class="nav-root">
+  <view class="nav {{tone}}" style="padding-top: {{statusBarPx}}px; padding-right: {{capsulePadPx}}px;">
+    <view class="nav-inner">
+      <view wx:if="{{showBack}}" class="back" catchtap="onBack">
+        <view class="back-ico" />
+      </view>
+      <view wx:else class="back placeholder" />
+      <view class="center">
+        <text class="title">{{title}}</text>
+        <text wx:if="{{sub}}" class="sub">{{sub}}</text>
+      </view>
+      <view class="right">
+        <slot name="right" />
+      </view>
+    </view>
+  </view>
+  <ice-toast-host />
+  <ice-confirm-host />
+</view>

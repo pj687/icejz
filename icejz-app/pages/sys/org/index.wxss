@@ -3,37 +3,8 @@
   background:
     radial-gradient(circle at top right, rgba(0, 168, 232, 0.1), transparent 36%),
     #f4f7fb;
-  padding: 24rpx 24rpx calc(40rpx + env(safe-area-inset-bottom));
+  padding: 0 24rpx calc(40rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
-}
-
-.hero {
-  padding: 34rpx 30rpx;
-  border-radius: 28rpx;
-  margin-bottom: 20rpx;
-  background:
-    radial-gradient(circle at 90% 10%, rgba(62, 198, 255, 0.32), transparent 36%),
-    linear-gradient(135deg, #121a28 0%, #0c6f9c 100%);
-  box-shadow: 0 16rpx 40rpx rgba(15, 23, 36, 0.16);
-}
-
-.hero-kicker {
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 20rpx;
-  letter-spacing: 4rpx;
-}
-
-.hero-title {
-  margin-top: 10rpx;
-  color: #fff;
-  font-size: 40rpx;
-  font-weight: 700;
-}
-
-.hero-sub {
-  margin-top: 10rpx;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 22rpx;
 }
 
 .empty {
@@ -65,42 +36,121 @@
 .tree {
   background: #fff;
   border-radius: 28rpx;
-  padding: 16rpx 12rpx;
+  padding: 8rpx 8rpx 16rpx;
   border: 1rpx solid rgba(232, 238, 245, 0.95);
   box-shadow: 0 8rpx 24rpx rgba(15, 23, 36, 0.04);
+}
+
+.tree-head {
+  padding: 16rpx 20rpx 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+}
+
+.tree-count {
+  font-size: 22rpx;
+  color: #8492a6;
+}
+
+.tree-actions {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.tree-action {
+  font-size: 22rpx;
+  font-weight: 650;
+  color: #00a8e8;
+  padding: 4rpx 0;
+}
+
+.tree-sep {
+  font-size: 20rpx;
+  color: #c5ced6;
 }
 
 .node {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  padding: 18rpx 16rpx;
-  margin-bottom: 8rpx;
-  border-radius: 18rpx;
-  background: linear-gradient(180deg, #f8fbfe, #f3f8fc);
+  gap: 18rpx;
+  min-height: 108rpx;
+  margin: 10rpx 8rpx 0;
+  padding-top: 18rpx;
+  padding-right: 16rpx;
+  padding-bottom: 18rpx;
+  border-radius: 22rpx;
+  background: #f7fafc;
+  box-sizing: border-box;
+}
+
+.node.foldable:active {
+  opacity: 0.88;
 }
 
 .node.root {
-  background: linear-gradient(180deg, #eef9fe, #e7f5fc);
+  background: linear-gradient(135deg, #eef9fe, #e3f4fb);
+  border: 1rpx solid rgba(0, 168, 232, 0.14);
+}
+
+.guide {
+  position: absolute;
+  left: 18rpx;
+  top: 0;
+  bottom: 50%;
+  width: 28rpx;
+  pointer-events: none;
+}
+
+.guide-v {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2rpx;
+  background: rgba(0, 168, 232, 0.28);
+}
+
+.guide-h {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 22rpx;
+  height: 2rpx;
+  background: rgba(0, 168, 232, 0.28);
 }
 
 .node-icon {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 16rpx;
-  background: #00a8e8;
-  color: #fff;
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 18rpx;
+  background: #dff2fb;
+  color: #0284c7;
   font-size: 24rpx;
-  font-weight: 700;
+  font-weight: 740;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.node.root .node-icon {
-  background: #121a28;
+.node-icon.tone-0 {
+  background: linear-gradient(145deg, #00a8e8, #2bb8ef);
+  color: #fff;
+  box-shadow: 0 8rpx 18rpx rgba(0, 168, 232, 0.24);
+}
+
+.node-icon.tone-1 {
+  background: #dff2fb;
+  color: #0284c7;
+}
+
+.node-icon.tone-2 {
+  background: #eef2f7;
+  color: #5b6b7c;
 }
 
 .node-main {
@@ -112,10 +162,107 @@
   font-size: 28rpx;
   font-weight: 700;
   color: #111827;
+  letter-spacing: 0.2rpx;
+  word-break: break-word;
 }
 
 .node-meta {
-  margin-top: 6rpx;
+  margin-top: 8rpx;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8rpx;
   font-size: 22rpx;
   color: #64748b;
+}
+
+/* L1 顶级：字号最大、字重最重 */
+.node.lv-0 .node-name {
+  font-size: 32rpx;
+  font-weight: 780;
+  color: #0b1220;
+  letter-spacing: 0.4rpx;
+}
+
+.node.lv-0 .node-meta {
+  font-size: 22rpx;
+  color: #5b7a8c;
+}
+
+.node.lv-0 .pill {
+  background: rgba(0, 168, 232, 0.16);
+  color: #0284c7;
+  font-size: 18rpx;
+}
+
+/* L2 中间层：中等字号、半粗 */
+.node.lv-1 .node-name {
+  font-size: 28rpx;
+  font-weight: 680;
+  color: #1e293b;
+}
+
+.node.lv-1 .node-meta {
+  font-size: 21rpx;
+  color: #64748b;
+}
+
+/* L3+ 末级：更小、更轻、略灰 */
+.node.lv-2 .node-name {
+  font-size: 26rpx;
+  font-weight: 560;
+  color: #475569;
+  letter-spacing: 0;
+}
+
+.node.lv-2 .node-meta {
+  font-size: 20rpx;
+  color: #94a3b8;
+}
+
+.node.lv-2 .pill {
+  background: #eef2f7;
+  color: #64748b;
+  font-weight: 620;
+}
+
+/* 叶子节点再轻一档，和可展开父节点区分 */
+.node.leaf .node-name {
+  font-weight: 520;
+}
+
+.node.lv-0.leaf .node-name {
+  font-weight: 720;
+}
+
+.pill {
+  padding: 2rpx 10rpx;
+  border-radius: 999rpx;
+  background: rgba(0, 168, 232, 0.1);
+  color: #00a8e8;
+  font-size: 18rpx;
+  font-weight: 720;
+}
+
+.dot {
+  opacity: 0.5;
+}
+
+.caret {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 14rpx;
+  background: rgba(0, 168, 232, 0.1);
+  color: #00a8e8;
+  font-size: 32rpx;
+  font-weight: 700;
+  line-height: 44rpx;
+  text-align: center;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+.caret.open {
+  transform: rotate(90deg);
 }

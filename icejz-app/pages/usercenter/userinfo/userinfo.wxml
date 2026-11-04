@@ -1,15 +1,87 @@
-<view>
-  <t-cell-group>
-    <t-cell title="头像" bind:click="uploadAvatar" arrow>
-      <t-image slot="note" src="{{user.avatar || 'https://oss.mlh.jucheng.icu/logo.png'}}" t-class="avatar" mode="aspectFill" />
-    </t-cell>
-    <t-cell title="姓名" note="{{user.realName}}" url="input/input?key=realName" arrow />
-    <t-cell title="手机号" note="{{user.mobile}}" url="input/input?key=mobile" arrow />
-    <t-cell title="邮箱" note="{{user.email}}" url="input/input?key=email" arrow />
-    <t-cell title="性别" note="{{genderMap[user.gender] || ''}}" bind:click="onGenderOpen" arrow />
-  </t-cell-group>
-</view>
+<view class="page">
+  <ice-nav-bar title="{{copy.title}}" sub="{{copy.sub}}" />
 
-<t-picker visible="{{genderVisible}}" value="{{[user.gender]}}" title="选择性别" cancelBtn="取消" confirmBtn="确认" bindchange="onGenderChange" bindcancel="onGenderCancel">
-  <t-picker-item options="{{genderList}}"></t-picker-item>
-</t-picker>
+  <view class="body">
+    <view class="profile-card">
+      <view class="avatar-wrap" bindtap="uploadAvatar">
+        <image src="{{displayAvatar}}" class="avatar" mode="aspectFill" />
+        <view class="camera">{{uploadingAvatar ? '…' : '摄'}}</view>
+      </view>
+      <view class="meta">
+        <text class="name">{{user.realName || copy.noName}}</text>
+        <text class="sub">{{user.mobile || copy.fillMobile}}</text>
+        <view class="tags">
+          <text class="tag">{{genderLabel}}</text>
+          <text class="tag soft">{{copy.accountInfo}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="panel">
+      <view class="panel-head">
+        <text class="panel-title">{{copy.basic}}</text>
+        <text class="panel-sub">{{copy.tapEdit}}</text>
+      </view>
+      <view class="rows">
+        <view class="row" data-key="realName" bindtap="navigateToInput">
+          <view class="mark dark">
+            <image class="mark-img" src="/images/icons/name.svg" mode="aspectFit" />
+          </view>
+          <view class="row-body">
+            <text class="label">{{copy.name}}</text>
+            <text class="tip">{{copy.nameTip}}</text>
+          </view>
+          <text class="value">{{user.realName || copy.pleaseFill}}</text>
+          <text class="arrow">›</text>
+        </view>
+        <view class="row" data-key="mobile" bindtap="navigateToInput">
+          <view class="mark cyan">
+            <image class="mark-img" src="/images/icons/phone.svg" mode="aspectFit" />
+          </view>
+          <view class="row-body">
+            <text class="label">{{copy.mobile}}</text>
+            <text class="tip">{{copy.mobileTip}}</text>
+          </view>
+          <text class="value">{{user.mobile || copy.pleaseFill}}</text>
+          <text class="arrow">›</text>
+        </view>
+        <view class="row" data-key="email" bindtap="navigateToInput">
+          <view class="mark sky">
+            <image class="mark-img" src="/images/icons/email.svg" mode="aspectFit" />
+          </view>
+          <view class="row-body">
+            <text class="label">{{copy.email}}</text>
+            <text class="tip">{{copy.emailTip}}</text>
+          </view>
+          <text class="value">{{user.email || copy.pleaseFill}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="panel">
+      <view class="panel-head">
+        <text class="panel-title">{{copy.gender}}</text>
+        <text class="panel-sub">{{copy.genderSave}}</text>
+      </view>
+      <view class="gender-row">
+        <view
+          wx:for="{{genderList}}"
+          wx:key="value"
+          class="gender {{item.tone}} {{Number(user.gender) === item.value ? 'active' : ''}}"
+          data-index="{{index}}"
+          bindtap="selectGender"
+        >
+          <view class="gender-art">
+            <image class="gender-img" src="{{item.art}}" mode="aspectFill" />
+          </view>
+          <text class="gender-name">{{item.label}}</text>
+          <text class="gender-desc">{{item.desc}}</text>
+          <view class="gender-check">
+            <view class="gender-check-ico" />
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
