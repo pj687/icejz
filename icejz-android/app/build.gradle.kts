@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
@@ -12,8 +12,8 @@ android {
         applicationId = "net.icejz.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 104
-        versionName = "1.0.4"
+        versionCode = 105
+        versionName = "1.0.5"
         buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080\"")
         vectorDrawables.useSupportLibrary = true
     }

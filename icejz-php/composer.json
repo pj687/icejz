@@ -1,0 +1,30 @@
+{
+  "name": "icejz/icejz-php",
+  "description": "ICEJZ PHP API — port of icejz-boot",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.2",
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "ext-mbstring": "*",
+    "ext-openssl": "*",
+    "ext-gmp": "*",
+    "ext-gd": "*",
+    "predis/predis": "^2.2",
+    "vlucas/phpdotenv": "^5.6",
+    "lpilp/guomi": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Icejz\\": "app/"
+    }
+  },
+  "scripts": {
+    "serve": "php -S 0.0.0.0:8080 -t public public/index.php"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}
