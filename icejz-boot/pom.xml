@@ -26,7 +26,7 @@
     </modules>
 
     <properties>
-        <revision>1.0.3</revision>
+        <revision>1.0.4</revision>
         <skipTests>true</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
