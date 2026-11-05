@@ -22,7 +22,7 @@
 初始化数据库（首次）：
 
 ```bash
-# 导入 icejz-boot/db/mysql 下的 icejz.sql 及 module/*.sql
+# 导入 icejz-boot/db/mysql/icejz.sql（一份全量库即可）
 # 库名建议：icejz_boot
 ```
 

@@ -12,10 +12,9 @@ icejz-boot 是采用组件模式，扩展不同的业务功能，可以很方便
 </dependency>
 ```
 
-## SQL语句
-引入组件时，还需要执行对应的SQL文件，初始化表结构和菜单等。
-如果使用的是MySQL数据库，则需要执行以下SQL文件：
+## SQL 语句
+组件相关表结构与初始数据已包含在全量脚本中，首次只需导入：
 
 ```
-icejz-boot/db/mysql/module/icejz-module-quartz.sql
+icejz-boot/db/mysql/icejz.sql
 ```

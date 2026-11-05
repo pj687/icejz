@@ -6,19 +6,32 @@ import re
 import subprocess
 from pathlib import Path
 
-OUT = Path(r"D:\framework\icejz\icejz-boot\db\mysql\icejz.sql")
+OUT = Path(__file__).resolve().parent / "icejz.sql"
 DB = "icejz_boot"
 MYSQL_USER = "root"
 MYSQL_PASS = "123456"
+MYSQLDUMP = r"D:\MySQL\MySQL Server 8.0\bin\mysqldump.exe"
 
 # table -> columns to blank in INSERT statements
 SECRET_COLUMNS = {
     "sys_ai_model": ["api_key"],
     "sys_sms_config": ["access_key", "secret_key"],
-    "sys_mail_config": ["access_key", "secret_key"],
+    "sys_mail_config": ["access_key", "secret_key", "mail_pass"],
     "sys_third_login_config": ["client_secret"],
+    "sys_captcha_config": ["turnstile_secret_key"],
     "gen_datasource": ["password"],
     "iot_device": ["secret"],
+}
+
+# sys_params.param_key whose param_value must be cleared
+SECRET_PARAM_KEYS = {
+    "TURNSTILE_SECRET_KEY",
+    "SMS_ACCESS_KEY",
+    "SMS_SECRET_KEY",
+    "MAIL_ACCESS_KEY",
+    "MAIL_SECRET_KEY",
+    "DEEPSEEK_API_KEY",
+    "OPENAI_API_KEY",
 }
 
 # drop data for ephemeral auth tokens
@@ -27,7 +40,7 @@ DROP_DATA_TABLES = {"sys_user_token"}
 
 def dump_database() -> str:
     cmd = [
-        "mysqldump",
+        MYSQLDUMP,
         f"-u{MYSQL_USER}",
         f"-p{MYSQL_PASS}",
         "--default-character-set=utf8mb4",
@@ -42,7 +55,6 @@ def dump_database() -> str:
     if proc.returncode != 0:
         err = proc.stderr.decode("utf-8", errors="replace")
         raise RuntimeError(f"mysqldump failed: {err}")
-    # mysqldump on Windows may emit GBK; prefer utf-8 then fallback
     raw = proc.stdout
     for enc in ("utf-8", "gbk", "latin1"):
         try:
@@ -145,22 +157,32 @@ def blank_insert_secrets(sql: str) -> str:
         if table in DROP_DATA_TABLES:
             return f"-- sanitized: skipped data for `{table}`\n"
 
-        secret_cols = SECRET_COLUMNS.get(table)
-        if not secret_cols:
-            return match.group(0)
-
-        indexes = [cols.index(c) for c in secret_cols if c in cols]
-        if not indexes:
-            return match.group(0)
-
         rows = split_sql_values(vals)
         new_rows: list[str] = []
+        changed = False
+
+        secret_cols = SECRET_COLUMNS.get(table, [])
+        indexes = [cols.index(c) for c in secret_cols if c in cols]
+
+        key_idx = cols.index("param_key") if table == "sys_params" and "param_key" in cols else -1
+        val_idx = cols.index("param_value") if table == "sys_params" and "param_value" in cols else -1
+
         for row in rows:
             fields = split_row_fields(row)
             for idx in indexes:
-                if idx < len(fields):
+                if idx < len(fields) and fields[idx] not in ("''", "NULL", "null"):
                     fields[idx] = "''"
+                    changed = True
+            if key_idx >= 0 and val_idx >= 0 and key_idx < len(fields) and val_idx < len(fields):
+                key_lit = fields[key_idx].strip("'")
+                if key_lit in SECRET_PARAM_KEYS and fields[val_idx] not in ("''", "NULL", "null"):
+                    fields[val_idx] = "''"
+                    changed = True
             new_rows.append("(" + ", ".join(fields) + ")")
+
+        if not changed and table not in SECRET_COLUMNS and table != "sys_params":
+            return match.group(0)
+
         return (
             f"INSERT INTO `{table}` ({match.group('cols')}) VALUES\n"
             + ",\n".join(new_rows)
@@ -174,7 +196,7 @@ def add_header(sql: str) -> str:
     header = """-- ICEJZ Boot MySQL dump (sanitized)
 -- Database: icejz_boot
 -- Notes:
---   1. AI / SMS / Mail / Third-login / IoT / Generator secrets are cleared.
+--   1. AI / SMS / Mail / Third-login / Captcha / IoT / Generator secrets are cleared.
 --   2. sys_user_token data is omitted.
 --   3. Fill API keys again in 「系统管理 · AI助手」 after import if needed.
 --   4. Default demo passwords remain SM3 hashes (e.g. 123456).
@@ -183,8 +205,6 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 """
-    # strip mysqldump's own SET NAMES if present to avoid duplication noise
-    sql = re.sub(r"^-- .*?\n", "", sql, count=0, flags=re.M)
     return header + sql + "\nSET FOREIGN_KEY_CHECKS = 1;\n"
 
 
