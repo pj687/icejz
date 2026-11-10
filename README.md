@@ -5,7 +5,7 @@
 当前版本：**1.0.6**
 
 - Gitee：https://gitee.com/ice_jz/icejz
-- GitHub：https://github.com/ice_jz/icejz
+- GitHub：https://github.com/pj687/icejz
 
 ---
 
