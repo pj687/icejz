@@ -255,7 +255,7 @@ def add_header(sql: str) -> str:
 --   1. AI / SMS / Mail / Third-login / Captcha / IoT / Generator secrets are cleared.
 --   2. sys_user_token data is omitted.
 --   3. Fill API keys again in 「系统管理 · AI助手」 after import if needed.
---   4. Default demo passwords remain SM3 hashes (e.g. 123456).
+--   4. Default demo passwords remain SM3 hashes; every seed user password is 123456.
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;

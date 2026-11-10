@@ -816,7 +816,7 @@ ICEJZ 低代码开发平台通过以下技术和设计实现了安全、高效�
 - **前端地址：** http://localhost:5173
 - **后端地址：** http://localhost:8080
 - **API 文档：** http://localhost:8080/doc.html
-- **默认账号：** admin / admin
+- **默认账号：** admin / 123456（用户表中所有演示用户密码均为 `123456`）
 
 ---
 
