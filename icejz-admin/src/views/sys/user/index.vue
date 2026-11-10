@@ -12,35 +12,67 @@
 			</div>
 		</section>
 
-		<el-row :gutter="12" class="user-layout">
-			<el-col :xs="24" :sm="24" :md="6" :lg="5">
+		<div class="user-layout" :class="{ 'org-collapsed': !orgPanelOpen }">
+			<aside v-show="orgPanelOpen" class="user-org-pane">
 				<ma-data-tree-left
 					url="/sys/org/list"
 					title="机构列表"
 					tree-data
+					collapsible
 					class="user-org-tree"
 					@click="handleClick"
-					@manage="treeVisible = true"
+					@hide="toggleOrgPanel"
 				/>
-			</el-col>
-			<el-col :xs="24" :sm="24" :md="18" :lg="19">
-				<el-card class="org-auth-card org-auth-query layout-query" shadow="never">
-					<el-form ref="queryRef" :inline="true" :model="state.queryForm" @keyup.enter="getDataList()">
-						<el-form-item prop="username">
-							<el-input v-model="state.queryForm.username" clearable placeholder="用户名"></el-input>
-						</el-form-item>
-						<el-form-item prop="mobile">
-							<el-input v-model="state.queryForm.mobile" clearable placeholder="手机号"></el-input>
-						</el-form-item>
-						<el-form-item prop="gender">
-							<ma-dict-select v-model="state.queryForm.gender" dict-type="user_gender" clearable placeholder="性别"></ma-dict-select>
-						</el-form-item>
-						<el-form-item>
-							<el-button icon="Search" type="primary" @click="getDataList()">查询</el-button>
-							<el-button icon="RefreshRight" @click="reset(queryRef)">重置</el-button>
-						</el-form-item>
-					</el-form>
-				</el-card>
+			</aside>
+
+			<section class="user-main-pane">
+				<section class="user-filter-panel">
+					<header class="filter-head">
+						<div class="filter-title">
+							<span class="filter-mark" aria-hidden="true"></span>
+							<strong>筛选条件</strong>
+							<em>按账号信息快速查找用户</em>
+						</div>
+						<button
+							v-if="!orgPanelOpen"
+							type="button"
+							class="org-expand-btn"
+							title="显示机构列表"
+							@click="toggleOrgPanel"
+						>
+							显示机构
+						</button>
+					</header>
+
+					<div class="filter-body">
+						<el-form ref="queryRef" :inline="true" :model="state.queryForm" class="query-form" @keyup.enter="getDataList()">
+							<el-form-item prop="username">
+								<el-input v-model="state.queryForm.username" clearable placeholder="用户名">
+									<template #prefix><ma-icon icon="icon-user" /></template>
+								</el-input>
+							</el-form-item>
+							<el-form-item prop="mobile">
+								<el-input v-model="state.queryForm.mobile" clearable placeholder="手机号">
+									<template #prefix><ma-icon icon="icon-phone" /></template>
+								</el-input>
+							</el-form-item>
+							<el-form-item prop="gender" class="gender-item">
+								<ma-dict-select v-model="state.queryForm.gender" dict-type="user_gender" clearable placeholder="性别" />
+							</el-form-item>
+							<el-form-item class="filter-actions">
+								<el-button class="search-btn" icon="Search" type="primary" @click="getDataList()">查询</el-button>
+								<el-button class="reset-btn" icon="RefreshRight" @click="resetQuery">重置</el-button>
+							</el-form-item>
+						</el-form>
+					</div>
+
+					<div v-if="hasOrgFilter" class="filter-chips">
+						<span class="filter-chip">
+							已按机构筛选
+							<button type="button" @click="clearOrgFilter">清除</button>
+						</span>
+					</div>
+				</section>
 
 				<el-card class="org-auth-card page-card" shadow="never" v-loading="state.dataListLoading">
 					<div class="org-auth-toolbar">
@@ -183,8 +215,8 @@
 					>
 					</el-pagination>
 				</el-card>
-			</el-col>
-		</el-row>
+			</section>
+		</div>
 
 		<add-or-update ref="addOrUpdateRef" @refresh-data-list="getDataList"></add-or-update>
 		<detail ref="detailRef" @edit="addOrUpdateHandle"></detail>
@@ -305,7 +337,7 @@
 <script setup lang="ts" name="SysUserIndex">
 import { useCrud } from '@/hooks'
 import { useViewMode } from '@/hooks/useViewMode'
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { CircleCheck, CircleClose, Delete, Edit, View } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import AddOrUpdate from './add-or-update.vue'
@@ -315,6 +347,7 @@ import { IHooksOptions } from '@/hooks/interface'
 import { useUserStatusApi } from '@/api/sys/user'
 
 const { viewMode } = useViewMode('sys-user')
+const ORG_PANEL_KEY = 'sys-user-org-panel'
 
 const state: IHooksOptions = reactive({
 	dataListUrl: '/sys/user/page',
@@ -323,7 +356,7 @@ const state: IHooksOptions = reactive({
 		username: '',
 		mobile: '',
 		gender: '',
-		orgId: []
+		orgId: [] as any[]
 	}
 })
 
@@ -337,12 +370,31 @@ const detailHandle = (id: number) => {
 	detailRef.value.init(id)
 }
 
+const orgPanelOpen = ref(localStorage.getItem(ORG_PANEL_KEY) !== '0')
+const hasOrgFilter = computed(() => Array.isArray(state.queryForm.orgId) && state.queryForm.orgId.length > 0)
+
+watch(orgPanelOpen, v => {
+	localStorage.setItem(ORG_PANEL_KEY, v ? '1' : '0')
+})
+
+const toggleOrgPanel = () => {
+	orgPanelOpen.value = !orgPanelOpen.value
+}
+
 const handleClick = (orgId: any[]) => {
 	state.queryForm.orgId = orgId
 	getDataList()
 }
 
-const treeVisible = ref(false)
+const clearOrgFilter = () => {
+	state.queryForm.orgId = []
+	getDataList()
+}
+
+const resetQuery = () => {
+	state.queryForm.orgId = []
+	reset(queryRef.value)
+}
 
 const isBanned = (status: number | string) => Number(status) === 0
 
@@ -492,16 +544,214 @@ const { getDataList, selectionChangeHandle, sizeChangeHandle, currentChangeHandl
 
 <style scoped lang="scss">
 .user-layout {
+	display: grid;
+	grid-template-columns: 260px minmax(0, 1fr);
+	gap: 12px;
 	align-items: stretch;
-	row-gap: 12px;
+
+	&.org-collapsed {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.user-org-pane {
+	min-width: 0;
 }
 
 .user-org-tree {
 	height: 100%;
 }
 
-.org-auth-query {
-	margin-bottom: 12px !important;
+.user-main-pane {
+	min-width: 0;
+}
+
+.user-filter-panel {
+	--uf-brand: var(--oa-brand, var(--el-color-primary));
+	--uf-brand-deep: var(--oa-brand-deep, var(--el-color-primary-dark-2, var(--el-color-primary)));
+	--uf-ink: var(--oa-ink, var(--el-text-color-primary));
+	--uf-muted: var(--oa-muted, var(--el-text-color-secondary));
+	--uf-line: var(--oa-line, var(--el-border-color-lighter));
+	--uf-surface: var(--oa-surface, var(--el-bg-color));
+	--uf-surface-soft: var(--oa-surface-soft, var(--el-fill-color-blank, var(--el-bg-color)));
+	margin-bottom: 12px;
+	padding: 14px 16px 12px;
+	border-radius: 16px;
+	border: 1px solid color-mix(in srgb, var(--uf-brand) 22%, var(--uf-line));
+	background:
+		linear-gradient(
+			145deg,
+			color-mix(in srgb, var(--uf-surface) 96%, transparent),
+			color-mix(in srgb, var(--uf-surface-soft) 94%, transparent)
+		),
+		radial-gradient(520px 120px at 0% 0%, color-mix(in srgb, var(--uf-brand) 10%, transparent), transparent 70%);
+	box-shadow: 0 6px 18px color-mix(in srgb, var(--uf-ink) 4%, transparent);
+}
+
+.filter-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.filter-title {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+
+	strong {
+		font-size: 14px;
+		color: var(--uf-ink);
+	}
+
+	em {
+		font-style: normal;
+		font-size: 12px;
+		color: var(--uf-muted);
+	}
+}
+
+.filter-mark {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--uf-brand);
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--uf-brand) 18%, transparent);
+	flex-shrink: 0;
+}
+
+.filter-body {
+	min-width: 0;
+}
+
+.query-form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 12px;
+	margin: 0;
+
+	:deep(.el-form-item) {
+		margin: 0;
+	}
+
+	:deep(.el-input),
+	:deep(.el-select) {
+		width: 168px;
+	}
+
+	:deep(.el-input__wrapper),
+	:deep(.el-select__wrapper) {
+		min-height: 34px;
+		border-radius: 11px;
+		box-shadow: 0 0 0 1px var(--uf-line) inset;
+		background: var(--uf-surface);
+		transition: box-shadow 0.18s ease, background 0.18s ease;
+	}
+
+	:deep(.el-input__wrapper:hover),
+	:deep(.el-select__wrapper:hover) {
+		box-shadow: 0 0 0 1px color-mix(in srgb, var(--uf-brand) 40%, var(--uf-line)) inset;
+	}
+
+	:deep(.el-input__wrapper.is-focus),
+	:deep(.el-select__wrapper.is-focused) {
+		box-shadow:
+			0 0 0 1px var(--uf-brand) inset,
+			0 0 0 3px color-mix(in srgb, var(--uf-brand) 16%, transparent);
+	}
+
+	:deep(.el-input__prefix) {
+		color: var(--uf-muted);
+	}
+}
+
+.filter-actions {
+	:deep(.el-form-item__content) {
+		display: inline-flex;
+		gap: 8px;
+	}
+}
+
+.search-btn {
+	border: 0;
+	border-radius: 10px;
+	background: linear-gradient(135deg, var(--uf-brand), color-mix(in srgb, var(--uf-brand) 70%, #fff));
+}
+
+.reset-btn {
+	border-radius: 10px;
+	border-color: var(--uf-line);
+	color: var(--uf-muted);
+	background: var(--uf-surface);
+
+	&:hover {
+		border-color: color-mix(in srgb, var(--uf-brand) 40%, var(--uf-line));
+		color: var(--uf-brand-deep);
+		background: color-mix(in srgb, var(--uf-brand) 8%, var(--uf-surface));
+	}
+}
+
+.org-expand-btn {
+	height: 30px;
+	padding: 0 12px;
+	border-radius: 999px;
+	border: 1px solid color-mix(in srgb, var(--uf-brand) 30%, var(--uf-line));
+	background: color-mix(in srgb, var(--uf-brand) 10%, var(--uf-surface));
+	color: var(--uf-brand-deep);
+	font-size: 12px;
+	font-weight: 650;
+	cursor: pointer;
+	flex-shrink: 0;
+
+	&:hover {
+		background: color-mix(in srgb, var(--uf-brand) 16%, var(--uf-surface));
+	}
+}
+
+.filter-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px dashed var(--uf-line);
+}
+
+.filter-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: 28px;
+	padding: 0 10px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--uf-brand) 12%, var(--uf-surface));
+	color: var(--uf-brand-deep);
+	font-size: 12px;
+	font-weight: 650;
+
+	button {
+		appearance: none;
+		border: 0;
+		background: transparent;
+		color: var(--uf-muted);
+		cursor: pointer;
+		padding: 0;
+		font: inherit;
+
+		&:hover {
+			color: var(--el-color-danger);
+		}
+	}
+}
+
+@media (max-width: 1100px) {
+	.filter-title em {
+		display: none;
+	}
 }
 
 .ban-body {
@@ -671,6 +921,10 @@ const { getDataList, selectionChangeHandle, sizeChangeHandle, currentChangeHandl
 }
 
 @media (max-width: 992px) {
+	.user-layout {
+		grid-template-columns: 1fr;
+	}
+
 	.user-org-tree {
 		min-height: 280px;
 	}

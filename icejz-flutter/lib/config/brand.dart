@@ -13,7 +13,7 @@ class Brand {
       '面向企业的低代码开发平台，支持代码生成、在线表单、工作流与多端接入，帮助团队更快交付业务系统。';
   static const poweredBy = 'ICEJZ';
   static const footer = '© 2026 ICEJZ';
-  static const version = 'v1.0.3';
+  static const version = 'v1.0.6';
   static const workspaceKicker = 'ICEJZ WORKSPACE';
   static const workspaceTitle = '工作台';
   static const workspaceSub = '与管理端同源数据，移动端快速查阅';

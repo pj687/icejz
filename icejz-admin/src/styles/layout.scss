@@ -91,11 +91,97 @@ a:hover {
   }
 
   .layout-query {
+    --lq-brand: var(--el-color-primary);
+    --lq-brand-deep: var(--el-color-primary-dark-2, var(--el-color-primary));
+    --lq-ink: var(--el-text-color-primary);
+    --lq-muted: var(--el-text-color-secondary);
+    --lq-line: var(--el-border-color-lighter);
+    --lq-surface: var(--el-bg-color);
+    --lq-surface-soft: var(--el-fill-color-blank, var(--el-bg-color));
     margin-bottom: 16px;
-    border-radius: var(--theme-card-radius);
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--lq-brand) 22%, var(--lq-line));
+    background:
+      linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--lq-surface) 96%, transparent),
+        color-mix(in srgb, var(--lq-surface-soft) 94%, transparent)
+      ),
+      radial-gradient(520px 120px at 0% 0%, color-mix(in srgb, var(--lq-brand) 10%, transparent), transparent 70%);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--lq-ink) 4%, transparent);
 
     .el-card__body {
-      padding: 16px 16px 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px 16px 12px;
+    }
+
+    /* 非 org-auth-query 的 layout-query 也补标题 */
+    &:not(.org-auth-query) > .el-card__body::before {
+      content: '筛选条件';
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 20px;
+      padding-left: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--lq-ink);
+      background:
+        radial-gradient(circle at 4px 50%, var(--lq-brand) 0 4px, transparent 5px),
+        radial-gradient(circle at 4px 50%, color-mix(in srgb, var(--lq-brand) 22%, transparent) 0 8px, transparent 9px);
+    }
+
+    .el-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 12px;
+      align-items: center;
+    }
+
+    .el-form-item {
+      margin-bottom: 0 !important;
+      margin-right: 0;
+    }
+
+    .el-input__wrapper,
+    .el-select__wrapper {
+      min-height: 34px;
+      border-radius: 11px;
+      box-shadow: 0 0 0 1px var(--lq-line) inset;
+      background: var(--lq-surface);
+    }
+
+    .el-input__wrapper:hover,
+    .el-select__wrapper:hover {
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--lq-brand) 40%, var(--lq-line)) inset;
+    }
+
+    .el-input__wrapper.is-focus,
+    .el-select__wrapper.is-focused {
+      box-shadow:
+        0 0 0 1px var(--lq-brand) inset,
+        0 0 0 3px color-mix(in srgb, var(--lq-brand) 16%, transparent);
+    }
+
+    .el-button {
+      border-radius: 10px;
+    }
+
+    .el-button--primary {
+      border: 0;
+      background: linear-gradient(
+        135deg,
+        var(--lq-brand),
+        color-mix(in srgb, var(--lq-brand) 70%, #ffffff)
+      );
+    }
+
+    .el-button:not(.el-button--primary):not(.el-button--danger):not(.el-button--success):not(.el-button--warning) {
+      border-color: var(--lq-line);
+      color: var(--lq-muted);
+      background: var(--lq-surface);
     }
   }
 

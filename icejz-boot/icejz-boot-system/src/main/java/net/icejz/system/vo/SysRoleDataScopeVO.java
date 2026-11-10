@@ -29,4 +29,11 @@ public class SysRoleDataScopeVO implements Serializable {
     @Schema(description = "机构ID列表")
     private List<Long> orgIdList;
 
+    @Schema(description = "聊天范围  0全部 1本机构及下级 2本机构 4自定义")
+    @NotNull(message = "聊天范围不能为空")
+    private Integer chatScope;
+
+    @Schema(description = "聊天自定义机构ID列表")
+    private List<Long> chatOrgIdList;
+
 }

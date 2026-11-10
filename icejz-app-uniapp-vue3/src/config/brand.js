@@ -10,7 +10,7 @@ export default {
     '面向企业的低代码开发平台，支持代码生成、在线表单、工作流与多端接入，帮助团队更快交付业务系统。',
   poweredBy: 'ICEJZ',
   footer: '© 2026 ICEJZ',
-  version: 'v1.0.3',
+  version: 'v1.0.6',
   workspaceKicker: 'ICEJZ WORKSPACE',
   workspaceTitle: '工作台',
   workspaceSub: '与管理端同源数据，移动端快速查阅',

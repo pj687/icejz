@@ -100,16 +100,19 @@
 						</el-form-item>
 					</el-col>
 					<el-col :span="12">
-						<el-form-item :label="`设备上限(≤${systemMax})`">
-							<el-input-number
-								v-model="dataForm.multiDeviceMax"
-								:min="1"
-								:max="systemMax"
-								:disabled="!systemOn || dataForm.multiDeviceLogin !== 1"
-								controls-position="right"
-								placeholder="跟随系统"
-								style="width: 100%"
-							/>
+						<el-form-item label="设备上限">
+							<div class="device-max-row">
+								<el-input-number
+									v-model="dataForm.multiDeviceMax"
+									:min="1"
+									:max="systemMax"
+									:disabled="!systemOn || dataForm.multiDeviceLogin !== 1"
+									controls-position="right"
+									placeholder="跟随系统"
+									style="width: 100%"
+								/>
+								<span class="device-max-cap">≤{{ systemMax }}</span>
+							</div>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -306,5 +309,19 @@ defineExpose({
 	font-size: 12px;
 	line-height: 1.5;
 	color: #94a3b8;
+}
+
+.device-max-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+}
+
+.device-max-cap {
+	flex-shrink: 0;
+	font-size: 12px;
+	color: #64748b;
+	white-space: nowrap;
 }
 </style>

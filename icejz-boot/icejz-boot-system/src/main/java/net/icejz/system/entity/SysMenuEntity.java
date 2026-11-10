@@ -39,6 +39,10 @@ public class SysMenuEntity extends BaseEntity {
      */
     private Integer type;
     /**
+     * 客户端  0：PC  1：APP  2：小程序
+     */
+    private Integer clientType;
+    /**
      * 打开方式   0：内部   1：外部
      */
     private Integer openStyle;

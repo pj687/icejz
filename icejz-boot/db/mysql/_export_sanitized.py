@@ -143,30 +143,84 @@ def split_row_fields(row: str) -> list[str]:
     return fields
 
 
+def find_insert_end(sql: str, start: int) -> int:
+    """Return index just past the terminating ';' of an INSERT, respecting quotes."""
+    in_str = False
+    escape = False
+    i = start
+    while i < len(sql):
+        ch = sql[i]
+        if in_str:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == "'":
+                in_str = False
+        else:
+            if ch == "'":
+                in_str = True
+            elif ch == ";":
+                return i + 1
+        i += 1
+    return len(sql)
+
+
+def iter_inserts(sql: str):
+    """Yield (start, end, table, cols, vals) for each INSERT statement."""
+    marker = "INSERT INTO `"
+    pos = 0
+    while True:
+        start = sql.find(marker, pos)
+        if start < 0:
+            break
+        table_start = start + len(marker)
+        table_end = sql.find("`", table_start)
+        if table_end < 0:
+            break
+        table = sql[table_start:table_end]
+        cols_open = sql.find("(", table_end)
+        cols_close = sql.find(")", cols_open)
+        if cols_open < 0 or cols_close < 0:
+            break
+        cols = sql[cols_open + 1 : cols_close]
+        values_kw = sql.find("VALUES", cols_close)
+        if values_kw < 0:
+            break
+        vals_start = values_kw + len("VALUES")
+        end = find_insert_end(sql, vals_start)
+        vals = sql[vals_start:end].lstrip()
+        if vals.endswith(";"):
+            vals = vals[:-1].strip()
+        yield start, end, table, cols, vals
+        pos = end
+
+
 def blank_insert_secrets(sql: str) -> str:
-    pattern = re.compile(
-        r"INSERT INTO `(?P<table>[^`]+)` \((?P<cols>[^)]+)\) VALUES (?P<vals>.+?);",
-        re.S,
-    )
-
-    def repl(match: re.Match[str]) -> str:
-        table = match.group("table")
-        cols = [c.strip().strip("`") for c in match.group("cols").split(",")]
-        vals = match.group("vals")
-
+    pieces: list[str] = []
+    cursor = 0
+    for start, end, table, cols_raw, vals in iter_inserts(sql):
+        pieces.append(sql[cursor:start])
         if table in DROP_DATA_TABLES:
-            return f"-- sanitized: skipped data for `{table}`\n"
+            pieces.append(f"-- sanitized: skipped data for `{table}`\n")
+            cursor = end
+            continue
+
+        cols = [c.strip().strip("`") for c in cols_raw.split(",")]
+        secret_cols = SECRET_COLUMNS.get(table, [])
+        indexes = [cols.index(c) for c in secret_cols if c in cols]
+        key_idx = cols.index("param_key") if table == "sys_params" and "param_key" in cols else -1
+        val_idx = cols.index("param_value") if table == "sys_params" and "param_value" in cols else -1
+        needs_work = bool(indexes) or table == "sys_params"
+
+        if not needs_work:
+            pieces.append(sql[start:end])
+            cursor = end
+            continue
 
         rows = split_sql_values(vals)
         new_rows: list[str] = []
         changed = False
-
-        secret_cols = SECRET_COLUMNS.get(table, [])
-        indexes = [cols.index(c) for c in secret_cols if c in cols]
-
-        key_idx = cols.index("param_key") if table == "sys_params" and "param_key" in cols else -1
-        val_idx = cols.index("param_value") if table == "sys_params" and "param_value" in cols else -1
-
         for row in rows:
             fields = split_row_fields(row)
             for idx in indexes:
@@ -180,16 +234,18 @@ def blank_insert_secrets(sql: str) -> str:
                     changed = True
             new_rows.append("(" + ", ".join(fields) + ")")
 
-        if not changed and table not in SECRET_COLUMNS and table != "sys_params":
-            return match.group(0)
+        if not changed:
+            pieces.append(sql[start:end])
+        else:
+            pieces.append(
+                f"INSERT INTO `{table}` ({cols_raw}) VALUES\n"
+                + ",\n".join(new_rows)
+                + ";\n"
+            )
+        cursor = end
 
-        return (
-            f"INSERT INTO `{table}` ({match.group('cols')}) VALUES\n"
-            + ",\n".join(new_rows)
-            + ";\n"
-        )
-
-    return pattern.sub(repl, sql)
+    pieces.append(sql[cursor:])
+    return "".join(pieces)
 
 
 def add_header(sql: str) -> str:

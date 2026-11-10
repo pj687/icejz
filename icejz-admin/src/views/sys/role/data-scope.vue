@@ -35,6 +35,43 @@
 					></el-tree>
 				</div>
 			</section>
+
+			<section class="scope-block">
+				<header class="block-head">
+					<strong>聊天范围</strong>
+					<span>控制即时通讯可发起/沟通的组织边界（白名单例外在「聊天权限」配置）</span>
+				</header>
+				<el-form-item prop="chatScope" label="聊天范围">
+					<el-select v-model="dataForm.chatScope" placeholder="聊天范围" style="width: 100%">
+						<el-option :value="0" label="全部" />
+						<el-option :value="1" label="本机构及下级" />
+						<el-option :value="2" label="本机构" />
+						<el-option :value="4" label="自定义机构" />
+					</el-select>
+				</el-form-item>
+			</section>
+
+			<section v-show="dataForm.chatScope == 4" class="scope-block org-block">
+				<header class="block-head">
+					<div>
+						<strong>可聊机构</strong>
+						<span>勾选后仅可与所选机构人员沟通</span>
+					</div>
+					<div class="tree-actions">
+						<el-button link type="primary" @click="checkAllChatOrgs(true)">全选</el-button>
+						<el-button link type="primary" @click="checkAllChatOrgs(false)">清空</el-button>
+					</div>
+				</header>
+				<div class="org-tree-wrap">
+					<el-tree
+						ref="chatOrgListTree"
+						:data="orgList"
+						:props="{ label: 'name', children: 'children' }"
+						node-key="id"
+						show-checkbox
+					></el-tree>
+				</div>
+			</section>
 		</el-form>
 		<template #footer>
 			<el-button @click="visible = false">取消</el-button>
@@ -52,13 +89,16 @@ import { useOrgListApi } from '@/api/sys/orgs'
 const visible = ref(false)
 const orgList = ref([])
 const orgListTree = ref()
+const chatOrgListTree = ref()
 const dataFormRef = ref()
 
 const dataForm = reactive({
 	id: '',
 	name: '',
-	orgIdList: [],
+	orgIdList: [] as any[],
+	chatOrgIdList: [] as any[],
 	dataScope: 0,
+	chatScope: 1,
 	remark: ''
 })
 
@@ -75,17 +115,23 @@ const checkAllOrgs = (checked: boolean) => {
 	orgListTree.value.setCheckedKeys(checked ? collectIds(orgList.value) : [])
 }
 
+const checkAllChatOrgs = (checked: boolean) => {
+	if (!chatOrgListTree.value) return
+	chatOrgListTree.value.setCheckedKeys(checked ? collectIds(orgList.value) : [])
+}
+
 const init = (id?: number) => {
 	visible.value = true
 	dataForm.id = ''
+	dataForm.chatScope = 1
+	dataForm.chatOrgIdList = []
 
 	if (dataFormRef.value) {
 		dataFormRef.value.resetFields()
 	}
 	nextTick(() => {
-		if (orgListTree.value) {
-			orgListTree.value.setCheckedKeys([])
-		}
+		orgListTree.value?.setCheckedKeys([])
+		chatOrgListTree.value?.setCheckedKeys([])
 	})
 
 	if (id) {
@@ -103,14 +149,21 @@ const getOrgList = async () => {
 const getRole = (id: number) => {
 	useRoleApi(id).then((res) => {
 		Object.assign(dataForm, res.data)
+		if (dataForm.chatScope == null) dataForm.chatScope = 1
 		nextTick(() => {
 			orgListTree.value?.setCheckedKeys(dataForm.orgIdList || [])
+			chatOrgListTree.value?.setCheckedKeys(dataForm.chatOrgIdList || [])
 		})
 	})
 }
 
 const submitHandle = () => {
 	dataForm.orgIdList = orgListTree.value?.getCheckedKeys?.() || []
+	dataForm.chatOrgIdList = chatOrgListTree.value?.getCheckedKeys?.() || []
+	if (dataForm.chatScope == null) {
+		ElMessage.warning('请选择聊天范围')
+		return
+	}
 
 	useRoleDataScopeSubmitApi(dataForm).then(() => {
 		ElMessage.success({

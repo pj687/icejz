@@ -12,6 +12,7 @@ import net.icejz.framework.security.user.SecurityUser;
 import net.icejz.framework.security.user.UserDetail;
 import net.icejz.system.convert.SysMenuConvert;
 import net.icejz.system.entity.SysMenuEntity;
+import net.icejz.system.enums.MenuClientTypeEnum;
 import net.icejz.system.enums.MenuTypeEnum;
 import net.icejz.system.service.SysMenuService;
 import net.icejz.system.vo.SysMenuVO;
@@ -36,9 +37,12 @@ public class SysMenuController {
 
     @GetMapping("nav")
     @Operation(summary = "菜单导航")
-    public Result<List<SysMenuVO>> nav() {
+    @Parameter(name = "clientType", description = "客户端 0：PC  1：APP  2：小程序，默认 PC")
+    public Result<List<SysMenuVO>> nav(
+            @RequestParam(value = "clientType", required = false) Integer clientType) {
         UserDetail user = SecurityUser.getUser();
-        List<SysMenuVO> list = sysMenuService.getUserMenuList(user, MenuTypeEnum.MENU.getValue());
+        int client = clientType == null ? MenuClientTypeEnum.PC.getValue() : clientType;
+        List<SysMenuVO> list = sysMenuService.getUserMenuList(user, MenuTypeEnum.MENU.getValue(), client);
 
         return Result.ok(list);
     }
@@ -55,9 +59,10 @@ public class SysMenuController {
     @GetMapping("list")
     @Operation(summary = "菜单列表")
     @Parameter(name = "type", description = "菜单类型 0：菜单 1：按钮  2：接口  null：全部")
+    @Parameter(name = "clientType", description = "客户端 0：PC  1：APP  2：小程序  null：全部")
     @PreAuthorize("hasAuthority('sys:menu:list')")
-    public Result<List<SysMenuVO>> list(Integer type) {
-        List<SysMenuVO> list = sysMenuService.getMenuList(type);
+    public Result<List<SysMenuVO>> list(Integer type, Integer clientType) {
+        List<SysMenuVO> list = sysMenuService.getMenuList(type, clientType);
 
         return Result.ok(list);
     }

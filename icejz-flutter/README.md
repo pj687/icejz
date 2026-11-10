@@ -1,4 +1,4 @@
-﻿# ICEJZ Flutter
+# ICEJZ Flutter
 
 ICEJZ 低代码开发平台移动端（Flutter），与 `icejz-android` / `icejz-app-uniapp-vue3` 功能与界面保持一致。
 
@@ -44,4 +44,4 @@ flutter run --dart-define=BASE_URL=http://192.168.1.8:8080
 
 ## 版本
 
-`v1.0.5`（`1.0.5+105`）
+`v1.0.6`（`1.0.6+105`）

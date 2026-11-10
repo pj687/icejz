@@ -40,6 +40,7 @@ public class SysRoleController {
     private final SysUserService sysUserService;
     private final SysRoleMenuService sysRoleMenuService;
     private final SysRoleDataScopeService sysRoleDataScopeService;
+    private final SysChatScopeOrgService sysChatScopeOrgService;
     private final SysMenuService sysMenuService;
     private final SysUserRoleService sysUserRoleService;
 
@@ -77,6 +78,10 @@ public class SysRoleController {
         // 查询角色对应的数据权限
         List<Long> orgIdList = sysRoleDataScopeService.getOrgIdList(id);
         role.setOrgIdList(orgIdList);
+
+        // 查询角色聊天自定义机构
+        List<Long> chatOrgIdList = sysChatScopeOrgService.getOrgIdList(id);
+        role.setChatOrgIdList(chatOrgIdList);
 
         return Result.ok(role);
     }
@@ -126,7 +131,8 @@ public class SysRoleController {
     @PreAuthorize("hasAuthority('sys:role:menu')")
     public Result<List<SysMenuVO>> menu() {
         UserDetail user = SecurityUser.getUser();
-        List<SysMenuVO> list = sysMenuService.getUserMenuList(user, null);
+        // 角色授权树：PC + APP + 小程序全部菜单
+        List<SysMenuVO> list = sysMenuService.getUserMenuList(user, null, null);
 
         return Result.ok(list);
     }

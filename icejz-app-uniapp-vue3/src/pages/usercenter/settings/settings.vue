@@ -157,7 +157,7 @@
 
       <view class="ver">
         <text class="ver-lab">{{ $t('settings.version') }}</text>
-        <text class="ver-val">v1.0.3</text>
+        <text class="ver-val">v1.0.6</text>
       </view>
     </view>
   </view>

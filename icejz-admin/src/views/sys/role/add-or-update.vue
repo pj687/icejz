@@ -42,7 +42,7 @@
 						<el-tree
 							ref="menuListTree"
 							:data="menuList"
-							:props="{ label: 'name', children: 'children' }"
+							:props="{ label: menuLabel, children: 'children' }"
 							node-key="id"
 							show-checkbox
 							:default-expand-all="menuExpandAll"
@@ -119,6 +119,11 @@ const init = async (id?: number) => {
 	if (id) {
 		getRole(id)
 	}
+}
+
+const menuLabel = (data: any) => {
+	const tag = data.clientType === 1 ? '[APP] ' : data.clientType === 2 ? '[小程序] ' : '[PC] '
+	return `${tag}${data.name || ''}`
 }
 
 const getMenuList = async () => {

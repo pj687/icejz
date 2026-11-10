@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 角色
@@ -32,6 +33,7 @@ import java.util.List;
 public class SysRoleServiceImpl extends BaseServiceImpl<SysRoleDao, SysRoleEntity> implements SysRoleService {
     private final SysRoleMenuService sysRoleMenuService;
     private final SysRoleDataScopeService sysRoleDataScopeService;
+    private final SysChatScopeOrgService sysChatScopeOrgService;
     private final SysUserRoleService sysUserRoleService;
     private final SysUserTokenService sysUserTokenService;
 
@@ -66,6 +68,9 @@ public class SysRoleServiceImpl extends BaseServiceImpl<SysRoleDao, SysRoleEntit
 
         // 保存角色
         entity.setDataScope(DataScopeEnum.SELF.getValue());
+        if (entity.getChatScope() == null) {
+            entity.setChatScope(DataScopeEnum.ORG_AND_CHILD.getValue());
+        }
         baseMapper.insert(entity);
 
         // 保存角色菜单关系
@@ -92,6 +97,7 @@ public class SysRoleServiceImpl extends BaseServiceImpl<SysRoleDao, SysRoleEntit
     public void dataScope(SysRoleDataScopeVO vo) {
         SysRoleEntity entity = getById(vo.getId());
         entity.setDataScope(vo.getDataScope());
+        entity.setChatScope(vo.getChatScope());
         // 更新角色
         updateById(entity);
 
@@ -100,6 +106,13 @@ public class SysRoleServiceImpl extends BaseServiceImpl<SysRoleDao, SysRoleEntit
             sysRoleDataScopeService.saveOrUpdate(entity.getId(), vo.getOrgIdList());
         } else {
             sysRoleDataScopeService.deleteByRoleIdList(Collections.singletonList(vo.getId()));
+        }
+
+        // 更新角色聊天自定义机构
+        if (Objects.equals(vo.getChatScope(), DataScopeEnum.CUSTOM.getValue())) {
+            sysChatScopeOrgService.saveOrUpdate(entity.getId(), vo.getChatOrgIdList());
+        } else {
+            sysChatScopeOrgService.deleteByRoleIdList(Collections.singletonList(vo.getId()));
         }
 
         // 更新角色对应用户的缓存权限
@@ -120,6 +133,9 @@ public class SysRoleServiceImpl extends BaseServiceImpl<SysRoleDao, SysRoleEntit
 
         // 删除角色数据权限关系
         sysRoleDataScopeService.deleteByRoleIdList(idList);
+
+        // 删除角色聊天自定义机构
+        sysChatScopeOrgService.deleteByRoleIdList(idList);
 
         // 更新角色对应用户的缓存权限
         idList.forEach(sysUserTokenService::updateCacheAuthByRoleId);

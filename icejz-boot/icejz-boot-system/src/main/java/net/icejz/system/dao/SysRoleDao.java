@@ -21,6 +21,8 @@ public interface SysRoleDao extends BaseDao<SysRoleEntity> {
      */
     Integer getDataScopeByUserId(@Param("userId") Long userId);
 
+    Integer getChatScopeByUserId(@Param("userId") Long userId);
+
     /**
      * 根据用户ID，获取用户角色编码
      */

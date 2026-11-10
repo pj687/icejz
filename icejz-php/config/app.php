@@ -1,8 +1,8 @@
-﻿<?php
+<?php
 
 return [
     'name' => env('APP_NAME', 'ICEJZ'),
-    'version' => env('APP_VERSION', '1.0.5'),
+    'version' => env('APP_VERSION', '1.0.6'),
     'debug' => filter_var(env('APP_DEBUG', true), FILTER_VALIDATE_BOOLEAN),
     'url' => env('APP_URL', 'http://localhost:8080'),
     'timezone' => 'Asia/Shanghai',

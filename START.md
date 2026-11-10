@@ -1,6 +1,6 @@
-﻿# ICEJZ 项目启动指南
+# ICEJZ 项目启动指南
 
-当前版本：**1.0.5**
+当前版本：**1.0.6**
 
 本文说明仓库内各子项目如何启动、依赖关系与常用地址。后端 API 默认端口均为 **8080**（`icejz-boot` 与 `icejz-php` 二选一，不要同时占用同一端口）。
 
@@ -25,6 +25,23 @@
 # 导入 icejz-boot/db/mysql/icejz.sql（一份全量库即可）
 # 库名建议：icejz_boot
 ```
+
+增量能力（若全量 SQL 尚未包含时按需执行）：
+
+```bash
+# APP / 小程序菜单客户端类型
+# icejz-boot/db/mysql/upgrade_menu_client_type.sql
+
+# 企业内部聊天（企微风格即时通讯）
+# icejz-boot/db/mysql/upgrade_sys_chat.sql
+# 或同内容：icejz-boot/db/mysql/module/sys_chat.sql
+
+# 即时通讯 ACL（机构聊天范围 + 白名单）
+# icejz-boot/db/mysql/upgrade_sys_chat_acl.sql
+# 或同内容：icejz-boot/db/mysql/module/sys_chat_acl.sql
+```
+
+即时通讯说明：管理端菜单「即时通讯」；权限含 `sys:chat:page/direct/group/manage/file/acl`。站内通知（消息管理）与聊天并存。会话范围由角色「聊天范围」控制，跨组织例外在「聊天权限」白名单配置；发起单聊/建群/加成员/发消息均会校验。
 
 默认管理员账号：
 
@@ -195,22 +212,7 @@ flutter run --dart-define=BASE_URL=http://192.168.1.8:8080
 
 ---
 
-## 九、官方网站：`icejz-official-website`
-
-产品介绍与使用指南站点（落地页 + 文档页）。
-
-```bash
-cd icejz-official-website
-npm install
-npm run dev
-```
-
-默认访问：http://localhost:5174  
-使用指南：http://localhost:5174/guide.html
-
----
-
-## 十、子项目速查
+## 九、子项目速查
 
 | 目录 | 角色 |
 |------|------|
@@ -222,7 +224,8 @@ npm run dev
 | `icejz-android` | 原生 Android |
 | `icejz-flutter` | Flutter 客户端 |
 | `icejz-app` | 微信小程序（旧） |
-| `icejz-official-website` | 官方介绍与使用站点 |
 | `docs/` | 其他文档 |
+
+> `icejz-official-website` 为内部站点工程，不对外公开为开源子项目；本地维护时自行启动即可。
 
 更细的模块说明见各目录下 `README.md`。

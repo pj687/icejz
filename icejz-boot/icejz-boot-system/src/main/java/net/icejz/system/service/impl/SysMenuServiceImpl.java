@@ -11,6 +11,7 @@ import net.icejz.framework.security.user.UserDetail;
 import net.icejz.framework.security.utils.PreAuthorizeUtil;
 import net.icejz.system.dao.SysMenuDao;
 import net.icejz.system.entity.SysMenuEntity;
+import net.icejz.system.enums.MenuClientTypeEnum;
 import net.icejz.system.enums.SuperAdminEnum;
 import net.icejz.system.service.SysMenuService;
 import net.icejz.system.service.SysRoleMenuService;
@@ -38,6 +39,9 @@ public class SysMenuServiceImpl extends BaseServiceImpl<SysMenuDao, SysMenuEntit
     @Transactional(rollbackFor = Exception.class)
     public void save(SysMenuVO vo) {
         SysMenuEntity entity = BeanUtil.copyProperties(vo, SysMenuEntity.class);
+        if (entity.getClientType() == null) {
+            entity.setClientType(MenuClientTypeEnum.PC.getValue());
+        }
 
         // 保存菜单
         baseMapper.insert(entity);
@@ -47,6 +51,9 @@ public class SysMenuServiceImpl extends BaseServiceImpl<SysMenuDao, SysMenuEntit
     @Transactional(rollbackFor = Exception.class)
     public void update(SysMenuVO vo) {
         SysMenuEntity entity = BeanUtil.copyProperties(vo, SysMenuEntity.class);
+        if (entity.getClientType() == null) {
+            entity.setClientType(MenuClientTypeEnum.PC.getValue());
+        }
 
         // 上级菜单不能为自己
         if (entity.getId().equals(entity.getPid())) {
@@ -68,21 +75,21 @@ public class SysMenuServiceImpl extends BaseServiceImpl<SysMenuDao, SysMenuEntit
     }
 
     @Override
-    public List<SysMenuVO> getMenuList(Integer type) {
-        List<SysMenuEntity> menuList = baseMapper.getMenuList(type);
+    public List<SysMenuVO> getMenuList(Integer type, Integer clientType) {
+        List<SysMenuEntity> menuList = baseMapper.getMenuList(type, clientType);
 
         return TreeUtils.build(BeanUtil.copyToList(menuList, SysMenuVO.class));
     }
 
     @Override
-    public List<SysMenuVO> getUserMenuList(UserDetail user, Integer type) {
+    public List<SysMenuVO> getUserMenuList(UserDetail user, Integer type, Integer clientType) {
         List<SysMenuEntity> menuList;
 
         // 系统管理员，拥有最高权限
         if (user.getSuperAdmin().equals(SuperAdminEnum.YES.getValue())) {
-            menuList = baseMapper.getMenuList(type);
+            menuList = baseMapper.getMenuList(type, clientType);
         } else {
-            menuList = baseMapper.getUserMenuList(user.getId(), type);
+            menuList = baseMapper.getUserMenuList(user.getId(), type, clientType);
         }
 
         return TreeUtils.build(BeanUtil.copyToList(menuList, SysMenuVO.class));

@@ -34,6 +34,10 @@ public class SysMenuVO extends TreeNode<SysMenuVO> {
     @Range(min = 0, max = 2, message = "类型不正确")
     private Integer type;
 
+    @Schema(description = "客户端  0：PC  1：APP  2：小程序")
+    @Range(min = 0, max = 2, message = "客户端类型不正确")
+    private Integer clientType;
+
     @Schema(description = "打开方式   0：内部   1：外部")
     @Range(min = 0, max = 1, message = "打开方式不正确")
     private Integer openStyle;

@@ -35,6 +35,10 @@ public class SysRoleEntity extends BaseEntity {
      */
     private Integer dataScope;
     /**
+     * 聊天范围  0全部 1本机构及下级 2本机构 4自定义
+     */
+    private Integer chatScope;
+    /**
      * 机构ID
      */
     @TableField(fill = FieldFill.INSERT)

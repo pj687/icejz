@@ -6,19 +6,31 @@
 					<span class="title-mark" aria-hidden="true"></span>
 					<span>{{ title }}</span>
 				</div>
-				<el-dropdown @command="handleCommand">
-					<span class="menu-btn" title="更多操作">
-						<ma-icon icon="icon-menu" size="18px"></ma-icon>
-					</span>
-					<template #dropdown>
-						<el-dropdown-menu>
-							<el-dropdown-item command="refresh">刷新数据</el-dropdown-item>
-							<el-dropdown-item command="expand">展开全部</el-dropdown-item>
-							<el-dropdown-item command="collapse">折叠全部</el-dropdown-item>
-							<el-dropdown-item v-if="manage" command="manage">数据管理</el-dropdown-item>
-						</el-dropdown-menu>
-					</template>
-				</el-dropdown>
+				<div class="header-actions">
+					<button
+						v-if="collapsible"
+						type="button"
+						class="menu-btn hide-btn"
+						title="隐藏机构列表"
+						@click="emits('hide')"
+					>
+						<ma-icon icon="icon-outdent" size="16px"></ma-icon>
+						<span>隐藏</span>
+					</button>
+					<el-dropdown @command="handleCommand">
+						<span class="menu-btn" title="更多操作">
+							<ma-icon icon="icon-menu" size="18px"></ma-icon>
+						</span>
+						<template #dropdown>
+							<el-dropdown-menu>
+								<el-dropdown-item command="refresh">刷新数据</el-dropdown-item>
+								<el-dropdown-item command="expand">展开全部</el-dropdown-item>
+								<el-dropdown-item command="collapse">折叠全部</el-dropdown-item>
+								<el-dropdown-item v-if="manage" command="manage">数据管理</el-dropdown-item>
+							</el-dropdown-menu>
+						</template>
+					</el-dropdown>
+				</div>
 			</div>
 		</template>
 		<div class="tree-search">
@@ -74,6 +86,11 @@ const prop = defineProps({
 		type: Boolean,
 		required: false,
 		default: () => false
+	},
+	collapsible: {
+		type: Boolean,
+		required: false,
+		default: false
 	},
 	title: {
 		type: String,
@@ -136,7 +153,7 @@ emit.on(MittEvent.LeftTree, () => {
 	getDataList()
 })
 
-const emits = defineEmits(['click', 'manage'])
+const emits = defineEmits(['click', 'manage', 'hide'])
 // 处理点击事件
 const handleNodeClick = (row: any) => {
 	if (currentNodeKey.value === row.id) {
@@ -259,12 +276,22 @@ function getChildrenIdsRecursively(node: any): any[] {
 		box-shadow: 0 0 0 4px rgba(0, 168, 232, 0.14);
 	}
 
+	.header-actions {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
 	.menu-btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
+		gap: 4px;
 		width: 30px;
 		height: 30px;
+		border: 0;
+		padding: 0;
+		background: transparent;
 		border-radius: 9px;
 		cursor: pointer;
 		color: #64748b;
@@ -273,6 +300,13 @@ function getChildrenIdsRecursively(node: any): any[] {
 		&:hover {
 			background: rgba(0, 168, 232, 0.1);
 			color: #007eb8;
+		}
+
+		&.hide-btn {
+			width: auto;
+			padding: 0 8px;
+			font-size: 12px;
+			font-weight: 650;
 		}
 	}
 

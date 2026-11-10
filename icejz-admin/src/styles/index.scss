@@ -24,12 +24,14 @@
 }
 
 .org-auth-page {
-  --oa-ink: #122033;
-  --oa-muted: #64748b;
-  --oa-soft: #f5f9fc;
-  --oa-line: #e7eef5;
-  --oa-brand: #00a8e8;
-  --oa-brand-deep: #007eb8;
+  --oa-ink: var(--el-text-color-primary, #122033);
+  --oa-muted: var(--el-text-color-secondary, #64748b);
+  --oa-soft: var(--el-fill-color-light, #f5f9fc);
+  --oa-line: var(--el-border-color-lighter, #e7eef5);
+  --oa-brand: var(--el-color-primary, #00a8e8);
+  --oa-brand-deep: var(--el-color-primary-dark-2, var(--el-color-primary));
+  --oa-surface: var(--el-bg-color, #fff);
+  --oa-surface-soft: var(--el-fill-color-blank, #f8fbfd);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -37,8 +39,8 @@
   padding: 2px 2px 12px;
   animation: org-auth-rise 0.32s ease both;
   background:
-    radial-gradient(860px 280px at 100% -12%, rgba(0, 168, 232, 0.07), transparent 55%),
-    radial-gradient(640px 240px at 0% 100%, rgba(0, 168, 232, 0.045), transparent 50%);
+    radial-gradient(860px 280px at 100% -12%, color-mix(in srgb, var(--oa-brand) 12%, transparent), transparent 55%),
+    radial-gradient(640px 240px at 0% 100%, color-mix(in srgb, var(--oa-brand) 8%, transparent), transparent 50%);
 }
 
 @keyframes org-auth-rise {
@@ -59,11 +61,15 @@
   gap: 16px;
   padding: 18px 20px;
   border-radius: 20px;
-  border: 1px solid rgba(0, 168, 232, 0.14);
+  border: 1px solid color-mix(in srgb, var(--oa-brand) 22%, var(--oa-line));
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(241, 249, 253, 0.9)),
-    radial-gradient(520px 220px at 0% 40%, rgba(0, 168, 232, 0.1), transparent 60%);
-  box-shadow: 0 12px 28px rgba(15, 23, 36, 0.035);
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--oa-surface) 96%, transparent),
+      color-mix(in srgb, var(--oa-surface-soft) 90%, transparent)
+    ),
+    radial-gradient(520px 220px at 0% 40%, color-mix(in srgb, var(--oa-brand) 12%, transparent), transparent 60%);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--oa-ink) 4%, transparent);
 
   .hero-copy {
     min-width: 0;
@@ -85,7 +91,7 @@
     height: 8px;
     border-radius: 50%;
     background: var(--oa-brand);
-    box-shadow: 0 0 0 4px rgba(0, 168, 232, 0.14);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--oa-brand) 18%, transparent);
   }
 
   h2 {
@@ -148,29 +154,120 @@
 
 .org-auth-query {
   margin-bottom: 0 !important;
+  border-color: color-mix(in srgb, var(--oa-brand) 22%, var(--oa-line)) !important;
   background:
-    linear-gradient(180deg, rgba(247, 251, 254, 0.96), rgba(255, 255, 255, 0.94)) !important;
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--oa-surface) 96%, transparent),
+      color-mix(in srgb, var(--oa-surface-soft) 94%, transparent)
+    ),
+    radial-gradient(520px 120px at 0% 0%, color-mix(in srgb, var(--oa-brand) 10%, transparent), transparent 70%) !important;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--oa-ink) 4%, transparent) !important;
+
+  > .el-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px 12px !important;
+  }
+
+  > .el-card__body::before {
+    content: '筛选条件';
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 20px;
+    padding-left: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--oa-ink);
+    letter-spacing: 0.01em;
+    background:
+      radial-gradient(circle at 4px 50%, var(--oa-brand) 0 4px, transparent 5px),
+      radial-gradient(circle at 4px 50%, color-mix(in srgb, var(--oa-brand) 22%, transparent) 0 8px, transparent 9px);
+  }
 
   .el-form {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 4px;
+    gap: 10px 12px;
     align-items: center;
   }
 
   .el-form-item {
     margin-bottom: 0 !important;
-    margin-right: 10px;
+    margin-right: 0;
+  }
+
+  .el-input,
+  .el-select {
+    --filter-control-width: 168px;
+    width: var(--filter-control-width);
+  }
+
+  .el-date-editor.el-input,
+  .el-date-editor.el-input__wrapper,
+  .el-range-editor.el-input__wrapper {
+    width: 240px;
   }
 
   .el-input__wrapper,
   .el-select__wrapper {
+    min-height: 34px;
     border-radius: 11px;
-    box-shadow: 0 0 0 1px #e2e8f0 inset;
+    box-shadow: 0 0 0 1px var(--oa-line) inset;
+    background: var(--oa-surface);
+    transition: box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  .el-input__wrapper:hover,
+  .el-select__wrapper:hover {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--oa-brand) 40%, var(--oa-line)) inset;
+  }
+
+  .el-input__wrapper.is-focus,
+  .el-select__wrapper.is-focused {
+    box-shadow:
+      0 0 0 1px var(--oa-brand) inset,
+      0 0 0 3px color-mix(in srgb, var(--oa-brand) 16%, transparent);
+  }
+
+  .el-input__prefix {
+    color: var(--oa-muted);
   }
 
   .el-button {
-    border-radius: 11px;
+    border-radius: 10px;
+  }
+
+  .el-button--primary {
+    border: 0;
+    background: linear-gradient(
+      135deg,
+      var(--oa-brand),
+      color-mix(in srgb, var(--oa-brand) 70%, #ffffff)
+    );
+  }
+
+  .el-button--primary:hover,
+  .el-button--primary:focus {
+    background: linear-gradient(
+      135deg,
+      var(--oa-brand-deep),
+      color-mix(in srgb, var(--oa-brand) 78%, #ffffff)
+    );
+  }
+
+  .el-button:not(.el-button--primary):not(.el-button--danger):not(.el-button--success):not(.el-button--warning) {
+    border-color: var(--oa-line);
+    color: var(--oa-muted);
+    background: var(--oa-surface);
+  }
+
+  .el-button:not(.el-button--primary):not(.el-button--danger):not(.el-button--success):not(.el-button--warning):hover {
+    border-color: color-mix(in srgb, var(--oa-brand) 40%, var(--oa-line));
+    color: var(--oa-brand-deep);
+    background: color-mix(in srgb, var(--oa-brand) 8%, var(--oa-surface));
   }
 }
 

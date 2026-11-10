@@ -145,7 +145,7 @@ export default {
   components: { IceNavBar },
   data() {
     return {
-      version: brand.version || 'v1.0.3'
+      version: brand.version || 'v1.0.6'
     }
   },
   computed: {

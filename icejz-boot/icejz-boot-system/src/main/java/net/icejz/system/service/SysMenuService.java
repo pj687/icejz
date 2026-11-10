@@ -26,17 +26,19 @@ public interface SysMenuService extends BaseService<SysMenuEntity> {
 	/**
 	 * 菜单列表
 	 *
-	 * @param type 菜单类型
+	 * @param type       菜单类型
+	 * @param clientType 客户端 0PC 1APP 2小程序，null=全部
 	 */
-	List<SysMenuVO> getMenuList(Integer type);
+	List<SysMenuVO> getMenuList(Integer type, Integer clientType);
 
 	/**
 	 * 用户菜单列表
 	 *
-	 * @param user  用户
-	 * @param type 菜单类型
+	 * @param user       用户
+	 * @param type       菜单类型
+	 * @param clientType 客户端 0PC 1APP 2小程序，null=全部
 	 */
-	List<SysMenuVO> getUserMenuList(UserDetail user, Integer type);
+	List<SysMenuVO> getUserMenuList(UserDetail user, Integer type, Integer clientType);
 
 	/**
 	 * 获取子菜单的数量

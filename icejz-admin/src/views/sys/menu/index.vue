@@ -4,7 +4,7 @@
 			<div class="hero-copy">
 				<span class="hero-kicker"><i class="hero-mark" aria-hidden="true"></i>系统管理</span>
 				<h2>菜单管理</h2>
-				<p>维护导航菜单、按钮权限与接口授权标识</p>
+				<p>维护 PC / APP / 小程序导航菜单，以及按钮权限与接口授权标识</p>
 			</div>
 			<div class="hero-meta">
 				<span class="hero-chip"><em>{{ nodeCount }}</em>项</span>
@@ -14,6 +14,11 @@
 
 		<el-card class="org-auth-card page-card" shadow="never" v-loading="state.dataListLoading">
 			<div class="org-auth-toolbar">
+				<el-radio-group v-model="clientType" class="client-tabs" @change="onClientChange">
+					<el-radio-button :value="0">PC 管理端</el-radio-button>
+					<el-radio-button :value="1">APP</el-radio-button>
+					<el-radio-button :value="2">小程序</el-radio-button>
+				</el-radio-group>
 				<el-space wrap>
 					<el-button v-auth="'sys:menu:save'" icon="Plus" type="primary" @click="addOrUpdateHandle(false, null)">新增菜单</el-button>
 					<el-button plain @click="toggleExpandAll()">
@@ -62,7 +67,7 @@
 					</template>
 				</el-table-column>
 				<el-table-column prop="sort" label="排序" width="90" align="center"></el-table-column>
-				<el-table-column prop="url" label="路由" min-width="160">
+				<el-table-column prop="url" :label="clientType === 0 ? '路由' : '页面路径'" min-width="180">
 					<template #default="scope">
 						<span v-if="scope.row.url" class="sys-route-code">{{ scope.row.url }}</span>
 						<span v-else class="muted">—</span>
@@ -109,18 +114,28 @@ import AddOrUpdate from './add-or-update.vue'
 import { IHooksOptions } from '@/hooks/interface'
 import { ArrowDown, ArrowUp, Delete, Edit, Plus } from '@element-plus/icons-vue'
 
+const clientType = ref(0)
+
 const state: IHooksOptions = reactive({
 	dataListUrl: '/sys/menu/list',
 	deleteUrl: '/sys/menu',
-	isPage: false
+	isPage: false,
+	queryForm: {
+		clientType: 0
+	}
 })
 
 const addOrUpdateRef = ref()
 const addOrUpdateHandle = (isUpdate: Boolean, row: any) => {
-	addOrUpdateRef.value.init(isUpdate, row)
+	addOrUpdateRef.value.init(isUpdate, row, clientType.value)
 }
 
 const { getDataList, deleteHandle } = useCrud(state)
+
+const onClientChange = () => {
+	state.queryForm.clientType = clientType.value
+	getDataList()
+}
 
 const isExpandAll = ref(false)
 const refreshTable = ref(true)
@@ -160,6 +175,18 @@ const toggleExpandAll = () => {
 <style scoped lang="scss">
 .muted {
 	color: #94a3b8;
+}
+
+.org-auth-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.client-tabs {
+	flex-shrink: 0;
 }
 
 .org-auth-name .avatar :deep(svg),

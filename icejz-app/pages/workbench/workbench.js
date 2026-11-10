@@ -7,6 +7,7 @@ const {
   useWorkbenchNoteSaveApi,
   useWorkbenchNoteDeleteApi
 } = require('@/api/workbench.js')
+const { useMenuNavApi, flattenMenuLeaves } = require('@/api/menu.js')
 
 const pad2 = (n) => String(n).padStart(2, '0')
 const toDateKey = (y, m, d) => `${y}-${pad2(m + 1)}-${pad2(d)}`
@@ -125,6 +126,7 @@ Page({
     messages: [],
     kpiList: [],
     quickNav: [],
+    remoteQuickNav: [],
     projects: [],
     todos: []
   },
@@ -176,6 +178,19 @@ Page({
     this.loadUser()
     this.fetchNotes()
     this.loadLatestMessages()
+    this.loadQuickNav()
+  },
+
+  async loadQuickNav() {
+    try {
+      const res = await useMenuNavApi(2)
+      const data = (res && res.data) || res || []
+      const remoteQuickNav = flattenMenuLeaves(Array.isArray(data) ? data : [])
+      this.setData({ remoteQuickNav })
+      this.refreshI18n()
+    } catch (e) {
+      this.setData({ remoteQuickNav: [] })
+    }
   },
 
   refreshI18n() {
@@ -260,12 +275,15 @@ Page({
       noteMetaText: this.data.selectedNotes.length
         ? t('workbench.noteCount', { n: this.data.selectedNotes.length })
         : t('workbench.noteNone'),
-      quickNav: [
-        { name: t('workbench.userManage'), path: '/pages/sys/user/index', icon: '/images/icons/user.svg' },
-        { name: t('workbench.myMsg'), path: '/pages/message/inbox', icon: '/images/icons/msg.svg' },
-        { name: t('workbench.assistant'), path: '/pages/assistant/chat', icon: '/images/mascot/xiaobing-head.png' },
-        { name: t('workbench.profile'), path: '/pages/usercenter/userinfo/userinfo', icon: '/images/icons/profile.svg' }
-      ],
+      quickNav:
+        this.data.remoteQuickNav && this.data.remoteQuickNav.length
+          ? this.data.remoteQuickNav
+          : [
+              { name: t('workbench.userManage'), path: '/pages/sys/user/index', icon: '/images/icons/user.svg' },
+              { name: t('workbench.myMsg'), path: '/pages/message/inbox', icon: '/images/icons/msg.svg' },
+              { name: t('workbench.assistant'), path: '/pages/assistant/chat', icon: '/images/mascot/xiaobing-head.png' },
+              { name: t('workbench.profile'), path: '/pages/usercenter/userinfo/userinfo', icon: '/images/icons/profile.svg' }
+            ],
       projects,
       todos: [
         { id: 1, title: t('workbench.todo1'), time: t('workbench.timeToday', { t: '10:20' }), level: 'high', path: '/pages/sys/user/index' },

@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 菜单管理
- * 
+ *
  * @author ice_jz
  * <a href="https://icejz.net">ICEJZ</a>
  */
@@ -18,22 +18,17 @@ public interface SysMenuDao extends BaseDao<SysMenuEntity> {
 
 	/**
 	 * 查询所有菜单列表
-	 *
-	 * @param type 菜单类型
 	 */
-	List<SysMenuEntity> getMenuList(@Param("type") Integer type);
+	List<SysMenuEntity> getMenuList(@Param("type") Integer type, @Param("clientType") Integer clientType);
 
 	/**
 	 * 查询用户菜单列表
-	 *
-	 * @param userId 用户ID
-	 * @param type 菜单类型
 	 */
-	List<SysMenuEntity> getUserMenuList(@Param("userId") Long userId, @Param("type") Integer type);
+	List<SysMenuEntity> getUserMenuList(@Param("userId") Long userId, @Param("type") Integer type,
+										@Param("clientType") Integer clientType);
 
 	/**
 	 * 查询用户权限列表
-	 * @param userId  用户ID
 	 */
 	List<String> getUserAuthorityList(@Param("userId") Long userId);
 

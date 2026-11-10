@@ -38,11 +38,17 @@ public class SysRoleVO implements Serializable {
     @Schema(description = "数据范围  0：全部数据  1：本机构及子机构数据  2：本机构数据  3：本人数据  4：自定义数据")
     private Integer dataScope;
 
+    @Schema(description = "聊天范围  0全部 1本机构及下级 2本机构 4自定义")
+    private Integer chatScope;
+
     @Schema(description = "菜单ID列表")
     private List<Long> menuIdList;
 
     @Schema(description = "机构ID列表")
     private List<Long> orgIdList;
+
+    @Schema(description = "聊天自定义机构ID列表")
+    private List<Long> chatOrgIdList;
 
     @Schema(description = "创建时间")
     @JsonFormat(pattern = DateUtils.DATE_TIME_PATTERN)

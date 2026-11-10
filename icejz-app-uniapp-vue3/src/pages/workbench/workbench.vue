@@ -323,6 +323,7 @@ import {
   useWorkbenchNoteSaveApi,
   useWorkbenchNoteDeleteApi
 } from '@/api/workbench.js'
+import { useMenuNavApi, flattenMenuLeaves } from '@/api/menu.js'
 
 const pad2 = (n) => String(n).padStart(2, '0')
 const toDateKey = (y, m, d) => `${y}-${pad2(m + 1)}-${pad2(d)}`
@@ -347,7 +348,8 @@ export default {
       draftText: '',
       noteSaving: false,
       agendaPulse: false,
-      messages: []
+      messages: [],
+      remoteQuickNav: []
     }
   },
   computed: {
@@ -565,6 +567,9 @@ export default {
     },
     quickNav() {
       void this.$i18n.locale
+      if (this.remoteQuickNav && this.remoteQuickNav.length) {
+        return this.remoteQuickNav
+      }
       return [
         {
           name: this.$t('workbench.userManage'),
@@ -674,9 +679,26 @@ export default {
     this.loadUser()
     this.fetchNotes()
     this.loadLatestMessages()
+    this.loadQuickNav()
     this.$nextTick(() => this.$refs.tabBar && this.$refs.tabBar.init())
   },
   methods: {
+    resolveClientType() {
+      let clientType = 1
+      // #ifdef MP-WEIXIN
+      clientType = 2
+      // #endif
+      return clientType
+    },
+    async loadQuickNav() {
+      try {
+        const res = await useMenuNavApi(this.resolveClientType())
+        const data = (res && res.data) || res || []
+        this.remoteQuickNav = flattenMenuLeaves(Array.isArray(data) ? data : [])
+      } catch (e) {
+        this.remoteQuickNav = []
+      }
+    },
     buildSparkSrc(values = [], color = '#00a8e8') {
       const w = 160
       const h = 36

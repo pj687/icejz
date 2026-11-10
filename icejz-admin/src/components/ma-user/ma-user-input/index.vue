@@ -4,7 +4,7 @@
 			<el-button icon="Search" @click="visible = true"></el-button>
 		</template>
 	</el-input>
-	<ma-user-dialog v-if="!disabled && visible" :key="visible" v-model="visible" :multiple @select="userHandle"></ma-user-dialog>
+	<ma-user-dialog v-if="!disabled && visible" :key="visible" v-model="visible" :multiple="multiple" @select="userHandle"></ma-user-dialog>
 </template>
 
 <script setup lang="ts" name="MaUserInput">
